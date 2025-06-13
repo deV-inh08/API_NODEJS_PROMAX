@@ -1,0 +1,45 @@
+{
+  "name": "api_ecommerce",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx nodemon",
+    "build": "rimraf ./dist && tsc && tsc-alias",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/node": "^24.0.1",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "globals": "^16.2.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.0"
+  },
+  "dependencies": {
+    "@types/compression": "^1.8.1",
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "compression": "^1.8.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.15.2",
+    "morgan": "^1.10.0",
+    "zod": "^3.25.64"
+  }
+}
