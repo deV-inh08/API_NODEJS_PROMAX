@@ -1,6 +1,51 @@
 import { app } from './src/index'
-import envConfig from './src/config/env.config'
+import envConfig from './src/api/v1/config/env.config'
+import Database from './src/api/v1/db/init.mongo'
+import MongoDBMonitor from './src/monitoring/mongoDb.monitor'
 
-app.listen(envConfig.PORT, () => {
-  console.log(`Server is running at http://localhost:${envConfig.PORT}`);
-})
+async function startServer() {
+  try {
+    // 1. Connect DB
+    const mongoDb = Database.getInstace()
+    mongoDb.connect()
+
+    // 2. start monitor DB
+    const mongoDbMonitor = MongoDBMonitor.getInstance()
+    mongoDbMonitor.startMonitoring()
+
+    // 3. Start server when connect DB & start Monitor
+    const server = app.listen(envConfig.PORT, () => {
+      console.log(`Server is running at http://localhost:${envConfig.PORT}`);
+    })
+
+    // 4. Gracefull shutdown handling
+    const gracefulShutdown = (signal: string) => {
+      console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+      try {
+        // Stop accepting new connections
+        server.close(() => {
+          console.log('✅ HTTP server closed')
+        })
+
+        // stop monitor
+        mongoDbMonitor.stopMonitor()
+
+        // disconnect DB
+        mongoDb.disconnect()
+
+        console.log('✅ Graceful shutdown completed')
+        process.exit(0)
+      } catch (error) {
+        console.error('❌ Error during shutdown:', error)
+        process.exit(1)
+      }
+    }
+    // Listen for shutdown signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  } catch (error) {
+    console.error('❌ Failed to start server:', error)
+    process.exit(1)
+  }
+}
+startServer()
