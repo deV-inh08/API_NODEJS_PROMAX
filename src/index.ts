@@ -5,7 +5,6 @@ import helmet from 'helmet'
 import Database from '~/api/v1/db/init.mongo'
 import MongoDBMonitor from '~/monitoring/mongoDb.monitor'
 
-
 const app = express()
 
 // init middleware

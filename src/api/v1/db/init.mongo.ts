@@ -18,7 +18,6 @@ class Database {
         console.log('Connected MongoDb Success')
       }).catch(err => console.log('Error connect'));
     }
-
   }
 
   // instance with SingleTon pattern
