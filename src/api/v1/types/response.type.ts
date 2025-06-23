@@ -1,4 +1,4 @@
-import { IUser } from "~/api/v1/types/user.type"
+import { IUser } from '~/api/v1/types/user.type'
 export type StatusRes = 'success' | 'error'
 
 export interface UserResponseType {

@@ -15,12 +15,12 @@ async function startServer() {
 
     // 3. Start server when connect DB & start Monitor
     const server = app.listen(envConfig.PORT, () => {
-      console.log(`Server is running at http://localhost:${envConfig.PORT}`);
+      console.log(`Server is running at http://localhost:${envConfig.PORT}`)
     })
 
     // 4. Gracefull shutdown handling
     const gracefulShutdown = (signal: string) => {
-      console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+      console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`)
       try {
         // Stop accepting new connections
         server.close(() => {
@@ -41,8 +41,8 @@ async function startServer() {
       }
     }
     // Listen for shutdown signals
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'))
   } catch (error) {
     console.error('❌ Failed to start server:', error)
     process.exit(1)

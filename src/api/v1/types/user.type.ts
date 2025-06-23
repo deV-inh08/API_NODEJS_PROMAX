@@ -1,8 +1,7 @@
-import { Document } from "mongoose";
-import { IAddress } from "~/api/v1/types/address.type";
-import { ICartItem } from "~/api/v1/types/cart.type";
-import { Gender, Role, Status } from "~/api/v1/types/comon.types";
-
+import mongoose, { Document } from 'mongoose'
+import { IAddress } from '~/api/v1/types/address.type'
+import { ICartItem } from '~/api/v1/types/cart.type'
+import { Gender, Role, Status } from '~/api/v1/types/comon.types'
 
 // Social when user login
 export interface ISocialAccounts {
@@ -12,7 +11,6 @@ export interface ISocialAccounts {
 
 // Main User Document Interface
 export interface IUser extends Document {
-
   // Info Basic
   email: string
   password: string
@@ -35,6 +33,9 @@ export interface IUser extends Document {
   // Cart
   cart: ICartItem[]
 
+  // Wish list
+  wishList: mongoose.Types.ObjectId[] // trỏ đến ID Product
+
   // Security
   emailVerificationToken?: string
   emailVerificationExpires?: Date
@@ -56,7 +57,7 @@ export interface IUser extends Document {
   removeProductFromCart(productId: string): void
 }
 
-export interface RegisterUser {
+export interface IRegisterUser {
   email: string
   password: string
   firstName: string
@@ -66,19 +67,23 @@ export interface RegisterUser {
   gender?: Gender
 }
 
-export interface LoginUser {
+export interface ILoginUser {
   email: string
   password: string
 }
 
-export interface ChangePassword {
+export interface IChangePassword {
   currentPassword: string
   newPassword: string
   confirmPassword: string
 }
 
-export interface ForgotPassword {
+export interface IForgotPassword {
   email: string
 }
 
-// 
+export interface IResetPassword {
+  token: string
+  password: string
+  confirmPassword: string
+}

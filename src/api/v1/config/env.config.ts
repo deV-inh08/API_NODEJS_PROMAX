@@ -11,7 +11,7 @@ env.config({
 // check file .env is exists
 const checkIsExistEnvFile = () => {
   if (!fs.existsSync(path.resolve('.env'))) {
-    console.log('file Env not found');
+    console.log('file Env not found')
   }
 }
 checkIsExistEnvFile()
@@ -21,7 +21,12 @@ const configSchemaEnv = z.object({
   PORT: z.string().default('3000'),
   DB_URI: z.string(),
   DB_NAME: z.string(),
-  NODE_ENV: z.string()
+  NODE_ENV: z.string(),
+  JWT_REFRESH_TOKEN_EXPIRES_IN: z.string(),
+  JWT_ACCESS_TOKEN_EXPIRES_IN: z.string(),
+  JWT_ACCESS_TOKEN_SECRET: z.string(),
+  JWT_REFRESH_TOKEN_SECRET: z.string(),
+  ALGORITHM: z.string()
 })
 
 // from schema -> object {isSuccess, data: {} }

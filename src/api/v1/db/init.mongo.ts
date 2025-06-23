@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import envConfig from "~/api/v1/config/env.config";
+import mongoose from 'mongoose'
+import envConfig from '~/api/v1/config/env.config'
 
 class Database {
   private static instance: Database
@@ -9,14 +9,18 @@ class Database {
   }
 
   // connect
-  connect(type = 'mongodb') {
+  async connect(type = 'mongodb') {
     if (!this.isConnected) {
-      mongoose.connect(envConfig.DB_URI, {
-        maxPoolSize: 50
-      }).then(_ => {
-        this.isConnected = true
+      try {
+        await mongoose.connect(envConfig.DB_URI, {
+          maxPoolSize: 50
+        })
         console.log('Connected MongoDb Success')
-      }).catch(err => console.log('Error connect'));
+      } catch (error) {
+        console.log('Error connect', error)
+      }
+    } else {
+      console.log('Database was connected')
     }
   }
 
@@ -31,7 +35,7 @@ class Database {
   // disconnect
   disconnect() {
     if (this.isConnected) {
-      mongoose.disconnect().then(_ => console.log('Disconnected MongoDb'))
+      mongoose.disconnect().then((_) => console.log('Disconnected MongoDb'))
       this.isConnected = false
     }
   }
@@ -44,13 +48,13 @@ class Database {
         status: 'healthy',
         connected: this.isConnected,
         readyState: mongoose.connection.readyState
-      };
+      }
     } catch (error) {
       return {
         status: 'unhealthy',
         connected: false,
         error: error
-      };
+      }
     }
   }
 }

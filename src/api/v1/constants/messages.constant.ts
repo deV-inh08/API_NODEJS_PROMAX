@@ -16,3 +16,8 @@ export const UserMessage = {
   PHONE_NUMBER_INVALID: 'Số điện thoại không hợp lệ',
   DATE_OF_BIRTH_INVALID: ''
 } as const
+
+export const ErrorMessage = {
+  BAD_REQUEST: 'Bad Request',
+  UNAUTHORIZED: 'Unauthorized'
+} as const

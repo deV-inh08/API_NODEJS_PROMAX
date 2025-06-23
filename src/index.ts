@@ -4,13 +4,25 @@ import compression from 'compression'
 import helmet from 'helmet'
 import Database from '~/api/v1/db/init.mongo'
 import MongoDBMonitor from '~/monitoring/mongoDb.monitor'
+import routerApiV1 from '~/api/v1/routes/index.route'
 
 const app = express()
 
 // init middleware
+
+// Compression middleware
 app.use(compression())
+
 app.use(morgan('dev'))
+
+// Security headers
 app.use(helmet())
+
+// ==================== BODY PARSING ====================
+app.use(express.json({
+  limit: '10mb'
+}))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // init routes
 app.get('/', (req, res) => {
@@ -42,6 +54,11 @@ app.get('/health', async (req, res) => {
   }
 })
 
+// ==================== API ROUTE ====================
+app.use('/api/v1', routerApiV1)
+
 // handling Error
 
+
+// export app
 export { app }

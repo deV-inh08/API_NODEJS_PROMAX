@@ -14,7 +14,7 @@ class MongoDBMonitor {
     timeInterval: number = 30000, // check interval
     maxConnectionCores: number = 5 // example 1 cor => 5 connections
   ) {
-    this.timeInterval = timeInterval;
+    this.timeInterval = timeInterval
     this.maxConnectionCores = maxConnectionCores
   }
 

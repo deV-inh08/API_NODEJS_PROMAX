@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
 export interface ICartVariant {
   size?: string
@@ -13,13 +13,13 @@ export interface ICartItem {
   addAt: Date
 }
 
-export interface AddToCart {
+export interface IAddToCart {
   productId: string
   quantity: number
   variant: ICartVariant
 }
 
-export interface UpdateToCart {
+export interface IUpdateToCart {
   productId: string
   quantity: number
   variant: ICartVariant

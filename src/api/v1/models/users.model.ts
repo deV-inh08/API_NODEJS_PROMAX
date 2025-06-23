@@ -1,8 +1,10 @@
-import { Schema } from "mongoose"
-import { IUser } from "~/api/v1/types/user.type"
-import { UserMessage } from "~/api/v1/constants/messages.constant"
-import { ISocialAccounts } from "~/api/v1/types/user.type"
-
+import mongoose, { Schema } from 'mongoose'
+import { IUser } from '~/api/v1/types/user.type'
+import { UserMessage } from '~/api/v1/constants/messages.constant'
+import { ISocialAccounts } from '~/api/v1/types/user.type'
+import { addressSchema } from '~/api/v1/models/address.model'
+import { cartSchema } from '~/api/v1/models/cart.model'
+import { GenderObject, StatusUser } from '~/api/v1/constants/common.constant'
 
 const socialAccountsSchema = new Schema<ISocialAccounts>({
   facebookId: {
@@ -13,7 +15,6 @@ const socialAccountsSchema = new Schema<ISocialAccounts>({
   }
 })
 
-
 const userSchema = new Schema<IUser>({
   email: {
     type: String,
@@ -21,10 +22,7 @@ const userSchema = new Schema<IUser>({
     unique: true,
     lowercase: true,
     trim: true,
-    match: [
-      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-      UserMessage.EMAIL_IS_INVALID
-    ]
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, UserMessage.EMAIL_IS_INVALID]
   },
   password: {
     type: String,
@@ -55,7 +53,7 @@ const userSchema = new Schema<IUser>({
     type: Date,
     validate: {
       validator: function (date: Date) {
-        return date < new Date
+        return date < new Date()
       },
       message: UserMessage.DATE_OF_BIRTH_INVALID
     }
@@ -64,9 +62,9 @@ const userSchema = new Schema<IUser>({
   gender: {
     type: String,
     enum: {
-      values: ['male', 'female'],
+      values: [GenderObject.male, GenderObject.female]
     },
-    default: 'other'
+    default: GenderObject.other
   },
 
   avatar: {
@@ -88,10 +86,10 @@ const userSchema = new Schema<IUser>({
   status: {
     type: String,
     enum: {
-      values: ['active', 'inactive', 'suspended', 'deleted'],
+      values: [StatusUser.active, StatusUser.inactive, StatusUser.suspended, StatusUser.deleted],
       message: 'Trạng thái không hợp lệ'
     },
-    default: 'active'
+    default: StatusUser.active
   },
 
   role: {
@@ -102,7 +100,6 @@ const userSchema = new Schema<IUser>({
     },
     default: 'customer'
   },
-
 
   // Statistics
   totalOrders: {
@@ -117,7 +114,14 @@ const userSchema = new Schema<IUser>({
     min: [0, 'Tổng chi tiêu không được âm']
   },
 
-
+  address: [addressSchema],
+  cart: [cartSchema],
+  wishList: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Product'
+    }
+  ],
 
   // Security Fields
   emailVerificationToken: String,
@@ -131,3 +135,6 @@ const userSchema = new Schema<IUser>({
     default: () => ({})
   }
 })
+
+const User = mongoose.model<IUser>('User', userSchema)
+export default User
