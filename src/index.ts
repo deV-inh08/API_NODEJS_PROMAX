@@ -8,7 +8,7 @@ import routerApiV1 from '~/api/v1/routes/index.route'
 
 const app = express()
 
-// init middleware
+// ==================== MIDDLEWARE ====================
 
 // Compression middleware
 app.use(compression())
@@ -24,12 +24,8 @@ app.use(express.json({
 }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-// init routes
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Hello world'
-  })
-})
+// ==================== API ROUTE ====================
+app.use('/api/v1', routerApiV1)
 
 app.get('/health', async (req, res) => {
   try {
@@ -54,10 +50,7 @@ app.get('/health', async (req, res) => {
   }
 })
 
-// ==================== API ROUTE ====================
-app.use('/api/v1', routerApiV1)
-
-// handling Error
+// ==================== HANDLE ERROR ====================
 
 
 // export app

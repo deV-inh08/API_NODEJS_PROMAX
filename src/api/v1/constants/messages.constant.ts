@@ -14,7 +14,7 @@ export const UserMessage = {
   LAST_NAME_LENGTH_MUST_BE_FROM_6_TO_50: 'last name length must be from 6 to 50',
 
   PHONE_NUMBER_INVALID: 'Số điện thoại không hợp lệ',
-  DATE_OF_BIRTH_INVALID: ''
+  DATE_OF_BIRTH_INVALID: 'Date of birth invalid'
 } as const
 
 export const ErrorMessage = {
