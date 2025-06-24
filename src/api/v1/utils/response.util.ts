@@ -1,22 +1,8 @@
 import { ErrorMessage } from "~/api/v1/constants/messages.constant"
+import { ISuccessResponse } from "~/api/v1/types/response.type"
 
 // ==================== SUCCESS RESPONSE ====================
-interface ISuccessResponse<T = any> {
-  status: 'success'
-  statusCode: number
-  message: string
-  data?: T
-  metadata?: {
-    timestamp: string
-    requestId?: string
-    pagination?: {
-      page: number
-      limit: number
-      total: number
-      totalPages: number
-    }
-  }
-}
+
 
 export class SuccessResponse<T = any> {
   private response: ISuccessResponse<T>
