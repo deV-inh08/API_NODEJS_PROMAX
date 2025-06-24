@@ -57,20 +57,20 @@ export interface IUser extends Document {
   removeProductFromCart(productId: string): void
 }
 
-export interface IRegisterUser {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  phoneNumber?: string
-  dateOfBirth?: Date
-  gender?: Gender
-}
+// export interface IRegisterUser {
+//   email: string
+//   password: string
+//   firstName: string
+//   lastName: string
+//   phoneNumber?: string
+//   dateOfBirth?: Date
+//   gender?: Gender
+// }
 
-export interface ILoginUser {
-  email: string
-  password: string
-}
+// export interface ILoginUser {
+//   email: string
+//   password: string
+// }
 
 export interface IChangePassword {
   currentPassword: string

@@ -1,9 +1,7 @@
-import { ErrorMessage } from "~/api/v1/constants/messages.constant"
-import { ISuccessResponse } from "~/api/v1/types/response.type"
+import { ErrorMessage } from '~/api/v1/constants/messages.constant'
+import { ISuccessResponse } from '~/api/v1/types/response.type'
 
 // ==================== SUCCESS RESPONSE ====================
-
-
 export class SuccessResponse<T = any> {
   private response: ISuccessResponse<T>
   constructor(
@@ -43,7 +41,6 @@ export class SuccessResponse<T = any> {
     res.status(this.response.statusCode).json(this.response)
   }
 }
-
 
 // ==================== ERROR RESPONSE ====================
 

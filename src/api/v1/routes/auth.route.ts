@@ -1,5 +1,11 @@
-import { Router } from "express";
+import { Router } from 'express'
+import { AuthController } from '~/api/v1/controllers/auth.controller'
+import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
+import { validationReq } from '~/api/v1/middlewares/validation.middleware'
+import { registerSchema } from '~/api/v1/validations/auth.validation'
 const authRouter = Router()
+
+const authController = new AuthController()
 
 // ==================== PUBLIC ROUTES ====================
 /**
@@ -7,8 +13,7 @@ const authRouter = Router()
  * @desc    Register a new user
  * @access  Public
  */
-authRouter.get('/register', (req, res) => {
-  res.send('<h1>Hello Register page</h1>')
-})
+authRouter.post('/register', authLimiter, validationReq(registerSchema), authController.register)
+
 
 export default authRouter

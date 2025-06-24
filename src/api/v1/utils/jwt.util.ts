@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken'
 import envConfig from '~/api/v1/config/env.config'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
-import type { StringValue } from "ms";
-import { UnauthorizedError } from '~/api/v1/utils/response.util';
-import { ErrorMessage } from '~/api/v1/constants/messages.constant';
-
+import type { StringValue } from 'ms'
+import { UnauthorizedError } from '~/api/v1/utils/response.util'
+import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 
 export class JWTServices {
   private static readonly JWT_REFRESH_TOKEN_EXPIRES_IN = envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN
@@ -15,7 +14,7 @@ export class JWTServices {
   // generate AccessToken
   static generateAccessToken(payload: JWTPayload) {
     return jwt.sign(payload, this.JWT_ACCESS_TOKEN_SECRET, {
-      expiresIn: this.JWT_ACCESS_TOKEN_EXPIRES_IN as StringValue,
+      expiresIn: this.JWT_ACCESS_TOKEN_EXPIRES_IN as StringValue
     })
   }
 
@@ -27,11 +26,11 @@ export class JWTServices {
   }
 
   // verify token
-  static verifyToken({ token, secretOrPublicKey }: { token: string, secretOrPublicKey: string }) {
+  static verifyToken(token: string) {
     try {
-      return jwt.sign(token, secretOrPublicKey)
+      return jwt.verify(token, this.JWT_REFRESH_TOKEN_SECRET)
     } catch (error) {
-      throw new UnauthorizedError(ErrorMessage.UNAUTHORIZED, error)
+      throw new UnauthorizedError('Invalid refresh token', error)
     }
   }
 }

@@ -21,7 +21,6 @@ export interface UsersListResponse {
   }
 }
 
-
 export interface ISuccessResponse<T = any> {
   status: 'success'
   statusCode: number

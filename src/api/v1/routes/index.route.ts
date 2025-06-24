@@ -1,5 +1,5 @@
-import authRouter from "~/api/v1/routes/auth.route";
-import { Router } from "express";
+import authRouter from '~/api/v1/routes/auth.route'
+import { Router } from 'express'
 
 const routerApiV1 = Router()
 
