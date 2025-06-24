@@ -14,7 +14,7 @@ app.use(
     limit: '10mb'
   })
 )
-// app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // ==================== MIDDLEWARE ====================
 
@@ -25,8 +25,6 @@ app.use(morgan('dev'))
 
 // Security headers
 app.use(helmet())
-
-
 
 // ==================== API ROUTE ====================
 app.use('/api/v1', routerApiV1)

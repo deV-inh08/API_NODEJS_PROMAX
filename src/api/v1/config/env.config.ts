@@ -21,6 +21,7 @@ const configSchemaEnv = z.object({
   PORT: z.string().default('3000'),
   DB_URI: z.string(),
   DB_NAME: z.string(),
+  DB_OPTION: z.string(),
   NODE_ENV: z.string(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: z.string(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: z.string(),

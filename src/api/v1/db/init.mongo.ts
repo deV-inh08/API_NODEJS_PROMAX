@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import envConfig from '~/api/v1/config/env.config'
+import dbManager from '~/api/v1/db/dbName.mongo'
 
 class Database {
   private static instance: Database
@@ -12,10 +13,11 @@ class Database {
   async connect(type = 'mongodb') {
     if (!this.isConnected) {
       try {
-        await mongoose.connect(envConfig.DB_URI, {
-          maxPoolSize: 50
-        })
-        console.log('Connected MongoDb Success')
+        await dbManager.getConnection(envConfig.DB_NAME as 'ecommerce')
+        // await mongoose.connect(envConfig.DB_URI, {
+        //   maxPoolSize: 50
+        // })
+        this.isConnected = true
       } catch (error) {
         console.log('Error connect', error)
       }

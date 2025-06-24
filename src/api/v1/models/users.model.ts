@@ -15,7 +15,7 @@ const socialAccountsSchema = new Schema<ISocialAccounts>({
   }
 })
 
-const userSchema = new Schema<IUser>({
+export const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: [true, UserMessage.EMAIL_IS_REQUIRED],
