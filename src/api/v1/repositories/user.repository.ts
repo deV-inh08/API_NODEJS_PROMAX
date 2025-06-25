@@ -1,9 +1,37 @@
 import { registerZodType } from "~/api/v1/validations/auth.validation";
-import User from "~/api/v1/models/users.model";
+import { userSchema } from "~/api/v1/models/users.model";
+import { IUser } from "~/api/v1/types/user.type";
+import { Model } from "mongoose";
+import dbManager from "~/api/v1/db/dbName.mongo";
+
 
 export class UserRepository {
-  async registerUser(user: registerZodType) {
-    const userModel = new User(user)
-    return await userModel.save()
+  private models = new Map<string, Model<IUser>>()
+  private dbName: 'ecommerce' = 'ecommerce' as const
+
+
+  // Dynamic model per DB
+  private async getUserModel(dbName: 'ecommerce' | 'testing') {
+    if (!this.models.has(dbName)) {
+      const connection = await dbManager.getConnection(dbName)
+      const userModel = connection.model<IUser>('User', userSchema)
+      this.models.set(dbName, userModel)
+    }
+    return this.models.get(dbName)!
+  }
+
+  // check user is exist
+  async checkUserIsExists(email: string): Promise<IUser | null> {
+    const UserModel = await this.getUserModel(this.dbName)
+    return await UserModel.findOne({
+      email,
+    })
+  }
+
+  // register new user
+  async registerUser(userData: registerZodType) {
+    const UserModel = await this.getUserModel(this.dbName)
+    const user = new UserModel(userData)
+    return await user.save()
   }
 }

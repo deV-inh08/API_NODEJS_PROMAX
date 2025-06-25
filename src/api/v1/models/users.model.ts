@@ -135,6 +135,3 @@ export const userSchema = new Schema<IUser>({
     default: () => ({})
   }
 })
-
-const User = mongoose.model<IUser>('User', userSchema)
-export default User

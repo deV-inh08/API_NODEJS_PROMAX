@@ -11,6 +11,12 @@ class DatabaseManager {
       options: {
         maxPoolSize: 10
       }
+    },
+    testing: {
+      uri: `${envConfig.DB_URI}`,
+      options: {
+        maxPoolSize: 10
+      }
     }
   }
 

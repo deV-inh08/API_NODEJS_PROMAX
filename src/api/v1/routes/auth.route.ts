@@ -13,7 +13,7 @@ const authController = new AuthController()
  * @desc    Register a new user
  * @access  Public
  */
-authRouter.post('/register', authLimiter, validationReq(registerSchema), authController.register)
+authRouter.post('/register', validationReq(registerSchema), authController.register)
 
 
 export default authRouter

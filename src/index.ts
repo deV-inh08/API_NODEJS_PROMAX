@@ -5,6 +5,7 @@ import helmet from 'helmet'
 import Database from '~/api/v1/db/init.mongo'
 import MongoDBMonitor from '~/monitoring/mongoDb.monitor'
 import routerApiV1 from '~/api/v1/routes/index.route'
+import { errorHandler } from '~/api/v1/middlewares/errorHandler.middleware'
 
 const app = express()
 
@@ -53,6 +54,7 @@ app.get('/health', async (req, res) => {
 })
 
 // ==================== HANDLE ERROR ====================
+app.use(errorHandler)
 
 // export app
 export { app }
