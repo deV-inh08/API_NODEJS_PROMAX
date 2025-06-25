@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from "express";
-import envConfig from "~/api/v1/config/env.config";
-import { ErrorResponse } from "~/api/v1/utils/response.util";
+import type { Request, Response, NextFunction } from 'express'
+import envConfig from '~/api/v1/config/env.config'
+import { ErrorResponse } from '~/api/v1/utils/response.util'
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ErrorResponse) {

@@ -1,14 +1,12 @@
-import { registerZodType } from "~/api/v1/validations/auth.validation";
-import { userSchema } from "~/api/v1/models/users.model";
-import { IUser } from "~/api/v1/types/user.type";
-import { Model } from "mongoose";
-import dbManager from "~/api/v1/db/dbName.mongo";
-
+import { registerZodType } from '~/api/v1/validations/auth.validation'
+import { userSchema } from '~/api/v1/models/users.model'
+import { IUser } from '~/api/v1/types/user.type'
+import { Model } from 'mongoose'
+import dbManager from '~/api/v1/db/dbName.mongo'
 
 export class UserRepository {
   private models = new Map<string, Model<IUser>>()
   private dbName: 'ecommerce' = 'ecommerce' as const
-
 
   // Dynamic model per DB
   private async getUserModel(dbName: 'ecommerce' | 'testing') {
@@ -24,7 +22,7 @@ export class UserRepository {
   async checkUserIsExists(email: string): Promise<IUser | null> {
     const UserModel = await this.getUserModel(this.dbName)
     return await UserModel.findOne({
-      email,
+      email
     })
   }
 

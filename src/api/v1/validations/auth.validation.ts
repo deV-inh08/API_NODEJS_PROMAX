@@ -46,10 +46,8 @@ export const registerSchema = z.object({
 
     gender: z.enum(['male', 'female', 'other']).optional().default('other')
   })
-
 })
 export type registerZodType = z.infer<typeof registerSchema>['body']
-
 
 export const loginSchema = z.object({
   body: z.object({
