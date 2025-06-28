@@ -5,6 +5,7 @@ import { JWTServices } from '~/api/v1/utils/jwt.util'
 import { ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
+import { IDeviceInfo } from '~/api/v1/types/auth.type'
 
 export class AuthService {
   private userRepository: UserRepository
@@ -15,8 +16,18 @@ export class AuthService {
     this.refreshTokenRepository = new RefreshTokenRepository()
   }
 
+  getDateForToken() {
+    const now = new Date()
+    const expiresAt = new Date(now)
+    expiresAt.setDate(now.getDate() + 3000)
+    return {
+      iat: now,
+      exp: expiresAt
+    }
+  }
+
   // register new User
-  async register(user: registerZodType) {
+  async register(user: registerZodType, deviceInfo?: IDeviceInfo) {
     // check if user exists (chưa làm)
     const userIsExists = await this.userRepository.checkUserIsExists(user.email)
     if (userIsExists) {
@@ -41,6 +52,18 @@ export class AuthService {
 
     const refreshToken = JWTServices.generateRefreshToken({
       id: newUser.id
+    })
+
+    // get time
+    const { iat, exp } = this.getDateForToken()
+
+    // save refreshToken in DB
+    await this.refreshTokenRepository.saveRefreshtoken({
+      userId: newUser.id,
+      token: refreshToken,
+      deviceInfo,
+      exp,
+      iat
     })
 
     // Return user without sensitive data
@@ -68,7 +91,7 @@ export class AuthService {
   }
 
   // login
-  async login(loginBody: loginZodType, deviceInfo?: any) {
+  async login(loginBody: loginZodType, deviceInfo?: IDeviceInfo) {
     // find user by email
     const userIsExits = await this.userRepository.checkUserIsExists(loginBody.email)
     if (!userIsExits) {
@@ -92,12 +115,13 @@ export class AuthService {
     })
 
     // save refreshToken in DB
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 30) // 30days
+    const { iat, exp } = this.getDateForToken()
+
     await this.refreshTokenRepository.saveRefreshtoken({
       userId: userIsExits.id,
       token: refreshToken,
-      expiresAt,
+      iat,
+      exp,
       deviceInfo
     })
 

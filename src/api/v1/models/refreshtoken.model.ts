@@ -15,12 +15,16 @@ export const refreshTokenSchema = new Schema<IRefreshToken>(
       unique: true,
       index: true
     },
-    expiresAt: {
+    exp: {
       type: Date,
       required: true,
       index: {
         expireAfterSeconds: 0
       }
+    },
+    iat: {
+      type: Date,
+      required: true
     },
     isActive: {
       type: Boolean,

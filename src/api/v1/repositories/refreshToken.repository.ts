@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import dbManager from '~/api/v1/db/dbName.mongo'
-import { IRefreshToken } from '~/api/v1/types/auth.type'
+import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
 import { refreshTokenSchema } from '~/api/v1/models/refreshtoken.model'
 
 export class RefreshTokenRepository {
@@ -17,7 +17,7 @@ export class RefreshTokenRepository {
   }
 
   // save freshToken in DB
-  async saveRefreshtoken(tokenData: { userId: string; token: string; expiresAt: Date; deviceInfo?: any }) {
+  async saveRefreshtoken(tokenData: { userId: string; token: string; iat: Date; exp: Date; deviceInfo?: IDeviceInfo }) {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
     return await refreshTokenModel.create(tokenData)
   }

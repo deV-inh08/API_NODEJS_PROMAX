@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import envConfig from '~/api/v1/config/env.config'
-import { JWTExpiresPayload, JWTPayload } from '~/api/v1/types/jwt.type'
+import { JWTPayload } from '~/api/v1/types/jwt.type'
 import type { StringValue } from 'ms'
 import { UnauthorizedError } from '~/api/v1/utils/response.util'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
@@ -61,16 +61,38 @@ export class JWTServices {
     }
   }
 
+  // decoded Token for check validation
+  static decodedToken(token: string) {
+    try {
+      return jwt.decode(token)
+    } catch (error) {
+      return null
+    }
+  }
 
-  // // Get token expired time
-  // static getTokenExpired(token: string): JWTExpiresPayload {
-  //   try {
-  //     const decoded = jwt.decode(token) as JWTExpiresPayload
-  //     if() {
+  // Get token expired time
+  static getTokenExpired(token: string): Date | null {
+    try {
+      const decoded = jwt.decode(token) as JWTPayload
+      if (decoded && decoded.exp) {
+        return new Date(decoded.exp * 1000)
+      }
+      return null
+    } catch (error) {
+      return null
+    }
+  }
 
-  //     }
-  //   } catch (error) {
+  // Check Token is expired
+  static isTokenExpired(token: string): boolean {
+    const isExpired = this.getTokenExpired(token)
+    if (!isExpired) return true // Nếu isExpired là null -> không có token -> luôn luôn trả về True -> đã hết hạn
+    return isExpired < new Date()
+  }
 
-  //   }
-  // }
+  // validate JWT format => header.payload.signature
+  static validateJWTFormat(token: string): boolean {
+    const sliptTokens = token.split('.')
+    return sliptTokens.length === 3 && sliptTokens.every((part) => part.length > 0)
+  }
 }

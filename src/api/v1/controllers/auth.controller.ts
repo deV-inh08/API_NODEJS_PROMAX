@@ -13,7 +13,11 @@ export class AuthController {
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user: registerZodType = req.body
-      const result = await this.authServices.register(user)
+      const deviceInfo = {
+        userAgent: req.headers['user-agent'],
+        ip: req.ip || req.connection.remoteAddress
+      }
+      const result = await this.authServices.register(user, deviceInfo)
       const successResponse = SuccessResponse.created(result, 'User register successfully')
       successResponse.send(res)
     } catch (error) {

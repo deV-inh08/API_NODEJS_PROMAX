@@ -11,7 +11,8 @@ export interface IDeviceInfo {
 export interface IRefreshToken extends Document {
   userId: mongoose.Types.ObjectId
   token: string
-  expiresAt: Date
+  iat: Date
+  exp: Date
   deviceInfo: IDeviceInfo
   isActive: boolean
 
