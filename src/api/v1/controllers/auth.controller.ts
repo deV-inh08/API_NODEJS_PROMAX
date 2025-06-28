@@ -29,7 +29,7 @@ export class AuthController {
         ip: req.ip || req.connection.remoteAddress
       }
       const result = await this.authServices.login(loginBody, deviceInfo)
-      const successResponse = SuccessResponse.created(result, 'User registered successfully')
+      const successResponse = SuccessResponse.ok(result, 'User login successfully')
       successResponse.send(res)
     } catch (error) {
       next(error)

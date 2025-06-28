@@ -15,7 +15,6 @@ const authController = new AuthController()
  */
 authRouter.post('/register', validationReq(registerSchema), authController.register)
 
-
 /**
  * @route   POST /api/v1/auth/login
  * @desc    Login user
