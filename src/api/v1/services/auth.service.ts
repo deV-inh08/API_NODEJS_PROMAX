@@ -26,7 +26,7 @@ export class AuthService {
   getDateForToken() {
     const now = new Date()
     const expiresAt = new Date(now)
-    expiresAt.setDate(now.getDate() + 3000)
+    expiresAt.setDate(now.getDate() + 30) // 30 days 
     return {
       iat: now,
       exp: expiresAt
@@ -155,19 +155,96 @@ export class AuthService {
     }
   }
 
-  // refreshtoken
   // refreshToken
-  async refreshToken(refreshTokenData: refreshTokenZodType, deviceInfo?: IDeviceInfo) {
+  async refreshToken(refreshTokenData: refreshTokenZodType, accessToken?: string, deviceInfo?: IDeviceInfo) {
     const { refreshToken } = refreshTokenData
-    const decoded = JWTServices.verifyRefreshToken(refreshToken)
+    console.log(refreshToken);
+    try {
+      const decodedRT = JWTServices.verifyRefreshToken(refreshToken)
 
-    const storedToken = await this.refreshTokenRepository.findActiveToken(decoded.id, refreshToken)
+      let userFromAT = null
+      let isProactiveRefresh = false
+      if (accessToken) {
+        try {
+          const decodedAT = JWTServices.verifyAccessToken(accessToken)
+          if (decodedRT.id === decodedAT.id) {
+            userFromAT = decodedAT
+            isProactiveRefresh = true
+            console.log('🟢 Proactive refresh: AT still valid, refreshing early')
+          } else {
+            console.warn('⚠️ Token mismatch: AT and RT belong to different users')
+          }
+        } catch (error) {
+          // AT invalid/expired → fallback to reactive
+          console.log('🔴 AT provided but invalid, falling back to reactive refresh')
+        }
+      } else {
+        console.log('🔴 Reactive refresh: No AT provided (likely expired)')
+      }
 
-    // User status Validation
-    const user = await this.userRepository.getUserById(decoded.id)
-    if (!user || user.status !== 'active') {
-      // delete all Token for inActive user
 
+      // check token còn active không
+      const storedToken = await this.refreshTokenRepository.findActiveToken(decodedRT.id, refreshToken)
+      if (!storedToken) {
+        throw new UnauthorizedError('Refresh token not found or expired')
+      }
+
+      // check user có tồn tại không
+      const user = await this.userRepository.getUserById(decodedRT.id)
+
+      if (!user) {
+        throw new UnauthorizedError('User not found')
+      }
+
+      //  user don't active
+      if (user.status !== 'active') {
+        throw new UnauthorizedError(`Account is ${user.status}`)
+      }
+
+      // STEP 5: Additional security checks for proactive refresh
+      if (isProactiveRefresh && userFromAT) {
+        // Ensure user info consistency between AT and database
+        if (userFromAT.role !== user.role) {
+          console.warn('🚨 Role mismatch detected, forcing reactive refresh')
+          isProactiveRefresh = false
+        }
+      }
+
+      // Apply token limmit before genare new Token
+      await this.refreshTokenRepository.limitUserTokens(user.id)
+
+      // STEP 6: Generate New Access Token
+      const newAccessToken = JWTServices.generateAccessToken({
+        id: user.id,
+        email: user.email,
+        role: user.role
+      })
+
+      // Return response without sensitive data
+      const userResponse = {
+        _id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        status: user.status,
+        isEmailVerified: user.isEmailVerified
+      }
+
+      return {
+        user: userResponse,
+        tokens: {
+          accessToken: newAccessToken,
+          refreshToken
+        },
+        refreshType: isProactiveRefresh ? 'proactive' : 'reactive',
+      }
+
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error
+      }
+      throw new UnauthorizedError('Token refresh failed', error)
     }
 
   }

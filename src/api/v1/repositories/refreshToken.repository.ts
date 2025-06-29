@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import dbManager from '~/api/v1/db/dbName.mongo'
 import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
-import { refreshTokenSchema } from '~/api/v1/models/refreshtoken.model'
+import { refreshTokenModelSchema } from '~/api/v1/models/refreshtoken.model'
 
 export class RefreshTokenRepository {
   private models = new Map<string, mongoose.Model<IRefreshToken>>()
@@ -10,7 +10,7 @@ export class RefreshTokenRepository {
   private async getRefreshTokenModel(dbName: 'ecommerce' | 'testing') {
     if (!this.models.has(dbName)) {
       const connection = await dbManager.getConnection(dbName)
-      const refreshTokenModel = connection.model('RefreshToken', refreshTokenSchema)
+      const refreshTokenModel = connection.model('RefreshToken', refreshTokenModelSchema)
       this.models.set(dbName, refreshTokenModel)
     }
     return this.models.get(dbName)!
@@ -60,14 +60,21 @@ export class RefreshTokenRepository {
 
     const result = await refreshTokenModel.deleteMany({
       $or: [
+        // condition 1: Token expired < now -> Hết hạn
         {
           exp: {
             $lt: new Date() // lessThan now -> Expired tokens
           }
         },
+
+        // condition 2: Token inActive từ 2 tháng trở lên
         {
           isActive: false,
-          updateAt: { twoMonthsAgo } // Inactive for 2 months
+          updateAt: {
+            $lt: {
+              twoMonthsAgo
+            }
+          } // Inactive for 2 months
         }
       ]
     })
@@ -101,18 +108,18 @@ export class RefreshTokenRepository {
           }
         })
         .sort({
-          createdAt: 1
+          createdAt: 1 // thời gian tạo ->tăng dần -> ngày tạo cũ nhất lên đầu mảng -> [1/6, 5/6, 10/6, 20/6]
         })
-        .limit(activeTokensCount - maxTokens)
+        .limit(activeTokensCount - maxTokens) // giới hạn (4-3) = 1 -> [1/6]
       // revoke old tokens
-      const oldTokenIds = oldTokens.map((token) => token._id)
+      const oldTokenIds = oldTokens.map((token) => token._id) // oldTokens -> [1/6]
       await refreshTokenModel.updateMany(
         {
           _id: {
             $in: oldTokenIds
           }
         },
-        { isActive: false }
+        { isActive: false } // update [1/6] => isActive = false
       )
     }
   }

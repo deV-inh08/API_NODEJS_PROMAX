@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose'
 import { IRefreshToken } from '~/api/v1/types/auth.type'
 
-export const refreshTokenSchema = new Schema<IRefreshToken>(
+export const refreshTokenModelSchema = new Schema<IRefreshToken>(
   {
     userId: {
       type: Schema.Types.ObjectId,

@@ -35,5 +35,6 @@ export interface ISuccessResponse<T = any> {
       total: number
       totalPages: number
     }
+    refreshType?: string
   }
 }
