@@ -16,6 +16,9 @@ export const refreshTokenSchema = z.object({
         const decoded = JWTServices.decodedToken(token)
         return decoded && typeof decoded === 'object' && 'id' in decoded // Có decodedToken và decoded Token phải là Object và có thuộc tính 'id' mới pass được
       }, 'Invalid refresh token structure')
+      .refine((token) => {
+        return JWTServices.validateJWTFormat(token)
+      }, 'Invalid refresh token format')
   })
 })
 

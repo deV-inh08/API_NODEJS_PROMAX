@@ -6,6 +6,7 @@ import { ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 import { IDeviceInfo } from '~/api/v1/types/auth.type'
+import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 
 export class AuthService {
   private userRepository: UserRepository
@@ -143,5 +144,22 @@ export class AuthService {
         refreshToken
       }
     }
+  }
+
+  // refreshtoken
+  // refreshToken
+  async refreshToken(refreshTokenData: refreshTokenZodType, deviceInfo?: IDeviceInfo) {
+    const { refreshToken } = refreshTokenData
+    const decoded = JWTServices.verifyRefreshToken(refreshToken)
+
+    const storedToken = await this.refreshTokenRepository.findActiveToken(decoded.id, refreshToken)
+
+    // User status Validation
+    const user = await this.userRepository.getUserById(decoded.id)
+    if (!user || user.status !== 'active') {
+      // delete all Token for inActive user
+
+    }
+
   }
 }
