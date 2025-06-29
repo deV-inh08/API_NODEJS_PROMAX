@@ -2,8 +2,6 @@ import mongoose from 'mongoose'
 import dbManager from '~/api/v1/db/dbName.mongo'
 import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
 import { refreshTokenSchema } from '~/api/v1/models/refreshtoken.model'
-import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
-import { JWTServices } from '~/api/v1/utils/jwt.util'
 
 export class RefreshTokenRepository {
   private models = new Map<string, mongoose.Model<IRefreshToken>>()
@@ -49,19 +47,27 @@ export class RefreshTokenRepository {
     )
   }
 
-  // Xóa những token đã hết hạn
+
+  /**
+   * Xóa tokens đã hết hạn và inActive quá lâu (inActive 2 months)
+   * Chạy mỗi tuần để cleanUp (cron job)
+   * @returns 
+   */
   async cleanupExpiredTokens() {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
+    const twoMonthsAgo = new Date()
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2)
+
     const result = await refreshTokenModel.deleteMany({
       $or: [
         {
           exp: {
-            $lt: new Date() // Expired tokens
+            $lt: new Date() // lessThan now -> Expired tokens
           }
         },
         {
           isActive: false,
-          updateAt: { $lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Inactive for 7 days
+          updateAt: { twoMonthsAgo } // Inactive for 2 months
         }
       ]
     })
@@ -74,6 +80,7 @@ export class RefreshTokenRepository {
     * Limit Token Active
     * 1 User có thể có nhiều token: Đăng nhập khác thiết bị | khác Browser...
     *  Tối đa là 3 token cho mỗi user: laptop | phone | backup
+    * Nếu quá max token -> set inActive token cũ nhất
     */
   async limitUserTokens(userId: string, maxTokens: number = 3) {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
@@ -108,6 +115,57 @@ export class RefreshTokenRepository {
         { isActive: false }
       )
     }
+  }
+}
 
+export class TokenCleanUpScheduler {
+  private refreshTokenRepo: RefreshTokenRepository
+  private cleanUpInterval: NodeJS.Timeout | null = null
+  constructor() {
+    this.refreshTokenRepo = new RefreshTokenRepository()
+  }
+
+  /**
+   * Bắt đầu weekly cleanup (cron job)
+   */
+  async startWeeklyCleanup() {
+    if (this.cleanUpInterval) {
+      console.log('Cleanup scheduler already running')
+      return
+    }
+
+    // chạy ngay lập tức (lần đầu)
+    this.runCleanUp()
+
+    const _DAYS = 7 * 24 * 60 * 60 * 1000 // 7days
+    // Sau đó 7 ngày chạy 1 lần
+    this.cleanUpInterval = setInterval(() => {
+      this.runCleanUp()
+    }, _DAYS)
+  }
+
+  /**
+   * Stop cleanUp
+   */
+  stopWeekCleanUp() {
+    if (this.cleanUpInterval) {
+      clearInterval(this.cleanUpInterval)
+      this.cleanUpInterval = null
+      console.log('Stop cleanup successfully');
+    }
+  }
+
+  /**
+   * Run cleanUp
+   */
+  private async runCleanUp() {
+    try {
+      const result = await this.refreshTokenRepo.cleanupExpiredTokens()
+      console.log('Weekly cleanup completed', {
+        deleteTokens: result.deletedCount
+      });
+    } catch (error) {
+      console.log('Error run clean up', error);
+    }
   }
 }

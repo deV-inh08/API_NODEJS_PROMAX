@@ -7,14 +7,20 @@ import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 import { IDeviceInfo } from '~/api/v1/types/auth.type'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
+import { TokenCleanUpScheduler } from '~/api/v1/repositories/refreshToken.repository'
 
 export class AuthService {
   private userRepository: UserRepository
   private refreshTokenRepository: RefreshTokenRepository
+  private tokenCleanUpScheduler: TokenCleanUpScheduler
 
   constructor() {
     this.userRepository = new UserRepository()
     this.refreshTokenRepository = new RefreshTokenRepository()
+    this.tokenCleanUpScheduler = new TokenCleanUpScheduler()
+
+    // Run cleanUp Weekly after Auth services running
+    this.tokenCleanUpScheduler.startWeeklyCleanup()
   }
 
   getDateForToken() {
@@ -104,6 +110,9 @@ export class AuthService {
     if (!isValidPassword) {
       throw new UnauthorizedError('Invalid credentials')
     }
+
+    // Apply token limmit before genare new Token
+    await this.refreshTokenRepository.limitUserTokens(userIsExits.id)
 
     // generate token
     const accessToken = JWTServices.generateAccessToken({
