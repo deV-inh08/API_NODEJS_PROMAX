@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import dbManager from '~/api/v1/db/dbName.mongo'
 import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
 import { refreshTokenModelSchema } from '~/api/v1/models/refreshtoken.model'
@@ -36,7 +36,7 @@ export class RefreshTokenRepository {
   }
 
   //  Update lại token nếu user bị unactive
-  async deactiveTokenById(tokenId: string) {
+  async deactiveTokenById(tokenId: string | Types.ObjectId) {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
     return await refreshTokenModel.updateOne(
       { _id: tokenId },

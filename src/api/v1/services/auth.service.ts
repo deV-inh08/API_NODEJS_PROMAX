@@ -2,12 +2,13 @@ import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
 import { JWTServices } from '~/api/v1/utils/jwt.util'
-import { ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { BadRequestError, ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 import { IDeviceInfo } from '~/api/v1/types/auth.type'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 import { TokenCleanUpScheduler } from '~/api/v1/repositories/refreshToken.repository'
+import { JWTPayload } from '~/api/v1/types/jwt.type'
 
 export class AuthService {
   private userRepository: UserRepository
@@ -111,9 +112,6 @@ export class AuthService {
       throw new UnauthorizedError('Invalid credentials')
     }
 
-    // Apply token limmit before genare new Token
-    await this.refreshTokenRepository.limitUserTokens(userIsExits.id)
-
     // generate token
     const accessToken = JWTServices.generateAccessToken({
       id: userIsExits.id,
@@ -135,6 +133,9 @@ export class AuthService {
       deviceInfo
     })
 
+    // Apply token limmit after save token
+    await this.refreshTokenRepository.limitUserTokens(userIsExits.id)
+
     // Return response without sensitive data
     const userResponse = {
       _id: userIsExits.id,
@@ -154,6 +155,7 @@ export class AuthService {
       }
     }
   }
+  //u9Y
 
   // refreshToken
   async refreshToken(refreshTokenData: refreshTokenZodType, accessToken?: string, deviceInfo?: IDeviceInfo) {
@@ -181,7 +183,6 @@ export class AuthService {
       } else {
         console.log('🔴 Reactive refresh: No AT provided (likely expired)')
       }
-
 
       // check token còn active không
       const storedToken = await this.refreshTokenRepository.findActiveToken(decodedRT.id, refreshToken)
@@ -247,5 +248,40 @@ export class AuthService {
       throw new UnauthorizedError('Token refresh failed', error)
     }
 
+  }
+
+  // logout
+  async logout(accessToken: string, refreshToken: string) {
+
+    // Decoded AT (Có thể expired -> vẫn OK)
+    const decodedAT = JWTServices.decodedToken(accessToken)!
+    if (!decodedAT) {
+      throw new BadRequestError('Invalid access token format')
+    }
+    // verify RT (bắt buộc phải còn valid)
+    const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
+
+    // AT & RT phải cùng thuộc về 1 user
+    if (decodedAT.id !== verifyRT.id) {
+      throw new UnauthorizedError('Token mismatch - AT and RT belong to different users')
+    }
+
+    // Xem Rt có tồn tại trong DB không
+    const storedToken = await this.refreshTokenRepository.findActiveToken(verifyRT.id, refreshToken)
+    if (!storedToken) {
+      throw new UnauthorizedError('Refresh token not found or already expired')
+    }
+
+    // Check xem user có active không
+    const user = await this.userRepository.getUserById(verifyRT.id)
+    if (!user || user.status !== 'active') {
+      throw new UnauthorizedError('User account is not active')
+    }
+
+    // Set RT isActive = 'false'
+    await this.refreshTokenRepository.deactiveTokenById(storedToken._id.toString())
+    return {
+      message: 'Logout user success'
+    }
   }
 }

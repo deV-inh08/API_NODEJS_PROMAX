@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import envConfig from '~/api/v1/config/env.config'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
 import type { StringValue } from 'ms'
-import { UnauthorizedError } from '~/api/v1/utils/response.util'
+import { BadRequestError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 
 export class JWTServices {
@@ -62,11 +62,14 @@ export class JWTServices {
   }
 
   // decoded Token for check validation
-  static decodedToken(token: string) {
+  static decodedToken(token: string): JWTPayload | undefined {
     try {
-      return jwt.decode(token)
+      const decodedToken = jwt.decode(token)!
+      if (typeof decodedToken === 'object') {
+        return decodedToken as { id: string, email: string, role: string }
+      }
     } catch (error) {
-      return null
+      throw new BadRequestError('Invalid token')
     }
   }
 

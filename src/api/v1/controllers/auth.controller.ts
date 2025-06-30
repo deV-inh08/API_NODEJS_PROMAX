@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { AuthService } from '~/api/v1/services/auth.service'
-import { SuccessResponse } from '~/api/v1/utils/response.util'
-import { loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
+import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { loginZodType, logoutZodType, registerZodType } from '~/api/v1/validations/auth.validation'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 
 // route -> validate (zod) -> middleware (rate-limit) -> controller -> Services (DB) -> Models (declare schema)
@@ -56,6 +56,24 @@ export class AuthController {
       // call auth services
       const result = await this.authServices.refreshToken(refreshTokenData, accessToken, deviceInfo)
       const successResponse = SuccessResponse.ok(result, 'Token refreshed SuccessFully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { refreshToken }: logoutZodType = req.body
+      const authHeader = req.headers.authorization
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new UnauthorizedError('AccessToken is required in Authorization header')
+      }
+      const accessToken = authHeader.split(' ')[1]
+
+      // call auth services
+      const result = await this.authServices.logout(accessToken, refreshToken)
+      const successResponse = SuccessResponse.ok(result, 'Logout user success')
       successResponse.send(res)
     } catch (error) {
       next(error)

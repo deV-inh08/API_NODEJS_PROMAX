@@ -1,5 +1,6 @@
 import z from 'zod'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
+import { JWTServices } from '~/api/v1/utils/jwt.util'
 
 export const registerSchema = z.object({
   body: z.object({
@@ -62,3 +63,16 @@ export const loginSchema = z.object({
 })
 
 export type loginZodType = z.infer<typeof loginSchema>['body']
+
+export const logoutSchema = z.object({
+  body: z.object({
+    refreshToken: z.string({
+      required_error: 'RefreshToken is required'
+    }).min(1, 'Refresh token cannot be empty')
+      .refine((token) => {
+        return JWTServices.validateJWTFormat(token)
+      }, 'Invalid refresh token format')
+  })
+})
+
+export type logoutZodType = z.infer<typeof logoutSchema>['body']
