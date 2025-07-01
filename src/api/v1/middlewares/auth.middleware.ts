@@ -4,6 +4,7 @@ import { JWTServices } from '~/api/v1/utils/jwt.util';
 import { UnauthorizedError } from '~/api/v1/utils/response.util';
 import type { ParamsDictionary } from '../../../../node_modules/@types/express-serve-static-core/index'
 import { JWTPayload } from '~/api/v1/types/jwt.type';
+import { Role } from '~/api/v1/types/comon.types';
 
 export class AuthMiddleWare {
   private userRepository: UserRepository
@@ -37,6 +38,23 @@ export class AuthMiddleWare {
         id: user.id,
         email: user.email,
         role: user.role
+      }
+      next()
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // require role
+  requireRole = (roles: Role[]) => (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      if (!decodedAT) {
+        throw new UnauthorizedError('decoded_accessToken not found')
+      }
+      const role = decodedAT.role as Role
+      if (!roles.includes(role)) {
+        throw new UnauthorizedError('Insufficient permissions')
       }
       next()
     } catch (error) {
