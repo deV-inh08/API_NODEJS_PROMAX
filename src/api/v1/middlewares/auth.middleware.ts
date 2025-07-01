@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from 'express'
-import { UserRepository } from "~/api/v1/repositories/user.repository";
-import { JWTServices } from '~/api/v1/utils/jwt.util';
-import { UnauthorizedError } from '~/api/v1/utils/response.util';
+import { UserRepository } from '~/api/v1/repositories/user.repository'
+import { JWTServices } from '~/api/v1/utils/jwt.util'
+import { UnauthorizedError } from '~/api/v1/utils/response.util'
 import type { ParamsDictionary } from '../../../../node_modules/@types/express-serve-static-core/index'
-import { JWTPayload } from '~/api/v1/types/jwt.type';
-import { Role } from '~/api/v1/types/comon.types';
+import { JWTPayload } from '~/api/v1/types/jwt.type'
+import { Role } from '~/api/v1/types/comon.types'
 
 export class AuthMiddleWare {
   private userRepository: UserRepository

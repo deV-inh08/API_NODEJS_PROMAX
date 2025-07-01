@@ -66,9 +66,11 @@ export type loginZodType = z.infer<typeof loginSchema>['body']
 
 export const logoutSchema = z.object({
   body: z.object({
-    refreshToken: z.string({
-      required_error: 'RefreshToken is required'
-    }).min(1, 'Refresh token cannot be empty')
+    refreshToken: z
+      .string({
+        required_error: 'RefreshToken is required'
+      })
+      .min(1, 'Refresh token cannot be empty')
       .refine((token) => {
         return JWTServices.validateJWTFormat(token)
       }, 'Invalid refresh token format')

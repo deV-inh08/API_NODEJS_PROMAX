@@ -36,13 +36,16 @@ export class UserRepository {
   // get user by ID -> User Status Validation
   async getUserById(userId: string): Promise<IUser | null> {
     const UserModel = await this.getUserModel(this.dbName)
-    return await UserModel.findOne({
-      _id: userId
-    }, {
-      // Exclude sensitive fields for security
-      password: 0,
-      emailVerificationToken: 0,
-      passwordResetToken: 0
-    }).lean()
+    return await UserModel.findOne(
+      {
+        _id: userId
+      },
+      {
+        // Exclude sensitive fields for security
+        password: 0,
+        emailVerificationToken: 0,
+        passwordResetToken: 0
+      }
+    ).lean()
   }
 }

@@ -66,7 +66,7 @@ export class JWTServices {
     try {
       const decodedToken = jwt.decode(token)!
       if (typeof decodedToken === 'object') {
-        return decodedToken as { id: string, email: string, role: string }
+        return decodedToken as { id: string; email: string; role: string }
       }
     } catch (error) {
       throw new BadRequestError('Invalid token')

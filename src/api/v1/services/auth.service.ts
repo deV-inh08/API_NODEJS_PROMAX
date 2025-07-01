@@ -27,7 +27,7 @@ export class AuthService {
   getDateForToken() {
     const now = new Date()
     const expiresAt = new Date(now)
-    expiresAt.setDate(now.getDate() + 30) // 30 days 
+    expiresAt.setDate(now.getDate() + 30) // 30 days
     return {
       iat: now,
       exp: expiresAt
@@ -233,21 +233,18 @@ export class AuthService {
           accessToken: newAccessToken,
           refreshToken
         },
-        refreshType: isProactiveRefresh ? 'proactive' : 'reactive',
+        refreshType: isProactiveRefresh ? 'proactive' : 'reactive'
       }
-
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         throw error
       }
       throw new UnauthorizedError('Token refresh failed', error)
     }
-
   }
 
   // logout
   async logout(decodedAT: JWTPayload, refreshToken: string) {
-
     // verify RT (bắt buộc phải còn valid)
     const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
 

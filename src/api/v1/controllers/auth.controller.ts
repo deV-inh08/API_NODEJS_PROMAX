@@ -75,7 +75,6 @@ export class AuthController {
         throw new UnauthorizedError('Not found decodedAT')
       }
 
-
       // call auth services
       await this.authServices.logout(decodedAT, refreshToken)
       const successResponse = SuccessResponse.ok(null, 'Logout user success')

@@ -17,14 +17,17 @@
   "description": "",
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.1",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
     "globals": "^16.2.0",
+    "jest": "^30.0.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
@@ -36,6 +39,7 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
+    "@types/supertest": "^6.0.3",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.0",
     "dotenv": "^16.5.0",
@@ -43,8 +47,10 @@
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mongodb-memory-server": "^10.1.4",
     "mongoose": "^8.15.2",
     "morgan": "^1.10.0",
+    "supertest": "^7.1.1",
     "zod": "^3.25.64"
   }
 }

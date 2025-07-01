@@ -25,14 +25,16 @@ export class RefreshTokenRepository {
   //  Database token validation
   async findActiveToken(userId: string, token: string) {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
-    return await refreshTokenModel.findOne({
-      userId,
-      token,
-      isActive: true,
-      exp: {
-        $gt: new Date()
-      }
-    }).lean()
+    return await refreshTokenModel
+      .findOne({
+        userId,
+        token,
+        isActive: true,
+        exp: {
+          $gt: new Date()
+        }
+      })
+      .lean()
   }
 
   //  Update lại token nếu user bị unactive
@@ -47,11 +49,10 @@ export class RefreshTokenRepository {
     )
   }
 
-
   /**
    * Xóa tokens đã hết hạn và inActive quá lâu (inActive 2 months)
    * Chạy mỗi tuần để cleanUp (cron job)
-   * @returns 
+   * @returns
    */
   async cleanupExpiredTokens() {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
@@ -82,13 +83,12 @@ export class RefreshTokenRepository {
     return result
   }
 
-
   /**
-    * Limit Token Active
-    * 1 User có thể có nhiều token: Đăng nhập khác thiết bị | khác Browser...
-    *  Tối đa là 3 token cho mỗi user: laptop | phone | backup
-    * Nếu quá max token -> set inActive token cũ nhất
-    */
+   * Limit Token Active
+   * 1 User có thể có nhiều token: Đăng nhập khác thiết bị | khác Browser...
+   *  Tối đa là 3 token cho mỗi user: laptop | phone | backup
+   * Nếu quá max token -> set inActive token cũ nhất
+   */
   async limitUserTokens(userId: string, maxTokens: number = 3) {
     const refreshTokenModel = await this.getRefreshTokenModel(this.dbName)
     // Lấy số token active dựa trên 'userID'
@@ -158,7 +158,7 @@ export class TokenCleanUpScheduler {
     if (this.cleanUpInterval) {
       clearInterval(this.cleanUpInterval)
       this.cleanUpInterval = null
-      console.log('Stop cleanup successfully');
+      console.log('Stop cleanup successfully')
     }
   }
 
@@ -170,9 +170,9 @@ export class TokenCleanUpScheduler {
       const result = await this.refreshTokenRepo.cleanupExpiredTokens()
       console.log('Weekly cleanup completed', {
         deleteTokens: result.deletedCount
-      });
+      })
     } catch (error) {
-      console.log('Error run clean up', error);
+      console.log('Error run clean up', error)
     }
   }
 }
