@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { AuthController } from '~/api/v1/controllers/auth.controller'
+import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
 import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
 import { loginSchema, logoutSchema, registerSchema } from '~/api/v1/validations/auth.validation'
@@ -7,6 +8,7 @@ import { refreshTokenSchema } from '~/api/v1/validations/token.validation'
 const authRouter = Router()
 
 const authController = new AuthController()
+const authMiddleware = new AuthMiddleWare()
 
 // ==================== PUBLIC ROUTES ====================
 /**
@@ -29,8 +31,12 @@ authRouter.post('/login', validationReq(loginSchema), authController.login)
  * @body accessToken (header request) & RT (body)
  * @access  Public
  */
-authRouter.post('/refresh-token', validationReq(refreshTokenSchema), authController.refreshToken)
-
+authRouter.post(
+  '/refresh-token',
+  validationReq(refreshTokenSchema),
+  authMiddleware.verifyAT,
+  authController.refreshToken
+)
 
 /**
  * @route   POST /api/v1/auth/logout

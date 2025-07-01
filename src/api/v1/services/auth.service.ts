@@ -155,17 +155,17 @@ export class AuthService {
       }
     }
   }
-  //u9Y
 
   // refreshToken
   async refreshToken(refreshTokenData: refreshTokenZodType, accessToken?: string, deviceInfo?: IDeviceInfo) {
     const { refreshToken } = refreshTokenData
-    console.log(refreshToken);
     try {
       const decodedRT = JWTServices.verifyRefreshToken(refreshToken)
 
       let userFromAT = null
       let isProactiveRefresh = false
+
+      // AccessToken còn hạn (proactive)
       if (accessToken) {
         try {
           const decodedAT = JWTServices.verifyAccessToken(accessToken)
@@ -180,11 +180,9 @@ export class AuthService {
           // AT invalid/expired → fallback to reactive
           console.log('🔴 AT provided but invalid, falling back to reactive refresh')
         }
-      } else {
-        console.log('🔴 Reactive refresh: No AT provided (likely expired)')
       }
 
-      // check token còn active không
+      // check RT còn active không
       const storedToken = await this.refreshTokenRepository.findActiveToken(decodedRT.id, refreshToken)
       if (!storedToken) {
         throw new UnauthorizedError('Refresh token not found or expired')
@@ -210,9 +208,6 @@ export class AuthService {
           isProactiveRefresh = false
         }
       }
-
-      // Apply token limmit before genare new Token
-      await this.refreshTokenRepository.limitUserTokens(user.id)
 
       // STEP 6: Generate New Access Token
       const newAccessToken = JWTServices.generateAccessToken({
@@ -251,13 +246,8 @@ export class AuthService {
   }
 
   // logout
-  async logout(accessToken: string, refreshToken: string) {
+  async logout(decodedAT: JWTPayload, refreshToken: string) {
 
-    // Decoded AT (Có thể expired -> vẫn OK)
-    const decodedAT = JWTServices.decodedToken(accessToken)!
-    if (!decodedAT) {
-      throw new BadRequestError('Invalid access token format')
-    }
     // verify RT (bắt buộc phải còn valid)
     const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
 

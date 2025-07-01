@@ -65,15 +65,20 @@ export class AuthController {
   logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { refreshToken }: logoutZodType = req.body
-      const authHeader = req.headers.authorization
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new UnauthorizedError('AccessToken is required in Authorization header')
+      const decodedAT = req.decoded_accessToken
+      // const authHeader = req.headers.authorization
+      // if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      //   throw new UnauthorizedError('AccessToken is required in Authorization header')
+      // }
+      // const accessToken = authHeader.split(' ')[1]
+      if (!decodedAT) {
+        throw new UnauthorizedError('Not found decodedAT')
       }
-      const accessToken = authHeader.split(' ')[1]
+
 
       // call auth services
-      const result = await this.authServices.logout(accessToken, refreshToken)
-      const successResponse = SuccessResponse.ok(result, 'Logout user success')
+      await this.authServices.logout(decodedAT, refreshToken)
+      const successResponse = SuccessResponse.ok(null, 'Logout user success')
       successResponse.send(res)
     } catch (error) {
       next(error)
