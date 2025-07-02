@@ -47,9 +47,9 @@ jobs:
           # Environment variables for test
           NODE_ENV: test
           PORT: 3001
-          DB_URI: memory://test
-          DB_NAME: test_db
-          DB_OPTION: retryWrites=true&w=majority
+          DB_URI: mongodb://root:password@localhost:27017
+          DB_NAME: testing
+          DB_OPTION: retryWrites=true&w=majority&authSource=admin
           JWT_ACCESS_TOKEN_SECRET: test_access_secret_key_123456
           JWT_REFRESH_TOKEN_SECRET: test_refresh_secret_key_123456
           JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
