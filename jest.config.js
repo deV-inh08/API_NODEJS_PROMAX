@@ -18,7 +18,7 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup/setup.test.ts'],
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setup/setup.test.ts'],
 
   // Fix memory leaks and timeouts
   testTimeout: 30000,
