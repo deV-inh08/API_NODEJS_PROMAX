@@ -106,4 +106,4 @@ class MongoDbTest {
     }
   }
 }
-export default MongoDbTest
+export default MongoDbTest 

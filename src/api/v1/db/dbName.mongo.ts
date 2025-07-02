@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import envConfig from '~/api/v1/config/env.config'
+import envConfig from '../../v1/config/env.config'
 
 class DatabaseManager {
   private static instance: DatabaseManager

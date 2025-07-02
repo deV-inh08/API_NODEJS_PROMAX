@@ -43,7 +43,7 @@ export class TestHelper {
   }
 
   // validate JWT token
-  static isValidJWT(token): boolean {
+  static isValidJWT(token: string): boolean {
     return JWTServices.validateJWTFormat(token)
   }
 

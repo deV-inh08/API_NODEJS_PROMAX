@@ -1,4 +1,4 @@
-import MongoDbTest from "./MongoDB.test";
+import MongoDbTest from "../setup/mongodb-helper";
 
 const testDB = MongoDbTest.getInstance()
 

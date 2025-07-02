@@ -20,39 +20,18 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
-      - name: 📥 Install dependencies with retry
-        run: |
-          set -e
-          echo "Installing dependencies..."
-          npm ci --no-fund --no-audit --prefer-offline --no-optional || {
-            echo "First attempt failed, retrying..."
-            sleep 5
-            npm ci --no-fund --no-audit --prefer-offline --no-optional
-          }
-          echo "✅ Dependencies installed successfully"
-
-      - name: 🔍 Lint code (if script exists)
-        run: |
-          if npm run lint --dry-run 2>/dev/null; then
-            npm run lint
-            echo "✅ Linting completed"
-          else
-            echo "⚠️ No lint script found, skipping..."
-          fi
+      - name: 📥 Install dependencies
+        run: npm ci
 
       - name: 🧪 Run tests
-        run: |
-          echo "Running tests..."
-          npm test
-          echo "✅ All tests passed!"
+        run: npm test
 
-      - name: 📊 Upload coverage (if exists)
+      - name: 📊 Upload coverage (optional)
         if: success()
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          file: ./coverage/lcov.info
           fail_ci_if_error: false
         continue-on-error: true

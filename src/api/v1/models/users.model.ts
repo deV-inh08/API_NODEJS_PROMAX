@@ -62,7 +62,7 @@ export const userSchema = new Schema<IUser>({
   gender: {
     type: String,
     enum: {
-      values: [GenderObject.male, GenderObject.female]
+      values: [GenderObject.male, GenderObject.female, GenderObject.other]
     },
     default: GenderObject.other
   },
