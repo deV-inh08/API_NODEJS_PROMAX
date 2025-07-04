@@ -136,6 +136,12 @@ export class TokenCleanUpScheduler {
    * Bắt đầu weekly cleanup (cron job)
    */
   async startWeeklyCleanup() {
+    // 🚨 KHÔNG CHẠY SCHEDULER TRONG TEST ENVIRONMENT
+    if (process.env.NODE_ENV === 'test') {
+      console.log('🧪 Test environment - skipping weekly cleanup scheduler')
+      return
+    }
+
     if (this.cleanUpInterval) {
       console.log('Cleanup scheduler already running')
       return
@@ -160,6 +166,10 @@ export class TokenCleanUpScheduler {
       this.cleanUpInterval = null
       console.log('Stop cleanup successfully')
     }
+  }
+
+  async runCleanUpOnce() {
+    return await this.runCleanUp()
   }
 
   /**

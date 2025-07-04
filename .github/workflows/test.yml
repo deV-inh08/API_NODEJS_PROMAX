@@ -11,7 +11,7 @@ jobs:
   test:
     name: 🧪 Run Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     # Add MongoDB service
     services:
       mongodb:
