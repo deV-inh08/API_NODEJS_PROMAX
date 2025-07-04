@@ -78,3 +78,25 @@ export const logoutSchema = z.object({
 })
 
 export type logoutZodType = z.infer<typeof logoutSchema>['body']
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z
+      .string({
+        required_error: UserMessage.PASSWORD_IS_REQUIRED
+      })
+      .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+      .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+
+    newPassword: z
+      .string({
+        required_error: UserMessage.NEW_PASSWORD_IS_REQUIRED
+      })
+      .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+      .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+
+    confirmPassword: z.string({
+      required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
+    })
+  })
+})

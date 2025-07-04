@@ -46,4 +46,14 @@ authRouter.post(
  */
 authRouter.post('/logout', validationReq(logoutSchema), authController.logout)
 
+/**
+ * @route   POST /api/v1/auth/change-password
+ * @desc    client request API với AT & RT-> Server verify AT & RT, xem có cùng 1 user không ? -> Set RT.isActive = 'false'
+ * @header AccessToken
+ * @body { currentPassword, newPassword, confirmPassword }
+ * @access  Public
+ */
+
+// authRouter.post('change-password', validationReq(), )
+
 export default authRouter

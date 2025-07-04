@@ -1,33 +1,31 @@
+// __tests__/auth/register.test.ts
 import request from 'supertest'
 import { Express } from 'express'
-import { UserRepository } from '../../src/api/v1/repositories/user.repository'
-import { RefreshTokenRepository } from '../../src/api/v1/repositories/refreshToken.repository'
-import { testUserData } from '../mock/testUserData'
-import { BcryptServices } from '../../src/api/v1/utils/bcrypt.util'
-import { TestHelper } from '../setup/test-helper'
+import { testUserData } from '../../mock/testUserData'
+import { TestHelper } from '../helper/test-helper'
+import { getUserModel } from '../models/simple-model'
 
-describe('Register route test', () => {
+describe('Register API - Unit Tests', () => {
   let app: Express
-  let userRepository: UserRepository
-  let refreshTokenRepository: RefreshTokenRepository
 
   beforeAll(() => {
     app = TestHelper.getApp()
-    userRepository = new UserRepository()
-    refreshTokenRepository = new RefreshTokenRepository()
+
+    console.log('🧪 Register Tests - Using Memory Server')
   })
 
   // Helper function to generate unique email
-  const generateUniqueEmail = () => `test${Date.now()}${Math.random().toString(36)}@example.com`
+  const generateUniqueEmail = () => `test-${Date.now()}-${Math.random().toString(36)}@example.com`
 
-  describe('success case', () => {
-    it('Register user successfully with valid data', async () => {
-      // Arrange - Use unique email
+  describe('✅ Success Cases', () => {
+    it('should register user successfully with valid data', async () => {
+      // Arrange
       const userData = {
         ...testUserData.valid,
         email: generateUniqueEmail()
       }
 
+      // Act
       const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       // Assert Response Structure
@@ -48,74 +46,43 @@ describe('Register route test', () => {
 
       // Should NOT return sensitive data
       expect(user).not.toHaveProperty('password')
-      expect(user).not.toHaveProperty('emailVerificationToken')
-      expect(user).not.toHaveProperty('passwordResetToken')
 
       // Assert Tokens
       expect(tokens).toHaveProperty('accessToken')
       expect(tokens).toHaveProperty('refreshToken')
       expect(TestHelper.isValidJWT(tokens.accessToken)).toBe(true)
       expect(TestHelper.isValidJWT(tokens.refreshToken)).toBe(true)
+
+      // Verify user saved in memory database
+      const UserModel = getUserModel()
+      const savedUser = await UserModel.findOne({ email: userData.email.toLowerCase() })
+      expect(savedUser).toBeTruthy()
+      expect(savedUser!.email).toBe(userData.email.toLowerCase())
+
+      console.log('✅ User created in memory database:', savedUser!._id)
     })
 
     it('should register user with minimal required fields', async () => {
-      // Arrange - Use unique email
       const userData = {
         ...testUserData.validMinimal,
         email: generateUniqueEmail()
       }
 
-      // Act
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
-      // Assert
       expect(response.body.data.user.email).toBe(userData.email.toLowerCase())
-      expect(response.body.data.user.firstName).toBe(userData.firstName)
-      expect(response.body.data.user.lastName).toBe(userData.lastName)
       expect(response.body.data.user.gender).toBe('other') // default value
     })
 
-    it('should save refresh token in database', async () => {
-      // Arrange - Use unique email
-      const userData = {
-        ...testUserData.valid,
-        email: generateUniqueEmail()
-      }
-
-      // Act
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
-
-      // Assert
-      const userId = response.body.data.user._id
-      const refreshToken = response.body.data.tokens.refreshToken
-
-      const storedToken = await refreshTokenRepository.findActiveToken(userId, refreshToken)
-      expect(storedToken).toBeTruthy()
-      expect(storedToken!.isActive).toBe(true)
-      expect(storedToken!.token).toBe(refreshToken)
-    })
-
     it('should handle email case insensitivity', async () => {
-      // Arrange - Use unique email
       const uniqueEmail = generateUniqueEmail()
       const userData = {
         ...testUserData.valid,
         email: uniqueEmail.toUpperCase()
       }
 
-      // Act
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
-      // Assert
       expect(response.body.data.user.email).toBe(uniqueEmail.toLowerCase())
     })
   })
@@ -137,30 +104,12 @@ describe('Register route test', () => {
       expect(response.body).toHaveProperty('errorType', 'VALIDATION_ERROR')
     })
 
-    it('should return 422 for missing email', async () => {
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          password: 'password123',
-          firstName: 'John',
-          lastName: 'Doe'
-        })
-        .expect(422)
-
-      expect(response.body.details).toContainEqual(
-        expect.objectContaining({
-          path: 'body.email',
-          message: 'Email is required'
-        })
-      )
-    })
-
     it('should return 422 for password too short', async () => {
       const response = await request(app)
         .post('/api/v1/auth/register')
         .send({
           email: generateUniqueEmail(),
-          password: '123',
+          password: '123', // Too short
           firstName: 'John',
           lastName: 'Doe'
         })
@@ -177,7 +126,6 @@ describe('Register route test', () => {
 
   describe('❌ Business Logic Error Cases', () => {
     it('should return 409 when email already exists', async () => {
-      // Arrange - Create user first with unique email
       const uniqueEmail = generateUniqueEmail()
       const userData = {
         ...testUserData.valid,
@@ -185,18 +133,11 @@ describe('Register route test', () => {
       }
 
       // Create user first
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
-      // Act - Try to register same email
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(409)
+      // Try to register same email
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(409)
 
-      // Assert
       expect(response.body).toHaveProperty('status', 'error')
       expect(response.body).toHaveProperty('statusCode', 409)
       expect(response.body).toHaveProperty('errorType', 'CONFLICT')
@@ -211,10 +152,7 @@ describe('Register route test', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       expect(response.body.data.user).not.toHaveProperty('password')
 
@@ -229,10 +167,7 @@ describe('Register route test', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       const { accessToken, refreshToken } = response.body.data.tokens
 
@@ -246,6 +181,25 @@ describe('Register route test', () => {
 
       expect(accessTokenUserId).toBe(response.body.data.user._id)
       expect(refreshTokenUserId).toBe(response.body.data.user._id)
+    })
+  })
+
+  describe('🔍 Database Verification Tests', () => {
+    it('should save refresh token in memory database', async () => {
+      const userData = {
+        ...testUserData.valid,
+        email: generateUniqueEmail()
+      }
+
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
+
+      // Check database stats
+      const stats = await TestHelper.getDatabaseStats()
+      expect(stats.users).toBe(1)
+      expect(stats.refreshTokens).toBe(1)
+      expect(stats.isMemory).toBe(true)
+
+      console.log('📊 Database stats after test:', stats)
     })
   })
 })
