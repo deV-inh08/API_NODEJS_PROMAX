@@ -1,7 +1,8 @@
+// jest.config.js (Main configuration - chạy cả unit và integration)
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testTimeout: 30000,
+  testTimeout: 60000,
   forceExit: true,
 
   // TypeScript configuration
@@ -12,25 +13,23 @@ module.exports = {
   // File extensions
   moduleFileExtensions: ['ts', 'js', 'json'],
 
-  // Setup file for Memory Server
-  setupFilesAfterEnv: ['<rootDir>/__tests__/unit/setup/jest-unit-setup.ts'],
+  // Test tất cả các file test
+  testMatch: [
+    '**/__tests__/**/*.test.ts'
+  ],
 
   // Module name mapping
   moduleNameMapper: {
     '^~/(.*)$': '<rootDir>/src/$1'
   },
 
-  // Chỉ test unit tests
-  testMatch: ['**/__tests__/unit/**/*.test.ts'],
-
-  // Ignore integration tests
+  // Ignore patterns
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/dist/',
-    '__tests__/integration/'
+    '/dist/'
   ],
 
-  // Coverage cho unit tests
+  // Coverage
   collectCoverageFrom: [
     'src/**/*.{ts,js}',
     '!src/**/*.d.ts',
@@ -38,11 +37,17 @@ module.exports = {
     '!src/**/index.{ts,js}'
   ],
 
-  // Display settings
+  // Display
   verbose: true,
-  displayName: 'Unit Tests',
+  displayName: 'All Tests',
 
-  // Global settings for unit tests
+  // Projects - Chạy cả unit và integration
+  projects: [
+    '<rootDir>/jest.unit.config.js',
+    '<rootDir>/jest.integration.config.js'
+  ],
+
+  // Global settings
   globals: {
     'ts-jest': {
       useESM: false,

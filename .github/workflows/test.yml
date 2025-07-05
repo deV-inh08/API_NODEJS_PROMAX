@@ -8,11 +8,44 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: 🧪 Run Tests
+  unit-tests:
+    name: 🧪 Unit Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    # Add MongoDB service
+    timeout-minutes: 10
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build TypeScript
+        run: npm run build
+
+      - name: 🧪 Run Unit Tests
+        run: npm run test:unit
+        env:
+          NODE_ENV: test
+          TEST_TYPE: unit
+          JWT_ACCESS_TOKEN_SECRET: test_access_secret_key_123456
+          JWT_REFRESH_TOKEN_SECRET: test_refresh_secret_key_123456
+          JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
+          JWT_REFRESH_TOKEN_EXPIRES_IN: 30d
+          ALGORITHM: HS256
+
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # MongoDB service for integration tests
     services:
       mongodb:
         image: mongo:6.0
@@ -41,11 +74,14 @@ jobs:
       - name: 📥 Install dependencies
         run: npm ci
 
-      - name: 🧪 Run tests
-        run: npm test
+      - name: 🔨 Build TypeScript
+        run: npm run build
+
+      - name: 🔗 Run Integration Tests
+        run: npm run test:integration
         env:
-          # Environment variables for test
           NODE_ENV: test
+          TEST_TYPE: integration
           PORT: 3001
           DB_URI: mongodb://root:password@localhost:27017
           DB_NAME: testing
@@ -53,10 +89,10 @@ jobs:
           JWT_ACCESS_TOKEN_SECRET: test_access_secret_key_123456
           JWT_REFRESH_TOKEN_SECRET: test_refresh_secret_key_123456
           JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
-          JWT_REFRESH_TOKEN_EXPIRES_IN: 7d
+          JWT_REFRESH_TOKEN_EXPIRES_IN: 30d
           ALGORITHM: HS256
 
-      - name: 📊 Upload coverage (optional)
+      - name: 📊 Upload coverage
         if: success()
         uses: codecov/codecov-action@v4
         with:
