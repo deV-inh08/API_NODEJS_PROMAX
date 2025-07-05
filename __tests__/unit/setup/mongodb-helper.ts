@@ -1,6 +1,5 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
-import dbManager from '../../../src/api/v1/db/dbName.mongo'
 
 class MemoryDatabaseHelper {
   private static instance: MemoryDatabaseHelper
@@ -29,6 +28,7 @@ class MemoryDatabaseHelper {
         }
       })
       const uri = this.MongoServer.getUri()
+      console.log(uri);
 
       // connect
       await mongoose.connect(uri)

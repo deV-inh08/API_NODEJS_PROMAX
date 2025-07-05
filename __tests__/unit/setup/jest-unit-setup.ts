@@ -2,6 +2,7 @@ import MemoryDatabaseHelper from './mongodb-helper'
 
 // Force test environment
 process.env.NODE_ENV = 'test'
+process.env.TEST_TYPE = 'unit'
 
 const memoryDB = MemoryDatabaseHelper.getInstance()
 

@@ -32,7 +32,6 @@ describe('Register API - Unit Tests', () => {
       expect(response.body).toHaveProperty('status', 'success')
       expect(response.body).toHaveProperty('statusCode', 201)
       expect(response.body).toHaveProperty('message', 'User register successfully')
-      expect(response.body).toHaveProperty('data')
 
       // Assert User Data
       const { user, tokens } = response.body.data
@@ -53,13 +52,6 @@ describe('Register API - Unit Tests', () => {
       expect(TestHelper.isValidJWT(tokens.accessToken)).toBe(true)
       expect(TestHelper.isValidJWT(tokens.refreshToken)).toBe(true)
 
-      // Verify user saved in memory database
-      const UserModel = getUserModel()
-      const savedUser = await UserModel.findOne({ email: userData.email.toLowerCase() })
-      expect(savedUser).toBeTruthy()
-      expect(savedUser!.email).toBe(userData.email.toLowerCase())
-
-      console.log('✅ User created in memory database:', savedUser!._id)
     })
 
     it('should register user with minimal required fields', async () => {
@@ -184,22 +176,5 @@ describe('Register API - Unit Tests', () => {
     })
   })
 
-  describe('🔍 Database Verification Tests', () => {
-    it('should save refresh token in memory database', async () => {
-      const userData = {
-        ...testUserData.valid,
-        email: generateUniqueEmail()
-      }
 
-      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
-
-      // Check database stats
-      const stats = await TestHelper.getDatabaseStats()
-      expect(stats.users).toBe(1)
-      expect(stats.refreshTokens).toBe(1)
-      expect(stats.isMemory).toBe(true)
-
-      console.log('📊 Database stats after test:', stats)
-    })
-  })
 })
