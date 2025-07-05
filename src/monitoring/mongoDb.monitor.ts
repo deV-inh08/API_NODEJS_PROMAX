@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import os from 'os'
 import process from 'process'
-import { CollectionMetricsType } from '~/monitoring/types/mongoMonitor.type'
+import type { CollectionMetricsType } from '~/monitoring/types/mongoMonitor.type'
 import envConfig from '~/api/v1/config/env.config'
 
 class MongoDBMonitor {

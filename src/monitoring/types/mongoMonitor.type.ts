@@ -8,4 +8,4 @@ interface CollectionMetricsType {
   timeStamp: Date
 }
 
-export { CollectionMetricsType }
+export type { CollectionMetricsType }
