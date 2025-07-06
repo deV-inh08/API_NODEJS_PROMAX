@@ -2,9 +2,13 @@
 import mongoose from 'mongoose'
 import envConfig from '~/api/v1/config/env.config'
 
+import env from 'dotenv'
+env.config()
+
 // Force test environment
 process.env.NODE_ENV = 'test'
 process.env.TEST_TYPE = 'integration'
+process.env.DB_NAME = 'testing'
 
 // Database connection
 let connection: mongoose.Connection
@@ -15,8 +19,24 @@ beforeAll(async () => {
     throw new Error('❌ CRITICAL: Not in test environment!')
   }
 
+  // Debug: Log environment variables
+  console.log('🔍 Environment Variables:', {
+    NODE_ENV: process.env.NODE_ENV,
+    TEST_TYPE: process.env.TEST_TYPE,
+    DB_NAME: process.env.DB_NAME,
+    DB_URI: process.env.DB_URI
+  })
+
+  console.log('🔍 EnvConfig Values:', {
+    DB_URI: envConfig.DB_URI,
+    DB_NAME: envConfig.DB_NAME,
+    DB_OPTION: envConfig.DB_OPTION
+  })
+
   // Connect to real test database
-  const testDbUri = `${envConfig.DB_URI}/${envConfig.DB_NAME}?${envConfig.DB_OPTION}`
+  const testDbUri = `${process.env.DB_URI}/${envConfig.DB_NAME}?${envConfig.DB_OPTION}`
+
+  console.log('🔗 Connecting to:', testDbUri)
 
   try {
     await mongoose.connect(testDbUri)
@@ -41,10 +61,10 @@ afterAll(async () => {
 
   try {
     // Drop test database to ensure clean state
-    if (connection && connection.db) {
-      await connection.db.dropDatabase()
-      console.log('🗑️ Test database dropped')
-    }
+    // if (connection && connection.db) {
+    //   await connection.db.dropDatabase()
+    //   console.log('🗑️ Test database dropped')
+    // }
 
     // Close connection
     await mongoose.disconnect()
@@ -55,12 +75,12 @@ afterAll(async () => {
 }, 30000)
 
 // Clean database before each test for isolation
-beforeEach(async () => {
-  if (connection && connection.db) {
-    const collections = await connection.db.collections()
+// beforeEach(async () => {
+//   if (connection && connection.db) {
+//     const collections = await connection.db.collections()
 
-    for (const collection of collections) {
-      await collection.deleteMany({})
-    }
-  }
-}, 15000)
+//     for (const collection of collections) {
+//       await collection.deleteMany({})
+//     }
+//   }
+// }, 15000)

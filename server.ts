@@ -6,8 +6,37 @@ import MongoDBMonitor from './src/monitoring/mongoDb.monitor'
 async function startServer() {
   try {
     // 1. Connect DB
-    const mongoDb = Database.getInstace()
-    mongoDb.connect()
+    if (process.env.NODE_ENV !== 'test') {
+      const mongoDb = Database.getInstace()
+      mongoDb.connect()
+
+
+      // 4. Gracefull shutdown handling
+      const gracefulShutdown = (signal: string) => {
+        console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`)
+        try {
+          // Stop accepting new connections
+          server.close(() => {
+            console.log('✅ HTTP server closed')
+          })
+
+          // stop monitor
+          mongoDbMonitor.stopMonitor()
+
+          // disconnect DB
+          mongoDb.disconnect()
+
+          console.log('✅ Graceful shutdown completed')
+          process.exit(0)
+        } catch (error) {
+          console.error('❌ Error during shutdown:', error)
+          process.exit(1)
+        }
+      }
+      // Listen for shutdown signals
+      process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
+      process.on('SIGINT', () => gracefulShutdown('SIGINT'))
+    }
 
     // 2. start monitor DB
     const mongoDbMonitor = MongoDBMonitor.getInstance()
@@ -18,31 +47,6 @@ async function startServer() {
       console.log(`Server is running at http://localhost:${envConfig.PORT}`)
     })
 
-    // 4. Gracefull shutdown handling
-    const gracefulShutdown = (signal: string) => {
-      console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`)
-      try {
-        // Stop accepting new connections
-        server.close(() => {
-          console.log('✅ HTTP server closed')
-        })
-
-        // stop monitor
-        mongoDbMonitor.stopMonitor()
-
-        // disconnect DB
-        mongoDb.disconnect()
-
-        console.log('✅ Graceful shutdown completed')
-        process.exit(0)
-      } catch (error) {
-        console.error('❌ Error during shutdown:', error)
-        process.exit(1)
-      }
-    }
-    // Listen for shutdown signals
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'))
   } catch (error) {
     console.error('❌ Failed to start server:', error)
     process.exit(1)

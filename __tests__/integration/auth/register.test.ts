@@ -64,7 +64,19 @@ describe('Register API - Integration Tests', () => {
       const response = await request(app)
         .post('/api/v1/auth/register')
         .send(userData)
-        .expect(201)
+      // .expect(201) // Comment out temporarily to see error
+
+      // Debug: Log response if error
+      if (response.status !== 201) {
+        console.log('❌ API Error Response:', {
+          status: response.status,
+          body: response.body,
+          headers: response.headers
+        })
+      }
+
+      // Assert API Response
+      expect(response.status).toBe(201)
 
       // Assert API Response
       expect(response.body).toHaveProperty('status', 'success')

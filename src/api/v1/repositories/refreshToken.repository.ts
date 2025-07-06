@@ -1,5 +1,4 @@
 import mongoose, { Types } from 'mongoose'
-import dbManager from '~/api/v1/db/dbName.mongo'
 import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
 import { refreshTokenModelSchema } from '~/api/v1/models/refreshtoken.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'

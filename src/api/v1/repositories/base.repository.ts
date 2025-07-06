@@ -10,7 +10,7 @@ export abstract class BaseRepository {
     const testType = process.env.TEST_TYPE
 
     if (env === 'test') {
-      if (testType === 'intergration') {
+      if (testType === 'integration') {
         return 'testing' //  DB (testing)
       } else {
         return 'memory' // test RAM
@@ -23,10 +23,16 @@ export abstract class BaseRepository {
   // Smart connect strategy
   protected async getConnection() {
     const dbName = this.dbName
+
+    // For integration tests, use the existing mongoose connection
+    if (dbName === 'testing' && process.env.NODE_ENV === 'test') {
+      return mongoose.connection
+    }
+
     if (dbName === 'memory') {
       return mongoose.connection
     } else {
-      // Use dbManager for persistent databases
+      // Use dbManager for persistent databases (production)
       return await dbManager.getConnection(dbName)
     }
   }
