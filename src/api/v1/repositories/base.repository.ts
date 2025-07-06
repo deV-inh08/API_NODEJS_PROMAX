@@ -1,9 +1,8 @@
-import mongoose from "mongoose";
-import envConfig from "~/api/v1/config/env.config";
-import dbManager from "~/api/v1/db/dbName.mongo";
+import mongoose from 'mongoose'
+import envConfig from '~/api/v1/config/env.config'
+import dbManager from '~/api/v1/db/dbName.mongo'
 
 export abstract class BaseRepository {
-
   // Dynamic dbName based
   protected get dbName(): 'ecommerce' | 'testing' | 'memory' {
     const env = process.env.NODE_ENV

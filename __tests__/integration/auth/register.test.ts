@@ -61,9 +61,7 @@ describe('Register API - Integration Tests', () => {
       }
 
       // Act
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
+      const response = await request(app).post('/api/v1/auth/register').send(userData)
       // .expect(201) // Comment out temporarily to see error
 
       // Debug: Log response if error
@@ -149,10 +147,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       expect(response.body.data.user.email).toBe(userData.email.toLowerCase())
       expect(response.body.data.user.gender).toBe('other') // default value
@@ -184,10 +179,7 @@ describe('Register API - Integration Tests', () => {
         email: uniqueEmail.toUpperCase()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       expect(response.body.data.user.email).toBe(uniqueEmail.toLowerCase())
 
@@ -273,7 +265,7 @@ describe('Register API - Integration Tests', () => {
         .post('/api/v1/auth/register')
         .send({
           email: generateUniqueEmail(),
-          password: 'password123',
+          password: 'password123'
           // Missing firstName and lastName
         })
         .expect(422)
@@ -325,10 +317,7 @@ describe('Register API - Integration Tests', () => {
       }
 
       // Create user first
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       // Verify user exists in database
       const firstUser = await verifyUserInDatabase(uniqueEmail)
@@ -338,10 +327,7 @@ describe('Register API - Integration Tests', () => {
       const initialTokenCount = await RefreshTokenModel.countDocuments()
 
       // Try to register same email
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(409)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(409)
 
       expect(response.body).toHaveProperty('status', 'error')
       expect(response.body).toHaveProperty('statusCode', 409)
@@ -374,16 +360,10 @@ describe('Register API - Integration Tests', () => {
       }
 
       // Register with lowercase email
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData1)
-        .expect(201)
+      await request(app).post('/api/v1/auth/register').send(userData1).expect(201)
 
       // Try to register with uppercase email (should fail)
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData2)
-        .expect(409)
+      const response = await request(app).post('/api/v1/auth/register').send(userData2).expect(409)
 
       expect(response.body.message).toBe('Email already exists')
 
@@ -403,10 +383,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       // API should not return password
       expect(response.body.data.user).not.toHaveProperty('password')
@@ -438,10 +415,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       const { accessToken, refreshToken } = response.body.data.tokens
 
@@ -479,10 +453,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       const user = response.body.data.user
 
@@ -496,7 +467,7 @@ describe('Register API - Integration Tests', () => {
         '__v'
       ]
 
-      sensitiveFields.forEach(field => {
+      sensitiveFields.forEach((field) => {
         expect(user).not.toHaveProperty(field)
       })
 
@@ -516,10 +487,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       const dbUser = await getUserFromDatabase(userData.email.toLowerCase())
 
@@ -552,10 +520,7 @@ describe('Register API - Integration Tests', () => {
         email: generateUniqueEmail()
       }
 
-      const response = await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       // Verify counts increased by exactly 1
       const finalUserCount = await UserModel.countDocuments()
@@ -579,10 +544,7 @@ describe('Register API - Integration Tests', () => {
       }
 
       // First registration should succeed
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData)
-        .expect(201)
+      await request(app).post('/api/v1/auth/register').send(userData).expect(201)
 
       // Verify user exists
       const dbUser = await UserModel.findOne({ email }).lean()
@@ -610,31 +572,30 @@ describe('Register API - Integration Tests', () => {
   describe('🔄 Database Operations and Performance', () => {
     it('should handle multiple concurrent registrations', async () => {
       // Create multiple unique users concurrently
-      const userPromises = Array(5).fill(null).map((_, index) => {
-        const userData = {
-          ...testUserData.valid,
-          email: `concurrent-${index}-${generateUniqueEmail()}`,
-          firstName: `User${index}`
-        }
+      const userPromises = Array(5)
+        .fill(null)
+        .map((_, index) => {
+          const userData = {
+            ...testUserData.valid,
+            email: `concurrent-${index}-${generateUniqueEmail()}`,
+            firstName: `User${index}`
+          }
 
-        return request(app)
-          .post('/api/v1/auth/register')
-          .send(userData)
-          .expect(201)
-      })
+          return request(app).post('/api/v1/auth/register').send(userData).expect(201)
+        })
 
       const responses = await Promise.all(userPromises)
 
       // Verify all registrations succeeded
       expect(responses).toHaveLength(5)
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.body.status).toBe('success')
         expect(response.body.data.user).toBeDefined()
         expect(response.body.data.tokens).toBeDefined()
       })
 
       // Verify all users exist in database
-      const userIds = responses.map(r => r.body.data.user._id)
+      const userIds = responses.map((r) => r.body.data.user._id)
       const dbUsers = await UserModel.find({ _id: { $in: userIds } }).lean()
       expect(dbUsers).toHaveLength(5)
 

@@ -127,7 +127,7 @@ export const userSchema = new Schema<IUser>({
   emailVerificationToken: String,
   emailVerificationExpires: Date,
   passwordResetToken: String,
-  passwordExpires: Date,
+  // passwordExpires: Date,
 
   // Social Accounts
   socialAccounts: {

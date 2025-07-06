@@ -19,30 +19,13 @@ beforeAll(async () => {
     throw new Error('❌ CRITICAL: Not in test environment!')
   }
 
-  // Debug: Log environment variables
-  console.log('🔍 Environment Variables:', {
-    NODE_ENV: process.env.NODE_ENV,
-    TEST_TYPE: process.env.TEST_TYPE,
-    DB_NAME: process.env.DB_NAME,
-    DB_URI: process.env.DB_URI
-  })
-
-  console.log('🔍 EnvConfig Values:', {
-    DB_URI: envConfig.DB_URI,
-    DB_NAME: envConfig.DB_NAME,
-    DB_OPTION: envConfig.DB_OPTION
-  })
-
   // Connect to real test database
   const testDbUri = `${process.env.DB_URI}/${envConfig.DB_NAME}?${envConfig.DB_OPTION}`
-
-  console.log('🔗 Connecting to:', testDbUri)
 
   try {
     await mongoose.connect(testDbUri)
     connection = mongoose.connection
 
-    console.log('🔗 Connected to test database for integration tests')
     console.log('📊 Database Info:', {
       name: connection.db?.databaseName,
       host: connection.host,

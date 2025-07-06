@@ -6,7 +6,7 @@ module.exports = {
 
   // TypeScript configuration
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest'
   },
 
   // File extensions
@@ -24,19 +24,10 @@ module.exports = {
   testMatch: ['**/__tests__/unit/**/*.test.ts'],
 
   // Ignore integration tests
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '__tests__/integration/'
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '__tests__/integration/'],
 
   // Coverage cho unit tests
-  collectCoverageFrom: [
-    'src/**/*.{ts,js}',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.{ts,js}',
-    '!src/**/index.{ts,js}'
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts', '!src/**/*.test.{ts,js}', '!src/**/index.{ts,js}'],
 
   // Display settings
   verbose: true,

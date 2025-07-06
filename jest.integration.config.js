@@ -4,9 +4,9 @@ module.exports = {
   testTimeout: 120000, // Longer timeout for integration tests
   forceExit: true,
 
-  // TypeScript configuration  
+  // TypeScript configuration
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest'
   },
 
   // File extensions
@@ -24,19 +24,10 @@ module.exports = {
   testMatch: ['**/__tests__/integration/**/*.test.ts'],
 
   // Ignore unit tests
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '__tests__/unit/'
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '__tests__/unit/'],
 
   // Coverage cho integration tests
-  collectCoverageFrom: [
-    'src/**/*.{ts,js}',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.{ts,js}',
-    '!src/**/index.{ts,js}'
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts', '!src/**/*.test.{ts,js}', '!src/**/index.{ts,js}'],
 
   // Display settings
   verbose: true,

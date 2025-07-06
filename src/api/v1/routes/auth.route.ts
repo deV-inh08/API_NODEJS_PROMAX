@@ -3,7 +3,7 @@ import { AuthController } from '~/api/v1/controllers/auth.controller'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
 import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
-import { loginSchema, logoutSchema, registerSchema } from '~/api/v1/validations/auth.validation'
+import { changePasswordSchema, loginSchema, logoutSchema, registerSchema } from '~/api/v1/validations/auth.validation'
 import { refreshTokenSchema } from '~/api/v1/validations/token.validation'
 const authRouter = Router()
 
@@ -44,7 +44,7 @@ authRouter.post(
  * @body accessToken (header) & RT (body)
  * @access  Public
  */
-authRouter.post('/logout', validationReq(logoutSchema), authController.logout)
+authRouter.post('/logout', validationReq(logoutSchema), authMiddleware.verifyAT, authController.logout)
 
 /**
  * @route   POST /api/v1/auth/change-password
@@ -54,6 +54,11 @@ authRouter.post('/logout', validationReq(logoutSchema), authController.logout)
  * @access  Public
  */
 
-// authRouter.post('change-password', validationReq(), )
+authRouter.post(
+  'change-password',
+  validationReq(changePasswordSchema),
+  authMiddleware.verifyAT,
+  authController.changePassword
+)
 
 export default authRouter

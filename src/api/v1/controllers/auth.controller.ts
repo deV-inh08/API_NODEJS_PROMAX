@@ -1,7 +1,12 @@
 import type { Request, Response, NextFunction } from 'express'
 import { AuthService } from '~/api/v1/services/auth.service'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { loginZodType, logoutZodType, registerZodType } from '~/api/v1/validations/auth.validation'
+import {
+  changePasswordZodType,
+  loginZodType,
+  logoutZodType,
+  registerZodType
+} from '~/api/v1/validations/auth.validation'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 
 // route -> validate (zod) -> middleware (rate-limit) -> controller -> Services (DB) -> Models (declare schema)
@@ -82,5 +87,17 @@ export class AuthController {
     } catch (error) {
       next(error)
     }
+  }
+
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    const changePasswordBody: changePasswordZodType = req.body
+    const decodedAT = req.decoded_accessToken
+    const deviceInfo = this.getDeviceInfo(req)
+
+    if (!decodedAT) {
+      throw new UnauthorizedError('Not found decodedAT')
+    }
+
+    // call auth services
   }
 }

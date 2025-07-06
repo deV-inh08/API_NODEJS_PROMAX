@@ -4,6 +4,7 @@ import { JWTPayload } from '~/api/v1/types/jwt.type'
 import type { StringValue } from 'ms'
 import { BadRequestError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
+import { IUser } from '~/api/v1/types/user.type'
 
 export class JWTServices {
   private static readonly JWT_REFRESH_TOKEN_EXPIRES_IN = envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN
@@ -97,5 +98,22 @@ export class JWTServices {
   static validateJWTFormat(token: string): boolean {
     const sliptTokens = token.split('.')
     return sliptTokens.length === 3 && sliptTokens.every((part) => part.length > 0)
+  }
+
+  // generate AT & RT
+  static generateTokens(user: IUser) {
+    const AT = this.generateAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role
+    })
+
+    const RT = this.generateRefreshToken({
+      id: user.id
+    })
+    return {
+      accessToken: AT,
+      refreshToken: RT
+    }
   }
 }

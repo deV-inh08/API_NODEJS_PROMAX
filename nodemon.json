@@ -5,5 +5,5 @@
   ],
   "ext": ".ts,.js",
   "ignore": [],
-  "exec": "tsx server.ts"
+  "exec": "tsx server.ts NODE_ENV=dev"
 }

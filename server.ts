@@ -10,7 +10,6 @@ async function startServer() {
       const mongoDb = Database.getInstace()
       mongoDb.connect()
 
-
       // 4. Gracefull shutdown handling
       const gracefulShutdown = (signal: string) => {
         console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`)
@@ -46,7 +45,6 @@ async function startServer() {
     const server = app.listen(envConfig.PORT, () => {
       console.log(`Server is running at http://localhost:${envConfig.PORT}`)
     })
-
   } catch (error) {
     console.error('❌ Failed to start server:', error)
     process.exit(1)

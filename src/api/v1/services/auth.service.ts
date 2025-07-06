@@ -1,5 +1,5 @@
 import { UserRepository } from '~/api/v1/repositories/user.repository'
-import { loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
+import { changePasswordZodType, loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
 import { JWTServices } from '~/api/v1/utils/jwt.util'
 import { BadRequestError, ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
@@ -9,6 +9,7 @@ import { IDeviceInfo } from '~/api/v1/types/auth.type'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 import { TokenCleanUpScheduler } from '~/api/v1/repositories/refreshToken.repository'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
+import mongoose from 'mongoose'
 
 export class AuthService {
   private userRepository: UserRepository
@@ -260,7 +261,9 @@ export class AuthService {
     }
 
     // Check xem user có active không
-    const user = await this.userRepository.getUserById(verifyRT.id)
+    const user = await this.userRepository.getUserById(decodedAT.id)
+
+    console.log(user)
     if (!user || user.status !== 'active') {
       throw new UnauthorizedError('User account is not active')
     }
@@ -269,6 +272,72 @@ export class AuthService {
     await this.refreshTokenRepository.deactiveTokenById(storedToken._id.toString())
     return {
       message: 'Logout user success'
+    }
+  }
+
+  // change password
+  async changePassword(changePasswordBody: changePasswordZodType, decodedAT: JWTPayload, deviceInfo?: IDeviceInfo) {
+    const { currentPassword, newPassword, confirmPassword } = changePasswordBody
+    const user = await this.userRepository.getUserById(decodedAT.id)
+    if (!user || user.status !== 'active') {
+      throw new UnauthorizedError('User account is not active')
+    }
+
+    // check current == user.password in DB
+    const isValidCurrentPassword = await BcryptServices.comparePassword(user.password, currentPassword)
+
+    if (!isValidCurrentPassword) {
+      throw new UnauthorizedError('Current password is incorrect')
+    }
+
+    // hash newPassword
+    const hashNewPassword = await BcryptServices.hashPassword(newPassword)
+
+    // **** Transaction DB **** //
+
+    // create workspace to work
+    const session = await mongoose.startSession()
+    session.startTransaction()
+
+    try {
+      // Work in workspace (don't save)
+
+      // update password in DB
+      await this.userRepository.updatePassword(
+        decodedAT.id,
+        {
+          password: hashNewPassword,
+          passwordChangeAt: new Date()
+        },
+        { session }
+      )
+
+      // logout all devices
+      await this.refreshTokenRepository.invalidAllUsersToken(decodedAT.id, { session })
+
+      // generate new Token
+      const newTokens = JWTServices.generateTokens(user)
+
+      // save new RT in DB
+      const { iat, exp } = this.getDateForToken()
+      await this.refreshTokenRepository.saveRefreshtoken(
+        {
+          userId: user.id,
+          token: newTokens.refreshToken,
+          iat,
+          exp,
+          deviceInfo
+        },
+        { session }
+      )
+      return {
+        message: 'Password changed successfully',
+        tokens: newTokens
+      }
+    } catch (error) {
+      await session.abortTransaction()
+    } finally {
+      session.endSession()
     }
   }
 }

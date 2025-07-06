@@ -7,16 +7,14 @@ module.exports = {
 
   // TypeScript configuration
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest'
   },
 
   // File extensions
   moduleFileExtensions: ['ts', 'js', 'json'],
 
   // Test tất cả các file test
-  testMatch: [
-    '**/__tests__/**/*.test.ts'
-  ],
+  testMatch: ['**/__tests__/**/*.test.ts'],
 
   // Module name mapping
   moduleNameMapper: {
@@ -24,28 +22,17 @@ module.exports = {
   },
 
   // Ignore patterns
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/'
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 
   // Coverage
-  collectCoverageFrom: [
-    'src/**/*.{ts,js}',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.{ts,js}',
-    '!src/**/index.{ts,js}'
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts', '!src/**/*.test.{ts,js}', '!src/**/index.{ts,js}'],
 
   // Display
   verbose: true,
   displayName: 'All Tests',
 
   // Projects - Chạy cả unit và integration
-  projects: [
-    '<rootDir>/jest.unit.config.js',
-    '<rootDir>/jest.integration.config.js'
-  ],
+  projects: ['<rootDir>/jest.unit.config.js', '<rootDir>/jest.integration.config.js'],
 
   // Global settings
   globals: {

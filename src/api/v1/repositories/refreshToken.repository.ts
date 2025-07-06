@@ -2,6 +2,7 @@ import mongoose, { Types } from 'mongoose'
 import { IDeviceInfo, IRefreshToken } from '~/api/v1/types/auth.type'
 import { refreshTokenModelSchema } from '~/api/v1/models/refreshtoken.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
+import { ClientSession } from 'mongoose'
 
 export class RefreshTokenRepository extends BaseRepository {
   private models = new Map<string, mongoose.Model<IRefreshToken>>()
@@ -17,7 +18,10 @@ export class RefreshTokenRepository extends BaseRepository {
   }
 
   // save freshToken in DB
-  async saveRefreshtoken(tokenData: { userId: string; token: string; iat: Date; exp: Date; deviceInfo?: IDeviceInfo }) {
+  async saveRefreshtoken(
+    tokenData: { userId: string; token: string; iat: Date; exp: Date; deviceInfo?: IDeviceInfo },
+    options?: { session: ClientSession }
+  ) {
     const refreshTokenModel = await this.getRefreshTokenModel()
     return await refreshTokenModel.create(tokenData)
   }
@@ -37,7 +41,7 @@ export class RefreshTokenRepository extends BaseRepository {
       .lean()
   }
 
-  //  Update lại token nếu user bị unactive
+  //  set token with id isActive 'false' -> (logout)
   async deactiveTokenById(tokenId: string | Types.ObjectId) {
     const refreshTokenModel = await this.getRefreshTokenModel()
     return await refreshTokenModel.updateOne(
@@ -46,6 +50,19 @@ export class RefreshTokenRepository extends BaseRepository {
         isActive: false,
         updateAt: new Date()
       }
+    )
+  }
+
+  // logout all devices
+  async invalidAllUsersToken(userId: string, options: { session: ClientSession }) {
+    const refreshTokenModel = await this.getRefreshTokenModel()
+    return await refreshTokenModel.updateMany(
+      { userId, isActive: true },
+      {
+        isActive: false,
+        updateAt: new Date()
+      },
+      options
     )
   }
 

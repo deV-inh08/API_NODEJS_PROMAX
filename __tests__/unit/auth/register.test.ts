@@ -50,7 +50,6 @@ describe('Register API - Unit Tests', () => {
       expect(tokens).toHaveProperty('refreshToken')
       expect(TestHelper.isValidJWT(tokens.accessToken)).toBe(true)
       expect(TestHelper.isValidJWT(tokens.refreshToken)).toBe(true)
-
     })
 
     it('should register user with minimal required fields', async () => {
@@ -174,6 +173,4 @@ describe('Register API - Unit Tests', () => {
       expect(refreshTokenUserId).toBe(response.body.data.user._id)
     })
   })
-
-
 })

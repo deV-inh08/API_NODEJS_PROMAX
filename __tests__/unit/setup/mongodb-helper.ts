@@ -28,7 +28,7 @@ class MemoryDatabaseHelper {
         }
       })
       const uri = this.MongoServer.getUri()
-      console.log(uri);
+      console.log(uri)
 
       // connect
       await mongoose.connect(uri)

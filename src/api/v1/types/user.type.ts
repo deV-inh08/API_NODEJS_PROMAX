@@ -40,7 +40,7 @@ export interface IUser extends Document {
   emailVerificationToken?: string
   emailVerificationExpires?: Date
   passwordResetToken?: string
-  passwordExpires?: Date
+  // passwordExpires?: Date
   passwordChangeAt?: Date
 
   // Statistics
