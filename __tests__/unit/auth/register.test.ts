@@ -3,7 +3,6 @@ import request from 'supertest'
 import { Express } from 'express'
 import { testUserData } from '../../mock/testUserData'
 import { TestHelper } from '../helper/test-helper'
-import { getUserModel } from '../models/simple-model'
 
 describe('Register API - Unit Tests', () => {
   let app: Express
