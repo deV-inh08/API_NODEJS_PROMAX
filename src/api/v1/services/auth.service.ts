@@ -282,14 +282,17 @@ export class AuthService {
 
   // change password
   async changePassword(changePasswordBody: changePasswordZodType, decodedAT: JWTPayload, deviceInfo?: IDeviceInfo) {
-    const { currentPassword, newPassword, confirmPassword } = changePasswordBody
-    const user = await this.userRepository.getUserById(decodedAT.id)
+    const { currentPassword, newPassword } = changePasswordBody
+    // const user = await this.userRepository.getUserById(decodedAT.id)
+    const user = await this.userRepository.getUserByIdWithPassword(decodedAT.id)
+
     if (!user || user.status !== 'active') {
       throw new UnauthorizedError('User account is not active')
     }
 
+    console.log('user', user);
     // check current == user.password in DB
-    const isValidCurrentPassword = await BcryptServices.comparePassword(user.password, currentPassword)
+    const isValidCurrentPassword = await BcryptServices.comparePassword(currentPassword, user.password)
 
     if (!isValidCurrentPassword) {
       throw new UnauthorizedError('Current password is incorrect')
@@ -323,7 +326,7 @@ export class AuthService {
       // generate new Token
       const newTokens = JWTServices.generateTokens(user)
 
-      const userId = convertObjectIdToString(user.id)
+      const userId = convertObjectIdToString(user._id)
 
       // save new RT in DB
       const { iat, exp } = this.getDateForToken()
@@ -337,12 +340,15 @@ export class AuthService {
         },
         { session }
       )
+
+      session.commitTransaction()
       return {
         message: 'Password changed successfully',
         tokens: newTokens
       }
     } catch (error) {
       await session.abortTransaction()
+      throw error
     } finally {
       session.endSession()
     }

@@ -9,7 +9,7 @@ export class BcryptServices {
   }
 
   // compare password
-  static async comparePassword(password: string, comparePassword: string): Promise<boolean> {
-    return await brcypt.compare(password, comparePassword)
+  static async comparePassword(password: string, hashPassword: string): Promise<boolean> {
+    return await brcypt.compare(password, hashPassword)
   }
 }

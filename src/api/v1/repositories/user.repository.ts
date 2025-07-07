@@ -19,7 +19,7 @@ export class UserRepository extends BaseRepository {
     return this.models.get(dbName)!
   }
 
-  // check user is exist
+  // check user is exist => register /login flow
   async checkUserIsExists(email: string): Promise<IUser | null> {
     const UserModel = await this.getUserModel()
     return await UserModel.findOne({
@@ -34,7 +34,7 @@ export class UserRepository extends BaseRepository {
     return await user.save()
   }
 
-  // get user by ID -> User Status Validation
+  // get user by ID -> User Status Validation (Don't need password)
   async getUserById(userId: string): Promise<IUser | null> {
     const UserModel = await this.getUserModel()
     return await UserModel.findOne(
@@ -50,6 +50,15 @@ export class UserRepository extends BaseRepository {
     ).lean()
   }
 
+  // re-verify password user đã login
+  async getUserByIdWithPassword(userId: string): Promise<IUser | null> {
+    const UserModel = await this.getUserModel()
+    return await UserModel.findOne(
+      {
+        _id: userId
+      })
+  }
+
   async updatePassword(
     userId: string,
     updateData: {
@@ -59,6 +68,6 @@ export class UserRepository extends BaseRepository {
     options?: { session: ClientSession }
   ) {
     const UserModel = await this.getUserModel()
-    return await UserModel.updateOne({ id: userId }, updateData, options)
+    return await UserModel.updateOne({ _id: userId }, updateData, options)
   }
 }
