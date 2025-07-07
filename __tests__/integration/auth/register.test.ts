@@ -82,6 +82,7 @@ describe('Register API - Integration Tests', () => {
       expect(response.body).toHaveProperty('message', 'User register successfully')
 
       const { user, tokens } = response.body.data
+      console.log('user', user);
       expect(user).toHaveProperty('id')
       expect(user).toHaveProperty('email', userData.email.toLowerCase())
       expect(user).toHaveProperty('firstName', userData.firstName)
@@ -101,7 +102,8 @@ describe('Register API - Integration Tests', () => {
 
       // 🔍 DATABASE VERIFICATION
       const dbUser = await getUserFromDatabase(userData.email.toLowerCase())
-      expect(dbUser.id.toString()).toBe(user.id)
+      console.log('dbUser', dbUser);
+      expect(dbUser._id.toString()).toBe(user.id)
       expect(dbUser.email).toBe(userData.email.toLowerCase())
       expect(dbUser.firstName).toBe(userData.firstName)
       expect(dbUser.lastName).toBe(userData.lastName)
@@ -596,7 +598,7 @@ describe('Register API - Integration Tests', () => {
 
       // Verify all users exist in database
       const userIds = responses.map((r) => r.body.data.user.id)
-      const dbUsers = await UserModel.find({ id: { $in: userIds } }).lean()
+      const dbUsers = await UserModel.find({ _id: { $in: userIds } }).lean()
       expect(dbUsers).toHaveLength(5)
 
       // Verify all tokens exist
