@@ -5,6 +5,8 @@ import { UnauthorizedError } from '~/api/v1/utils/response.util'
 import type { ParamsDictionary } from '../../../../node_modules/@types/express-serve-static-core/index'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
 import { Role } from '~/api/v1/types/comon.types'
+import { convertObjectIdToString } from '~/api/v1/utils/common.util'
+import mongoose from 'mongoose'
 
 export class AuthMiddleWare {
   private userRepository: UserRepository
@@ -29,13 +31,19 @@ export class AuthMiddleWare {
       const user = await this.userRepository.getUserById(decodedAT.id)
 
       // if don't have user
-      if (!user || user.status !== 'active') {
+      if (!user) {
+        throw new UnauthorizedError('User not found')
+      }
+
+      if (user.status !== 'active') {
         throw new UnauthorizedError('User account is not active')
       }
 
+      const userId = convertObjectIdToString(user._id as mongoose.Types.ObjectId)
+
       // Attach user info to request
       req.decoded_accessToken = {
-        _id: user._id.toString(),
+        id: userId,
         email: user.email,
         role: user.role
       }

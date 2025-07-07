@@ -34,7 +34,7 @@ describe('Register API - Unit Tests', () => {
 
       // Assert User Data
       const { user, tokens } = response.body.data
-      expect(user).toHaveProperty('_id')
+      expect(user).toHaveProperty('id')
       expect(user).toHaveProperty('email', userData.email.toLowerCase())
       expect(user).toHaveProperty('firstName', userData.firstName)
       expect(user).toHaveProperty('lastName', userData.lastName)
@@ -169,8 +169,8 @@ describe('Register API - Unit Tests', () => {
       const accessTokenUserId = TestHelper.extractUserIdFromToken(accessToken)
       const refreshTokenUserId = TestHelper.extractUserIdFromToken(refreshToken)
 
-      expect(accessTokenUserId).toBe(response.body.data.user._id)
-      expect(refreshTokenUserId).toBe(response.body.data.user._id)
+      expect(accessTokenUserId).toBe(response.body.data.user.id)
+      expect(refreshTokenUserId).toBe(response.body.data.user.id)
     })
   })
 })

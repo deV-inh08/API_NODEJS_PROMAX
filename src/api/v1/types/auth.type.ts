@@ -9,6 +9,7 @@ export interface IDeviceInfo {
 }
 
 export interface IRefreshToken extends Document {
+  _id: mongoose.Types.ObjectId
   userId: mongoose.Types.ObjectId
   token: string
   iat: Date

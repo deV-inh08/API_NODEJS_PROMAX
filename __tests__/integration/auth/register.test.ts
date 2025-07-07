@@ -82,7 +82,7 @@ describe('Register API - Integration Tests', () => {
       expect(response.body).toHaveProperty('message', 'User register successfully')
 
       const { user, tokens } = response.body.data
-      expect(user).toHaveProperty('_id')
+      expect(user).toHaveProperty('id')
       expect(user).toHaveProperty('email', userData.email.toLowerCase())
       expect(user).toHaveProperty('firstName', userData.firstName)
       expect(user).toHaveProperty('lastName', userData.lastName)
@@ -101,7 +101,7 @@ describe('Register API - Integration Tests', () => {
 
       // 🔍 DATABASE VERIFICATION
       const dbUser = await getUserFromDatabase(userData.email.toLowerCase())
-      expect(dbUser._id.toString()).toBe(user._id)
+      expect(dbUser.id.toString()).toBe(user.id)
       expect(dbUser.email).toBe(userData.email.toLowerCase())
       expect(dbUser.firstName).toBe(userData.firstName)
       expect(dbUser.lastName).toBe(userData.lastName)
@@ -128,13 +128,13 @@ describe('Register API - Integration Tests', () => {
       // Note: User schema doesn't have timestamps enabled, so we skip timestamp checks
 
       // 🔍 REFRESH TOKEN VERIFICATION
-      const dbTokens = await verifyRefreshTokenInDatabase(user._id)
+      const dbTokens = await verifyRefreshTokenInDatabase(user.id)
       expect(dbTokens).toHaveLength(1)
 
       const dbToken = dbTokens[0]
       expect(dbToken.token).toBe(tokens.refreshToken)
       expect(dbToken.isActive).toBe(true)
-      expect(dbToken.userId.toString()).toBe(user._id)
+      expect(dbToken.userId.toString()).toBe(user.id)
       expect(dbToken.exp).toBeInstanceOf(Date)
       expect(dbToken.iat).toBeInstanceOf(Date)
       expect(dbToken.exp > new Date()).toBe(true) // Token not expired
@@ -393,7 +393,7 @@ describe('Register API - Integration Tests', () => {
       expect(responseString).not.toContain(userData.password)
 
       // 🔍 DATABASE SECURITY VERIFICATION
-      const dbUser = await UserModel.findById(response.body.data.user._id).lean()
+      const dbUser = await UserModel.findById(response.body.data.user.id).lean()
 
       // Password should be hashed, not plain text
       if (dbUser) {
@@ -425,7 +425,7 @@ describe('Register API - Integration Tests', () => {
 
       // 🔍 DATABASE TOKEN VERIFICATION
       const dbTokens = await RefreshTokenModel.find({
-        userId: response.body.data.user._id
+        userId: response.body.data.user.id
       }).lean()
 
       expect(dbTokens).toHaveLength(1)
@@ -433,7 +433,7 @@ describe('Register API - Integration Tests', () => {
       const dbToken = dbTokens[0]
       expect(dbToken.token).toBe(refreshToken)
       expect(dbToken.isActive).toBe(true)
-      expect(dbToken.userId.toString()).toBe(response.body.data.user._id)
+      expect(dbToken.userId.toString()).toBe(response.body.data.user.id)
       expect(dbToken.exp).toBeInstanceOf(Date)
       expect(dbToken.iat).toBeInstanceOf(Date)
       expect(dbToken.exp > dbToken.iat).toBe(true)
@@ -472,7 +472,7 @@ describe('Register API - Integration Tests', () => {
       })
 
       // Verify these fields exist in database but not in response
-      const dbUser = await UserModel.findById(user._id).lean()
+      const dbUser = await UserModel.findById(user.id).lean()
       if (dbUser) {
         expect(dbUser.password).toBeTruthy()
         expect(Object.keys(dbUser)).toContain('password')
@@ -530,7 +530,7 @@ describe('Register API - Integration Tests', () => {
       expect(finalTokenCount).toBe(initialTokenCount + 1)
 
       // Verify relationship between user and token
-      const userId = response.body.data.user._id
+      const userId = response.body.data.user.id
       const userTokens = await RefreshTokenModel.find({ userId }).lean()
       expect(userTokens).toHaveLength(1)
       expect(userTokens[0].token).toBe(response.body.data.tokens.refreshToken)
@@ -595,8 +595,8 @@ describe('Register API - Integration Tests', () => {
       })
 
       // Verify all users exist in database
-      const userIds = responses.map((r) => r.body.data.user._id)
-      const dbUsers = await UserModel.find({ _id: { $in: userIds } }).lean()
+      const userIds = responses.map((r) => r.body.data.user.id)
+      const dbUsers = await UserModel.find({ id: { $in: userIds } }).lean()
       expect(dbUsers).toHaveLength(5)
 
       // Verify all tokens exist

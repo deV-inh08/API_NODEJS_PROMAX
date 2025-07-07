@@ -59,6 +59,6 @@ export class UserRepository extends BaseRepository {
     options?: { session: ClientSession }
   ) {
     const UserModel = await this.getUserModel()
-    return await UserModel.updateOne({ _id: userId }, updateData, options)
+    return await UserModel.updateOne({ id: userId }, updateData, options)
   }
 }

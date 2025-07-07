@@ -29,9 +29,10 @@ export class RefreshTokenRepository extends BaseRepository {
   //  Database token validation
   async findActiveToken(userId: string, token: string) {
     const refreshTokenModel = await this.getRefreshTokenModel()
+    console.log(userId);
     return await refreshTokenModel
       .findOne({
-        userId,
+        userId: userId,
         token,
         isActive: true,
         exp: {
@@ -42,7 +43,7 @@ export class RefreshTokenRepository extends BaseRepository {
   }
 
   //  set token with id isActive 'false' -> (logout)
-  async deactiveTokenById(tokenId: string | Types.ObjectId) {
+  async deactiveTokenById(tokenId: string) {
     const refreshTokenModel = await this.getRefreshTokenModel()
     return await refreshTokenModel.updateOne(
       { _id: tokenId },
@@ -110,26 +111,30 @@ export class RefreshTokenRepository extends BaseRepository {
     const refreshTokenModel = await this.getRefreshTokenModel()
     // Lấy số token active dựa trên 'userID'
     const activeTokensCount = await refreshTokenModel.countDocuments({
-      userId,
+      userId: userId,
       isActive: true,
       exp: { $gt: new Date() }
     })
+    console.log('activeTokensCount', activeTokensCount);
     if (activeTokensCount > maxTokens) {
       // Get list old tokens
       const oldTokens = await refreshTokenModel
         .find({
-          userId,
+          userId: userId,
           isActive: true,
           exp: {
             $gt: new Date()
           }
         })
         .sort({
-          createdAt: 1 // thời gian tạo ->tăng dần -> ngày tạo cũ nhất lên đầu mảng -> [1/6, 5/6, 10/6, 20/6]
+          createdAt: 1 // thời gian tạo ->tăng dần -> ngày tạo cũ nhất lên đầu mảng -> [1/6, 5/6, 10/6, 20/6] thoi gian
         })
         .limit(activeTokensCount - maxTokens) // giới hạn (4-3) = 1 -> [1/6]
+
+      console.log('oldTokens', oldTokens);
       // revoke old tokens
       const oldTokenIds = oldTokens.map((token) => token._id) // oldTokens -> [1/6]
+      console.log(oldTokenIds);
       await refreshTokenModel.updateMany(
         {
           _id: {

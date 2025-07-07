@@ -2,13 +2,14 @@ import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { changePasswordZodType, loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
 import { JWTServices } from '~/api/v1/utils/jwt.util'
-import { BadRequestError, ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 import { IDeviceInfo } from '~/api/v1/types/auth.type'
 import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 import { TokenCleanUpScheduler } from '~/api/v1/repositories/refreshToken.repository'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
+import { convertObjectIdToString } from '~/api/v1/utils/common.util'
 import mongoose from 'mongoose'
 
 export class AuthService {
@@ -52,17 +53,17 @@ export class AuthService {
       password: hashPassword
     })
 
-    const userId = newUser._id.toString()
+    const userId = newUser.id.toString()
 
     // generate token
     const accessToken = JWTServices.generateAccessToken({
-      _id: userId,
+      id: userId,
       email: newUser.email,
       role: newUser.role
     })
 
     const refreshToken = JWTServices.generateRefreshToken({
-      _id: userId
+      id: userId
     })
 
     // get time
@@ -79,7 +80,7 @@ export class AuthService {
 
     // Return user without sensitive data
     const userResponse = {
-      _id: userId,
+      id: userId,
       email: newUser.email,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
@@ -115,21 +116,23 @@ export class AuthService {
       throw new UnauthorizedError('Invalid credentials')
     }
 
+    const userId = convertObjectIdToString(userIsExits.id)
+
     // generate token
     const accessToken = JWTServices.generateAccessToken({
-      _id: userIsExits.id,
+      id: userId,
       email: userIsExits.email,
       role: userIsExits.role
     })
     const refreshToken = JWTServices.generateRefreshToken({
-      _id: userIsExits.id
+      id: userId
     })
 
     // save refreshToken in DB
     const { iat, exp } = this.getDateForToken()
 
     await this.refreshTokenRepository.saveRefreshtoken({
-      userId: userIsExits.id,
+      userId: userId,
       token: refreshToken,
       iat,
       exp,
@@ -137,11 +140,11 @@ export class AuthService {
     })
 
     // Apply token limmit after save token
-    await this.refreshTokenRepository.limitUserTokens(userIsExits.id)
+    await this.refreshTokenRepository.limitUserTokens(userId)
 
     // Return response without sensitive data
     const userResponse = {
-      _id: userIsExits.id,
+      id: userIsExits.id,
       email: userIsExits.email,
       firstName: userIsExits.firstName,
       lastName: userIsExits.lastName,
@@ -203,6 +206,9 @@ export class AuthService {
         throw new UnauthorizedError(`Account is ${user.status}`)
       }
 
+      console.log('userFromAT', userFromAT?.role);
+      console.log('user', user.role);
+
       // STEP 5: Additional security checks for proactive refresh
       if (isProactiveRefresh && userFromAT) {
         // Ensure user info consistency between AT and database
@@ -212,16 +218,19 @@ export class AuthService {
         }
       }
 
+      const userId = convertObjectIdToString(user._id)
+
+      console.log('userId', userId);
       // STEP 6: Generate New Access Token
       const newAccessToken = JWTServices.generateAccessToken({
-        _id: user.id,
+        id: userId,
         email: user.email,
         role: user.role
       })
 
       // Return response without sensitive data
       const userResponse = {
-        _id: user.id,
+        id: userId,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -251,10 +260,6 @@ export class AuthService {
     // verify RT (bắt buộc phải còn valid)
     const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
 
-    console.log('AT', decodedAT)
-    console.log('AT id', decodedAT.id)
-    console.log('RT id', verifyRT.id)
-
     // AT & RT phải cùng thuộc về 1 user
     if (decodedAT.id !== verifyRT.id) {
       throw new UnauthorizedError('Token mismatch - AT and RT belong to different users')
@@ -266,18 +271,10 @@ export class AuthService {
       throw new UnauthorizedError('Refresh token not found or already expired')
     }
 
-    // Check xem user có active không
-    const user = await this.userRepository.getUserById(decodedAT.id)
-
-    console.log(user)
-
-    if (!user || user.status !== 'active') {
-      console.log(user?.status)
-      throw new UnauthorizedError('User account is not active')
-    }
-
     // Set RT isActive = 'false'
-    await this.refreshTokenRepository.deactiveTokenById(storedToken._id.toString())
+    const tokenId = convertObjectIdToString(storedToken._id)
+
+    await this.refreshTokenRepository.deactiveTokenById(tokenId)
     return {
       message: 'Logout user success'
     }
@@ -326,11 +323,13 @@ export class AuthService {
       // generate new Token
       const newTokens = JWTServices.generateTokens(user)
 
+      const userId = convertObjectIdToString(user.id)
+
       // save new RT in DB
       const { iat, exp } = this.getDateForToken()
       await this.refreshTokenRepository.saveRefreshtoken(
         {
-          userId: user.id,
+          userId: userId,
           token: newTokens.refreshToken,
           iat,
           exp,

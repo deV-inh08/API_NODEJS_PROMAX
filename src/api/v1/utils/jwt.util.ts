@@ -5,6 +5,7 @@ import type { StringValue } from 'ms'
 import { BadRequestError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 import { IUser } from '~/api/v1/types/user.type'
+import { convertObjectIdToString } from '~/api/v1/utils/common.util'
 
 export class JWTServices {
   private static readonly JWT_REFRESH_TOKEN_EXPIRES_IN = envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN
@@ -20,7 +21,7 @@ export class JWTServices {
   }
 
   // generate RefreshToken
-  static generateRefreshToken(payload: Pick<JWTPayload, '_id'>) {
+  static generateRefreshToken(payload: Pick<JWTPayload, 'id'>) {
     return jwt.sign(payload, this.JWT_REFRESH_TOKEN_SECRET, {
       expiresIn: this.JWT_REFRESH_TOKEN_EXPIRES_IN as StringValue
     })
@@ -67,7 +68,7 @@ export class JWTServices {
     try {
       const decodedToken = jwt.decode(token)!
       if (typeof decodedToken === 'object') {
-        return decodedToken as { _id: string; email: string; role: string }
+        return decodedToken as { id: string; email: string; role: string }
       }
     } catch (error) {
       throw new BadRequestError('Invalid token')
@@ -103,13 +104,13 @@ export class JWTServices {
   // generate AT & RT
   static generateTokens(user: IUser) {
     const AT = this.generateAccessToken({
-      _id: user.id,
+      id: convertObjectIdToString(user.id),
       email: user.email,
       role: user.role
     })
 
     const RT = this.generateRefreshToken({
-      _id: user.id
+      id: convertObjectIdToString(user.id)
     })
     return {
       accessToken: AT,
