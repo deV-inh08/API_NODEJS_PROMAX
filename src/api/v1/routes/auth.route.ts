@@ -55,7 +55,7 @@ authRouter.post('/logout', validationReq(logoutSchema), authMiddleware.verifyAT,
  */
 
 authRouter.post(
-  'change-password',
+  '/change-password',
   validationReq(changePasswordSchema),
   authMiddleware.verifyAT,
   authController.changePassword

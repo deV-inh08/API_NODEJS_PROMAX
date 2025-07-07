@@ -91,14 +91,21 @@ export class AuthController {
   }
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
-    const changePasswordBody: changePasswordZodType = req.body
-    const decodedAT = req.decoded_accessToken
-    const deviceInfo = this.getDeviceInfo(req)
+    try {
+      const changePasswordBody: changePasswordZodType = req.body
+      const decodedAT = req.decoded_accessToken
+      const deviceInfo = this.getDeviceInfo(req)
 
-    if (!decodedAT) {
-      throw new UnauthorizedError('Not found decodedAT')
+      if (!decodedAT) {
+        throw new UnauthorizedError('Not found decodedAT')
+      }
+
+      // call auth services
+      const result = await this.authServices.changePassword(changePasswordBody, decodedAT, deviceInfo)
+      const successResponse = SuccessResponse.ok(result, 'Change password success')
+      successResponse.send(req)
+    } catch (error) {
+      next(error)
     }
-
-    // call auth services
   }
 }
