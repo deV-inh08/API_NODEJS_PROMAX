@@ -290,7 +290,6 @@ export class AuthService {
       throw new UnauthorizedError('User account is not active')
     }
 
-    console.log('user', user);
     // check current == user.password in DB
     const isValidCurrentPassword = await BcryptServices.comparePassword(currentPassword, user.password)
 
@@ -301,14 +300,11 @@ export class AuthService {
     // hash newPassword
     const hashNewPassword = await BcryptServices.hashPassword(newPassword)
 
-    // **** Transaction DB **** //
-
-    // create workspace to work
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    console.log('hashNewPassword', hashNewPassword);
 
     try {
-      // Work in workspace (don't save)
+
+
 
       // update password in DB
       await this.userRepository.updatePassword(
@@ -317,17 +313,18 @@ export class AuthService {
           password: hashNewPassword,
           passwordChangeAt: new Date()
         },
-        { session }
       )
 
       // logout all devices
-      await this.refreshTokenRepository.invalidAllUsersToken(decodedAT.id, { session })
+      await this.refreshTokenRepository.invalidAllUsersToken(decodedAT.id)
 
       // generate new Token
       const newTokens = JWTServices.generateTokens(user)
 
+      console.log('newTokens', newTokens);
       const userId = convertObjectIdToString(user._id)
 
+      console.log('userId', userId);
       // save new RT in DB
       const { iat, exp } = this.getDateForToken()
       await this.refreshTokenRepository.saveRefreshtoken(
@@ -338,19 +335,14 @@ export class AuthService {
           exp,
           deviceInfo
         },
-        { session }
       )
 
-      session.commitTransaction()
       return {
         message: 'Password changed successfully',
         tokens: newTokens
       }
     } catch (error) {
-      await session.abortTransaction()
-      throw error
-    } finally {
-      session.endSession()
+      throw new UnauthorizedError('Failed to change password')
     }
   }
 }

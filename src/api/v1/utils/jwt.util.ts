@@ -104,13 +104,13 @@ export class JWTServices {
   // generate AT & RT
   static generateTokens(user: IUser) {
     const AT = this.generateAccessToken({
-      id: convertObjectIdToString(user.id),
+      id: convertObjectIdToString(user._id),
       email: user.email,
       role: user.role
     })
 
     const RT = this.generateRefreshToken({
-      id: convertObjectIdToString(user.id)
+      id: convertObjectIdToString(user._id)
     })
     return {
       accessToken: AT,

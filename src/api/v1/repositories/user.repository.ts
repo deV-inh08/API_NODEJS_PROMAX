@@ -56,7 +56,7 @@ export class UserRepository extends BaseRepository {
     return await UserModel.findOne(
       {
         _id: userId
-      })
+      }).lean()
   }
 
   async updatePassword(
@@ -64,10 +64,9 @@ export class UserRepository extends BaseRepository {
     updateData: {
       password: string
       passwordChangeAt: Date
-    },
-    options?: { session: ClientSession }
+    }
   ) {
     const UserModel = await this.getUserModel()
-    return await UserModel.updateOne({ _id: userId }, updateData, options)
+    return await UserModel.updateOne({ _id: userId }, updateData)
   }
 }

@@ -23,7 +23,11 @@ export class RefreshTokenRepository extends BaseRepository {
     options?: { session: ClientSession }
   ) {
     const refreshTokenModel = await this.getRefreshTokenModel()
-    return await refreshTokenModel.create(tokenData)
+    if (options?.session) {
+      return await refreshTokenModel.create([tokenData], options)
+    } else {
+      return await refreshTokenModel.create(tokenData)
+    }
   }
 
   //  Database token validation
@@ -55,15 +59,14 @@ export class RefreshTokenRepository extends BaseRepository {
   }
 
   // logout all devices
-  async invalidAllUsersToken(userId: string, options: { session: ClientSession }) {
+  async invalidAllUsersToken(userId: string, options?: { session: ClientSession }) {
     const refreshTokenModel = await this.getRefreshTokenModel()
     return await refreshTokenModel.updateMany(
-      { userId, isActive: true },
+      { userId: userId, isActive: true },
       {
         isActive: false,
-        updateAt: new Date()
+        updatedAt: new Date()
       },
-      options
     )
   }
 

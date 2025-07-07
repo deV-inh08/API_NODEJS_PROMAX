@@ -103,7 +103,7 @@ export class AuthController {
       // call auth services
       const result = await this.authServices.changePassword(changePasswordBody, decodedAT, deviceInfo)
       const successResponse = SuccessResponse.ok(result, 'Change password success')
-      successResponse.send(req)
+      successResponse.send(res)
     } catch (error) {
       next(error)
     }
