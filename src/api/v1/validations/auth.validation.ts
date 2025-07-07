@@ -79,46 +79,26 @@ export const logoutSchema = z.object({
 
 export type logoutZodType = z.infer<typeof logoutSchema>['body']
 
+
+
 export const changePasswordSchema = z.object({
-  body: z
-    .object({
-      currentPassword: z
-        .string({
-          required_error: UserMessage.PASSWORD_IS_REQUIRED
-        })
-        .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+  body: z.object({
+    currentPassword: z.string({
+      required_error: UserMessage.PASSWORD_IS_REQUIRED
+    })
+      .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+      .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
 
-      newPassword: z
-        .string({
-          required_error: UserMessage.NEW_PASSWORD_IS_REQUIRED
-        })
-        .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        .regex(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-          'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-        ),
+    newPassword: z.string({
+      required_error: UserMessage.NEW_PASSWORD_IS_REQUIRED
+    })
+      .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+      .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
 
-      confirmPassword: z
-        .string({
-          required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
-        })
-        .min(6, UserMessage.CONFIRM_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        .max(50, UserMessage.CONFIRM_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        .regex(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-          'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-        )
+    confirmPassword: z.string({
+      required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
     })
-    .refine((data) => data.newPassword !== data.confirmPassword, {
-      message: "New password and confirm password don't match",
-      path: ['confirmPassword']
-    })
-    .refine((data) => data.currentPassword !== data.newPassword, {
-      message: "New password and current password don't match",
-      path: ['newPassword']
-    })
+  })
 })
 
 export type changePasswordZodType = z.infer<typeof changePasswordSchema>['body']

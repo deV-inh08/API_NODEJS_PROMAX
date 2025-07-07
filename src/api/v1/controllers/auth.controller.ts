@@ -76,9 +76,11 @@ export class AuthController {
       //   throw new UnauthorizedError('AccessToken is required in Authorization header')
       // }
       // const accessToken = authHeader.split(' ')[1]
+
       if (!decodedAT) {
         throw new UnauthorizedError('Not found decodedAT')
       }
+
 
       // call auth services
       await this.authServices.logout(decodedAT, refreshToken)

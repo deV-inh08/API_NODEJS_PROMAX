@@ -52,15 +52,17 @@ export class AuthService {
       password: hashPassword
     })
 
+    const userId = newUser._id.toString()
+
     // generate token
     const accessToken = JWTServices.generateAccessToken({
-      id: newUser.id,
+      _id: userId,
       email: newUser.email,
       role: newUser.role
     })
 
     const refreshToken = JWTServices.generateRefreshToken({
-      id: newUser.id
+      _id: userId
     })
 
     // get time
@@ -68,7 +70,7 @@ export class AuthService {
 
     // save refreshToken in DB
     await this.refreshTokenRepository.saveRefreshtoken({
-      userId: newUser.id,
+      userId: userId,
       token: refreshToken,
       deviceInfo,
       exp,
@@ -77,7 +79,7 @@ export class AuthService {
 
     // Return user without sensitive data
     const userResponse = {
-      _id: newUser.id,
+      _id: userId,
       email: newUser.email,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
@@ -115,12 +117,12 @@ export class AuthService {
 
     // generate token
     const accessToken = JWTServices.generateAccessToken({
-      id: userIsExits.id,
+      _id: userIsExits.id,
       email: userIsExits.email,
       role: userIsExits.role
     })
     const refreshToken = JWTServices.generateRefreshToken({
-      id: userIsExits.id
+      _id: userIsExits.id
     })
 
     // save refreshToken in DB
@@ -212,7 +214,7 @@ export class AuthService {
 
       // STEP 6: Generate New Access Token
       const newAccessToken = JWTServices.generateAccessToken({
-        id: user.id,
+        _id: user.id,
         email: user.email,
         role: user.role
       })
@@ -249,6 +251,10 @@ export class AuthService {
     // verify RT (bắt buộc phải còn valid)
     const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
 
+    console.log('AT', decodedAT)
+    console.log('AT id', decodedAT.id)
+    console.log('RT id', verifyRT.id)
+
     // AT & RT phải cùng thuộc về 1 user
     if (decodedAT.id !== verifyRT.id) {
       throw new UnauthorizedError('Token mismatch - AT and RT belong to different users')
@@ -264,7 +270,9 @@ export class AuthService {
     const user = await this.userRepository.getUserById(decodedAT.id)
 
     console.log(user)
+
     if (!user || user.status !== 'active') {
+      console.log(user?.status)
       throw new UnauthorizedError('User account is not active')
     }
 

@@ -12,6 +12,7 @@ export interface ISocialAccounts {
 // Main User Document Interface
 export interface IUser extends Document {
   // Info Basic
+  _id: mongoose.Types.ObjectId,
   email: string
   password: string
   firstName: string

@@ -35,7 +35,7 @@ export class AuthMiddleWare {
 
       // Attach user info to request
       req.decoded_accessToken = {
-        id: user.id,
+        _id: user._id.toString(),
         email: user.email,
         role: user.role
       }

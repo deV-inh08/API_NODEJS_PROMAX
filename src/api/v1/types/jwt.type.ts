@@ -1,6 +1,6 @@
 import { JwtPayload } from 'jsonwebtoken'
 export interface JWTPayload extends JwtPayload {
-  id: string
+  _id: string
   email: string
   role: string
 }

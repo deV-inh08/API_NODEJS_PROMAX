@@ -20,7 +20,7 @@ export class JWTServices {
   }
 
   // generate RefreshToken
-  static generateRefreshToken(payload: Pick<JWTPayload, 'id'>) {
+  static generateRefreshToken(payload: Pick<JWTPayload, '_id'>) {
     return jwt.sign(payload, this.JWT_REFRESH_TOKEN_SECRET, {
       expiresIn: this.JWT_REFRESH_TOKEN_EXPIRES_IN as StringValue
     })
@@ -67,7 +67,7 @@ export class JWTServices {
     try {
       const decodedToken = jwt.decode(token)!
       if (typeof decodedToken === 'object') {
-        return decodedToken as { id: string; email: string; role: string }
+        return decodedToken as { _id: string; email: string; role: string }
       }
     } catch (error) {
       throw new BadRequestError('Invalid token')
@@ -103,13 +103,13 @@ export class JWTServices {
   // generate AT & RT
   static generateTokens(user: IUser) {
     const AT = this.generateAccessToken({
-      id: user.id,
+      _id: user.id,
       email: user.email,
       role: user.role
     })
 
     const RT = this.generateRefreshToken({
-      id: user.id
+      _id: user.id
     })
     return {
       accessToken: AT,
