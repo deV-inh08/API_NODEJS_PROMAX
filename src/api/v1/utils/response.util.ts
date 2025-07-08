@@ -105,3 +105,9 @@ export class InternalServerError extends ErrorResponse {
     super(message, 500, 'INTERNAL_SERVER_ERROR')
   }
 }
+
+export class TooManyRequest extends ErrorResponse {
+  constructor(message: string = 'Too many Request') {
+    super(message, 429, 'TOO_MANY_REQUEST')
+  }
+}

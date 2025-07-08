@@ -95,12 +95,12 @@ export const changePasswordSchema = z.object({
         })
         .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
         .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-        // ⭐ ADD: Password strength validation
+        //  Password strength validation
         .regex(/^(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
         .regex(/^(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
         .regex(/^(?=.*\d)/, 'Password must contain at least one number')
         .regex(/^(?=.*[@$!%*?&])/, 'Password must contain at least one special character')
-        // ⭐ ADD: No spaces allowed
+        //  No spaces allowed
         .refine((password) => !password.includes(' '), 'Password cannot contain spaces'),
 
       confirmPassword: z.string({
@@ -119,7 +119,7 @@ export const changePasswordSchema = z.object({
 
 export type changePasswordZodType = z.infer<typeof changePasswordSchema>['body']
 
-export const forgotPassword = z.object({
+export const requestOTPSchema = z.object({
   body: z.object({
     email: z
       .string({
@@ -131,7 +131,7 @@ export const forgotPassword = z.object({
   })
 })
 
-export type forgotPasswordZodType = z.infer<typeof forgotPassword>['body']
+export type forgotPasswordZodType = z.infer<typeof requestOTPSchema>['body']
 
 export const verifyOTPSchema = z.object({
   body: z.object({

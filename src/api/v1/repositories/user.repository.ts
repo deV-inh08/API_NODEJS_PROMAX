@@ -68,4 +68,70 @@ export class UserRepository extends BaseRepository {
     const UserModel = await this.getUserModel()
     return await UserModel.updateOne({ _id: userId }, updateData)
   }
+
+  // Update password when forgot password success
+  async updatePasswordReset(
+    userId: string,
+    data: {
+      passwordResetOTP: string
+      passwordResetOTPExpires: Date
+      passwordResetAttempts: number
+      passwordResetLastAttempt: Date
+    }
+  ) {
+    const UserModel = await this.getUserModel()
+    return await UserModel.updateOne(
+      {
+        _id: userId
+      },
+      data
+    )
+  }
+
+  // clear old password when forgot password success
+  async clearPasswordResetPassword(userId: string) {
+    const UserModel = await this.getUserModel()
+    return await UserModel.updateOne(
+      // unset: xóa field
+      { _id: userId },
+      {
+        $unset: {
+          passwordResetOTP: 1,
+          passwordResetOTPExpires: 1,
+          passwordResetToken: 1,
+          passwordResetAttempts: 1,
+          passwordResetLastAttempt: 1,
+          accountLockUntil: 1
+        }
+      }
+    )
+  }
+
+  // If User enter failed OTP -> Increment failed attempts
+  async incrementPasswordResetAttempt(userId: string) {
+    const UserModel = await this.getUserModel()
+    return await UserModel.updateOne(
+      {
+        _id: userId
+      },
+      {
+        $inc: {
+          passwordResetAttempts: 1 // incre 1
+        }
+      }
+    )
+  }
+
+  // lock Account
+  async lockAccount(userId: string, lockUntil: Date) {
+    const UserModel = await this.getUserModel()
+    return UserModel.updateOne(
+      {
+        _id: userId
+      },
+      {
+        accountLockUntils: lockUntil
+      }
+    )
+  }
 }

@@ -48,7 +48,7 @@ export interface IUser extends Document {
   passwordResetLastAttempts: Date // Thời gian mới nhất nhập OTP
   passwordChangeAt?: Date // Password thay đổi ngày nào
 
-  accountLockUntils: Date // Tạm khóa tài khoản trong khoảng thời gian
+  accountLockUntils?: Date // Tạm khóa tài khoản trong khoảng thời gian
   loginAttempts: number // Đếm số lần login sai
 
   // Statistics

@@ -126,8 +126,16 @@ export const userSchema = new Schema<IUser>({
   // Security Fields
   emailVerificationToken: String,
   emailVerificationExpires: Date,
-  passwordResetToken: String,
-  // passwordExpires: Date,
+
+  passwordResetOTP: String, // Lưu OTP đã hash
+  passwordResetOTPExpires: Date, // Thời gian hết hạn của OTP
+  passwordResetToken: String, // Backup: Email reset thay vì OTP
+  passwordResetAttempts: Number, // Số lần nhập sai OTP
+  passwordResetLastAttempts: Date, // Thời gian mới nhất nhập OTP
+  passwordChangeAt: Date, // Password thay đổi ngày nào
+
+  accountLockUntils: Date, // Tạm khóa tài khoản trong khoảng thời gian
+  loginAttempts: Number, // Đếm số lần login sai
 
   // Social Accounts
   socialAccounts: {

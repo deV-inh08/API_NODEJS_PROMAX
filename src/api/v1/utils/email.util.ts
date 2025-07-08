@@ -4,7 +4,8 @@ export class EmailServices {
   private static transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: envConfig.EMAIL_ADMIN
+      user: envConfig.EMAIL_ADMIN,
+      pass: envConfig.EMAIL_APP_PASSWORD
     }
   })
 
