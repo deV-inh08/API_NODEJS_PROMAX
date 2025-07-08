@@ -12,7 +12,7 @@ export interface ISocialAccounts {
 // Main User Document Interface
 export interface IUser extends Document {
   // Info Basic
-  _id: mongoose.Types.ObjectId,
+  _id: mongoose.Types.ObjectId
   email: string
   password: string
   firstName: string
@@ -40,9 +40,16 @@ export interface IUser extends Document {
   // Security
   emailVerificationToken?: string
   emailVerificationExpires?: Date
-  passwordResetToken?: string
-  // passwordExpires?: Date
-  passwordChangeAt?: Date
+
+  passwordResetOTP: string // Lưu OTP đã hash
+  passwordResetOTPExpires: Date // Thời gian hết hạn của OTP
+  passwordResetToken?: string // Backup: Email reset thay vì OTP
+  passwordResetAttempts: number // Số lần nhập sai OTP
+  passwordResetLastAttempts: Date // Thời gian mới nhất nhập OTP
+  passwordChangeAt?: Date // Password thay đổi ngày nào
+
+  accountLockUntils: Date // Tạm khóa tài khoản trong khoảng thời gian
+  loginAttempts: number // Đếm số lần login sai
 
   // Statistics
   totalOrders: number

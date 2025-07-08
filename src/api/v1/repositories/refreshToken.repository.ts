@@ -33,7 +33,7 @@ export class RefreshTokenRepository extends BaseRepository {
   //  Database token validation
   async findActiveToken(userId: string, token: string) {
     const refreshTokenModel = await this.getRefreshTokenModel()
-    console.log(userId);
+    console.log(userId)
     return await refreshTokenModel
       .findOne({
         userId: userId,
@@ -66,7 +66,7 @@ export class RefreshTokenRepository extends BaseRepository {
       {
         isActive: false,
         updatedAt: new Date()
-      },
+      }
     )
   }
 
@@ -118,7 +118,7 @@ export class RefreshTokenRepository extends BaseRepository {
       isActive: true,
       exp: { $gt: new Date() }
     })
-    console.log('activeTokensCount', activeTokensCount);
+    console.log('activeTokensCount', activeTokensCount)
     if (activeTokensCount > maxTokens) {
       // Get list old tokens
       const oldTokens = await refreshTokenModel
@@ -134,10 +134,10 @@ export class RefreshTokenRepository extends BaseRepository {
         })
         .limit(activeTokensCount - maxTokens) // giới hạn (4-3) = 1 -> [1/6]
 
-      console.log('oldTokens', oldTokens);
+      console.log('oldTokens', oldTokens)
       // revoke old tokens
       const oldTokenIds = oldTokens.map((token) => token._id) // oldTokens -> [1/6]
-      console.log(oldTokenIds);
+      console.log(oldTokenIds)
       await refreshTokenModel.updateMany(
         {
           _id: {

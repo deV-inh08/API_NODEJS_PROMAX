@@ -53,10 +53,9 @@ export class UserRepository extends BaseRepository {
   // re-verify password user đã login
   async getUserByIdWithPassword(userId: string): Promise<IUser | null> {
     const UserModel = await this.getUserModel()
-    return await UserModel.findOne(
-      {
-        _id: userId
-      }).lean()
+    return await UserModel.findOne({
+      _id: userId
+    }).lean()
   }
 
   async updatePassword(

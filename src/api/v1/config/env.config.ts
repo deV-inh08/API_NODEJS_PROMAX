@@ -29,7 +29,8 @@ const configSchemaEnv = z.object({
   JWT_ACCESS_TOKEN_EXPIRES_IN: z.string().default('15m'),
   JWT_ACCESS_TOKEN_SECRET: z.string().default('test_access_secret_key_123456'),
   JWT_REFRESH_TOKEN_SECRET: z.string().default('test_refresh_secret_key_123456'),
-  ALGORITHM: z.string().default('HS256')
+  ALGORITHM: z.string().default('HS256'),
+  EMAIL_ADMIN: z.string()
 })
 
 // from schema -> object {isSuccess, data: {} }

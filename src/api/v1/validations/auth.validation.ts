@@ -79,26 +79,97 @@ export const logoutSchema = z.object({
 
 export type logoutZodType = z.infer<typeof logoutSchema>['body']
 
-
-
 export const changePasswordSchema = z.object({
-  body: z.object({
-    currentPassword: z.string({
-      required_error: UserMessage.PASSWORD_IS_REQUIRED
-    })
-      .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-      .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+  body: z
+    .object({
+      currentPassword: z
+        .string({
+          required_error: UserMessage.PASSWORD_IS_REQUIRED
+        })
+        .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+        .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
 
-    newPassword: z.string({
-      required_error: UserMessage.NEW_PASSWORD_IS_REQUIRED
-    })
-      .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
-      .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+      newPassword: z
+        .string({
+          required_error: UserMessage.NEW_PASSWORD_IS_REQUIRED
+        })
+        .min(6, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+        .max(50, UserMessage.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+        // ⭐ ADD: Password strength validation
+        .regex(/^(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
+        .regex(/^(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
+        .regex(/^(?=.*\d)/, 'Password must contain at least one number')
+        .regex(/^(?=.*[@$!%*?&])/, 'Password must contain at least one special character')
+        // ⭐ ADD: No spaces allowed
+        .refine((password) => !password.includes(' '), 'Password cannot contain spaces'),
 
-    confirmPassword: z.string({
-      required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
+      confirmPassword: z.string({
+        required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
+      })
     })
-  })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: "New password and confirm password don't match",
+      path: ['confirmPassword'] // ⭐ Error sẽ hiển thị ở field confirmPassword
+    })
+    .refine((data) => data.currentPassword !== data.newPassword, {
+      message: 'New password must be different from current password',
+      path: ['newPassword']
+    })
 })
 
 export type changePasswordZodType = z.infer<typeof changePasswordSchema>['body']
+
+export const forgotPassword = z.object({
+  body: z.object({
+    email: z
+      .string({
+        required_error: 'Email is required'
+      })
+      .email('Invalid email format')
+      .toLowerCase()
+      .trim()
+  })
+})
+
+export type forgotPasswordZodType = z.infer<typeof forgotPassword>['body']
+
+export const verifyOTPSchema = z.object({
+  body: z.object({
+    otp: z.string({ required_error: 'OTP is requred' }).min(6, {
+      message: 'OTP must be 6 digits'
+    }),
+    email: z
+      .string({
+        required_error: 'Email is required'
+      })
+      .email('Invalid email format')
+      .toLowerCase()
+      .trim()
+  })
+})
+
+export type verifyOTPZodType = z.infer<typeof verifyOTPSchema>['body']
+
+export const forgotPasswordSchema = z.object({
+  body: z
+    .object({
+      otp: z
+        .string({
+          required_error: 'OTP is required'
+        })
+        .min(6, 'OTP must be 6 digits'),
+      newPassword: z
+        .string({
+          required_error: UserMessage.PASSWORD_IS_REQUIRED
+        })
+        .min(6, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50)
+        .max(50, UserMessage.PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50),
+      confirmPassword: z.string({
+        required_error: UserMessage.CONFIRM_PASSWORD_IS_REQUIRED
+      })
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: "Password don't match",
+      path: ['confirmPassword']
+    })
+})

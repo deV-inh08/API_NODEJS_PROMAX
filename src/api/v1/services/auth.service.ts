@@ -206,8 +206,8 @@ export class AuthService {
         throw new UnauthorizedError(`Account is ${user.status}`)
       }
 
-      console.log('userFromAT', userFromAT?.role);
-      console.log('user', user.role);
+      console.log('userFromAT', userFromAT?.role)
+      console.log('user', user.role)
 
       // STEP 5: Additional security checks for proactive refresh
       if (isProactiveRefresh && userFromAT) {
@@ -220,7 +220,7 @@ export class AuthService {
 
       const userId = convertObjectIdToString(user._id)
 
-      console.log('userId', userId);
+      console.log('userId', userId)
       // STEP 6: Generate New Access Token
       const newAccessToken = JWTServices.generateAccessToken({
         id: userId,
@@ -300,20 +300,14 @@ export class AuthService {
     // hash newPassword
     const hashNewPassword = await BcryptServices.hashPassword(newPassword)
 
-    console.log('hashNewPassword', hashNewPassword);
+    console.log('hashNewPassword', hashNewPassword)
 
     try {
-
-
-
       // update password in DB
-      await this.userRepository.updatePassword(
-        decodedAT.id,
-        {
-          password: hashNewPassword,
-          passwordChangeAt: new Date()
-        },
-      )
+      await this.userRepository.updatePassword(decodedAT.id, {
+        password: hashNewPassword,
+        passwordChangeAt: new Date()
+      })
 
       // logout all devices
       await this.refreshTokenRepository.invalidAllUsersToken(decodedAT.id)
@@ -321,21 +315,19 @@ export class AuthService {
       // generate new Token
       const newTokens = JWTServices.generateTokens(user)
 
-      console.log('newTokens', newTokens);
+      console.log('newTokens', newTokens)
       const userId = convertObjectIdToString(user._id)
 
-      console.log('userId', userId);
+      console.log('userId', userId)
       // save new RT in DB
       const { iat, exp } = this.getDateForToken()
-      await this.refreshTokenRepository.saveRefreshtoken(
-        {
-          userId: userId,
-          token: newTokens.refreshToken,
-          iat,
-          exp,
-          deviceInfo
-        },
-      )
+      await this.refreshTokenRepository.saveRefreshtoken({
+        userId: userId,
+        token: newTokens.refreshToken,
+        iat,
+        exp,
+        deviceInfo
+      })
 
       return {
         message: 'Password changed successfully',

@@ -43,12 +43,6 @@ afterAll(async () => {
   console.log('\n🧹 Cleaning up Integration Tests Environment...')
 
   try {
-    // Drop test database to ensure clean state
-    // if (connection && connection.db) {
-    //   await connection.db.dropDatabase()
-    //   console.log('🗑️ Test database dropped')
-    // }
-
     // Close connection
     await mongoose.disconnect()
     console.log('🔌 Database disconnected')
