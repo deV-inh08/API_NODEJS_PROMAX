@@ -133,6 +133,10 @@ export const userSchema = new Schema<IUser>({
   passwordResetAttempts: Number, // Số lần nhập sai OTP
   passwordResetLastAttempts: Date, // Thời gian mới nhất nhập OTP
   passwordChangeAt: Date, // Password thay đổi ngày nào
+  isOTPVerified: {
+    type: Boolean,
+    default: false
+  },
 
   accountLockUntils: Date, // Tạm khóa tài khoản trong khoảng thời gian
   loginAttempts: Number, // Đếm số lần login sai

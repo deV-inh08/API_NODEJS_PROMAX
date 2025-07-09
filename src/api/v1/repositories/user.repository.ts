@@ -70,13 +70,14 @@ export class UserRepository extends BaseRepository {
   }
 
   // Update password when forgot password success
-  async updatePasswordReset(
+  async updatePasswordResetOTP(
     userId: string,
     data: {
       passwordResetOTP: string
       passwordResetOTPExpires: Date
       passwordResetAttempts: number
       passwordResetLastAttempt: Date
+      isOTPVerified: boolean
     }
   ) {
     const UserModel = await this.getUserModel()
@@ -101,7 +102,8 @@ export class UserRepository extends BaseRepository {
           passwordResetToken: 1,
           passwordResetAttempts: 1,
           passwordResetLastAttempt: 1,
-          accountLockUntil: 1
+          accountLockUntil: 1,
+          isOTPVerified: 1
         }
       }
     )
@@ -133,5 +135,15 @@ export class UserRepository extends BaseRepository {
         accountLockUntils: lockUntil
       }
     )
+  }
+
+  // set isOTPVerify is true
+  async verifyOTP(userId: string) {
+    const UserModel = await this.getUserModel()
+    return UserModel.updateOne({
+      _id: userId
+    }, {
+      isOTPVerified: true
+    })
   }
 }

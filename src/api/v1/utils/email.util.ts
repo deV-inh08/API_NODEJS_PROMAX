@@ -18,7 +18,8 @@ export class EmailServices {
       html: `
         <h2>Password Reset Request</h2>
         <p>Hello,</p>
-        <p>Your OTP for password reset is: <strong>${otp}</strong></p>
+        <p>Your OTP for password reset is:</p>
+        <h1>${otp}</h1>
         <p>This OTP will expire in 10 minutes.</p>
         
         <hr>

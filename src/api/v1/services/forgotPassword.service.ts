@@ -1,16 +1,20 @@
-import { forgotPasswordZodType, verifyOTPZodType } from '~/api/v1/validations/auth.validation'
+import { forgotPasswordZodType, resetPasswordZodType, verifyOTPZodType } from '~/api/v1/validations/auth.validation'
 import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { BadRequestError, NotFoundError, TooManyRequest, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { OTP } from '~/api/v1/constants/otp.constant'
 import { OTPServices } from '~/api/v1/utils/otp.util'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
 import { EmailServices } from '~/api/v1/utils/email.util'
+import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
+import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 
 export class ForgotPasswordService {
   private userRepository: UserRepository
+  private refreshTokenRepository: RefreshTokenRepository
 
   constructor() {
     this.userRepository = new UserRepository()
+    this.refreshTokenRepository = new RefreshTokenRepository()
   }
 
   // Nhận request OTP -> body {email : string}
@@ -46,11 +50,12 @@ export class ForgotPasswordService {
 
     const userId = convertObjectIdToString(user._id)
     // save OTP in DB
-    await this.userRepository.updatePasswordReset(userId, {
+    await this.userRepository.updatePasswordResetOTP(userId, {
       passwordResetOTP: hashedOTP,
       passwordResetOTPExpires: expAt,
       passwordResetAttempts: 0,
-      passwordResetLastAttempt: new Date()
+      passwordResetLastAttempt: new Date(),
+      isOTPVerified: false
     })
 
     // send OTP email
@@ -108,8 +113,60 @@ export class ForgotPasswordService {
       throw new UnauthorizedError(`Invalid OTP. ${remainingAttempts} attemps remaining`)
     }
 
+    // set isVerifyOTP in DB = true
+    await this.userRepository.verifyOTP(userId)
+
     return {
       verified: true
+    }
+  }
+
+  // reset password after verify-otp
+  async resetPassword(body: resetPasswordZodType) {
+    const { email, password } = body
+
+    // check xem co user khong
+    const user = await this.userRepository.checkUserIsExists(email)
+
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+    const userId = convertObjectIdToString(user._id)
+
+    // check xem OTP có tồn tại không
+    if (!user.passwordResetOTP || !user.passwordResetOTPExpires) {
+      throw new BadRequestError('No OTP request found. Please request a new OTP')
+    }
+
+    // check xem OTP verified chưa
+    if (!user.isOTPVerified) {
+      throw new BadRequestError(`OTP don't verified. Please request a new OTP and verified`)
+    }
+
+    // check OTP còn hạn không
+    if (OTPServices.isOTPExpired(user.passwordResetOTPExpires)) {
+      // clear OTP expired from DB
+      await this.userRepository.clearPasswordResetPassword(userId)
+      throw new BadRequestError('OTP is expired. Please request a new OTP')
+    }
+
+    // hash new password
+    const hashPassword = await BcryptServices.hashPassword(password)
+
+    // update new Password
+    try {
+      await this.userRepository.updatePassword(userId, {
+        password: hashPassword,
+        passwordChangeAt: new Date()
+      })
+
+      // clear all reset data
+      await this.userRepository.clearPasswordResetPassword(userId)
+
+      // logout all devices
+      await this.refreshTokenRepository.invalidAllUsersToken(userId)
+    } catch (error) {
+      throw new BadRequestError('Failed to reset password')
     }
   }
 }
