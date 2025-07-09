@@ -1,4 +1,4 @@
-import { forgotPasswordZodType } from '~/api/v1/validations/auth.validation'
+import { forgotPasswordZodType, verifyOTPZodType } from '~/api/v1/validations/auth.validation'
 import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { BadRequestError, NotFoundError, TooManyRequest, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { OTP } from '~/api/v1/constants/otp.constant'
@@ -63,6 +63,53 @@ export class ForgotPasswordService {
     return {
       message: 'OTP sent to your email',
       expiresIn: OTP.OTP_EXPIRY / 60000 // minutes
+    }
+  }
+
+  // Verify OTP when client send
+  async verifyOTP(body: verifyOTPZodType) {
+    const { email, otp } = body
+    // check user is exists
+    const user = await this.userRepository.checkUserIsExists(email)
+
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+
+    const userId = convertObjectIdToString(user._id)
+
+    // check if OTP exists
+    if (!user.passwordResetOTP || !user.passwordResetOTPExpires) {
+      throw new BadRequestError('No OTP request found. Please request a new OTP')
+    }
+
+    // check if OTP expired
+    if (OTPServices.isOTPExpired(user.passwordResetOTPExpires)) {
+      // clear OTP expired from DB
+      await this.userRepository.clearPasswordResetPassword(userId)
+      throw new BadRequestError('OTP is expired. Please request a new OTP')
+    }
+
+    // check attempts limit
+    if (user.passwordResetAttempts >= OTP.MAX_ATTEMPTS) {
+      // lock account
+      await this.userRepository.lockAccount(userId, new Date(Date.now() + OTP.LOCKOUT_TIME))
+      throw new TooManyRequest('Too many failed attempts. Account locked 15 minutes')
+    }
+
+    // verify OTP
+    const isValidOTP = OTPServices.verifyOTP(otp, user.passwordResetOTP)
+
+    if (!isValidOTP) {
+      // Increament failed attempts
+      await this.userRepository.incrementPasswordResetAttempt(userId)
+
+      const remainingAttempts = OTP.MAX_ATTEMPTS - (user.passwordResetAttempts + 1)
+      throw new UnauthorizedError(`Invalid OTP. ${remainingAttempts} attemps remaining`)
+    }
+
+    return {
+      verified: true
     }
   }
 }

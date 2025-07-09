@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { ForgotPasswordController } from '~/api/v1/controllers/forgotPassword.controller'
 import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
-import { forgotPasswordSchema, requestOTPSchema } from '~/api/v1/validations/auth.validation'
+import { requestOTPSchema, verifyOTPSchema } from '~/api/v1/validations/auth.validation'
 
 const forgotPasswordRouter = Router()
 const forgotPasswordController = new ForgotPasswordController()
@@ -20,5 +20,32 @@ forgotPasswordRouter.post(
   forgotPasswordController.requestOTP
 )
 
+/**
+ * @route   POST /api/v1/forgot-password/verify-otp
+ * @desc    Verify OTP
+ * @body    { email: string, otp: string }
+ * @access  Public
+ */
+forgotPasswordRouter.post(
+  '/verify-otp',
+  authLimiter,
+  validationReq(verifyOTPSchema),
+  forgotPasswordController.verifyOTP
+)
+
+/**
+ * @route   POST /api/v1/forgot-password/reset-password
+ * @desc    Reset password with OTP
+ * @body    { email: string, otp: string, newPassword: string, confirmPassword: string }
+ * @access  Public
+ */
+
+
+/**
+ * @route   POST /api/v1/forgot-password/resend-otp
+ * @desc    Resend OTP
+ * @body    { email: string }
+ * @access  Public
+ */
 
 export default forgotPasswordRouter

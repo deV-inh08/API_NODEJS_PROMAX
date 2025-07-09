@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { ForgotPasswordService } from '~/api/v1/services/forgotPassword.service'
 import { SuccessResponse } from '~/api/v1/utils/response.util'
-import { forgotPasswordZodType } from '~/api/v1/validations/auth.validation'
+import { forgotPasswordZodType, verifyOTPZodType } from '~/api/v1/validations/auth.validation'
 
 export class ForgotPasswordController {
   private forgotPasswordServices: ForgotPasswordService
@@ -22,6 +22,18 @@ export class ForgotPasswordController {
 
       const result = await this.forgotPasswordServices.requestPasswordReset(data)
       const successResponse = SuccessResponse.ok(result, 'OTP sent successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // Verify OTP
+  verifyOTP = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body: verifyOTPZodType = req.body
+      const result = await this.forgotPasswordServices.verifyOTP(body)
+      const successResponse = SuccessResponse.ok(result, 'OTP verified successfully')
       successResponse.send(res)
     } catch (error) {
       next(error)
