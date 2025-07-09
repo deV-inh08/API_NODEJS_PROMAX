@@ -70,6 +70,7 @@ export class AuthController {
   logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { refreshToken }: logoutZodType = req.body
+      const accessToken = req.originalAccessToken!
       const decodedAT = req.decoded_accessToken
       // const authHeader = req.headers.authorization
       // if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -82,7 +83,7 @@ export class AuthController {
       }
 
       // call auth services
-      await this.authServices.logout(decodedAT, refreshToken)
+      await this.authServices.logout(decodedAT, refreshToken, accessToken)
       const successResponse = SuccessResponse.ok(null, 'Logout user success')
       successResponse.send(res)
     } catch (error) {

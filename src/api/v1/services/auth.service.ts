@@ -10,17 +10,19 @@ import { refreshTokenZodType } from '~/api/v1/validations/token.validation'
 import { TokenCleanUpScheduler } from '~/api/v1/repositories/refreshToken.repository'
 import { JWTPayload } from '~/api/v1/types/jwt.type'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
-import mongoose from 'mongoose'
+import { TokenBlacklistRepository } from '~/api/v1/repositories/tokenBlacklist.repository'
 
 export class AuthService {
   private userRepository: UserRepository
   private refreshTokenRepository: RefreshTokenRepository
   private tokenCleanUpScheduler: TokenCleanUpScheduler
+  private tokenBlacklistRepository: TokenBlacklistRepository
 
   constructor() {
     this.userRepository = new UserRepository()
     this.refreshTokenRepository = new RefreshTokenRepository()
     this.tokenCleanUpScheduler = new TokenCleanUpScheduler()
+    this.tokenBlacklistRepository = new TokenBlacklistRepository()
 
     // Run cleanUp Weekly after Auth services running
     this.tokenCleanUpScheduler.startWeeklyCleanup()
@@ -256,13 +258,25 @@ export class AuthService {
   }
 
   // logout
-  async logout(decodedAT: JWTPayload, refreshToken: string) {
+  async logout(decodedAT: JWTPayload, refreshToken: string, accessToken: string) {
     // verify RT (bắt buộc phải còn valid)
     const verifyRT = JWTServices.verifyRefreshToken(refreshToken)
 
     // AT & RT phải cùng thuộc về 1 user
     if (decodedAT.id !== verifyRT.id) {
       throw new UnauthorizedError('Token mismatch - AT and RT belong to different users')
+    }
+
+    // Nếu AT còn hạn -> add AT dô BlackList
+    const accessTokenExpiry = JWTServices.getTokenExpired(accessToken)
+
+    if (accessTokenExpiry && accessTokenExpiry > new Date()) {
+      await this.tokenBlacklistRepository.addBlackList({
+        userId: decodedAT.id,
+        token: accessToken,
+        expiresAt: accessTokenExpiry
+      })
+      console.log('add AT BlackList success')
     }
 
     // Xem Rt có tồn tại trong DB không
@@ -275,6 +289,8 @@ export class AuthService {
     const tokenId = convertObjectIdToString(storedToken._id)
 
     await this.refreshTokenRepository.deactiveTokenById(tokenId)
+
+
     return {
       message: 'Logout user success'
     }

@@ -134,8 +134,7 @@ export const userSchema = new Schema<IUser>({
   passwordResetLastAttempts: Date, // Thời gian mới nhất nhập OTP
   passwordChangeAt: Date, // Password thay đổi ngày nào
   isOTPVerified: {
-    type: Boolean,
-    default: false
+    type: Boolean
   },
 
   accountLockUntils: Date, // Tạm khóa tài khoản trong khoảng thời gian

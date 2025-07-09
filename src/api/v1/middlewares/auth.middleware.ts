@@ -7,11 +7,14 @@ import { JWTPayload } from '~/api/v1/types/jwt.type'
 import { Role } from '~/api/v1/types/comon.types'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
 import mongoose from 'mongoose'
+import { TokenBlacklistRepository } from '~/api/v1/repositories/tokenBlacklist.repository'
 
 export class AuthMiddleWare {
   private userRepository: UserRepository
+  private tokenBlackListRepository: TokenBlacklistRepository
   constructor() {
     this.userRepository = new UserRepository()
+    this.tokenBlackListRepository = new TokenBlacklistRepository()
   }
 
   // verify accessToken
@@ -24,6 +27,14 @@ export class AuthMiddleWare {
 
       // split token => Bearer acxansndue
       const accessToken = authHeader.split(' ')[1]
+
+      // check AT có trong BList k
+      const isBlackListed = await this.tokenBlackListRepository.isBlackListModel(accessToken)
+
+      if (isBlackListed) {
+        console.log('❌ Token found in blacklist!')
+        throw new UnauthorizedError('Token has been invalidated. Please login again')
+      }
 
       // decoded AT
       const decodedAT = JWTServices.verifyAccessToken(accessToken)
@@ -47,11 +58,39 @@ export class AuthMiddleWare {
         email: user.email,
         role: user.role
       }
+      req.originalAccessToken = accessToken
       next()
     } catch (error) {
       next(error)
     }
   }
+
+  // // verify AT with BlackList
+  // verifyATSecure = async (req: Request<ParamsDictionary, any, JWTPayload>, res: Response, next: NextFunction) => {
+  //   try {
+  //     const authHeader = req.headers.authorization // Bearer dasdsadsadas
+
+  //     if (!authHeader) {
+  //       throw new UnauthorizedError('authorization is undefined')
+  //     }
+  //     // split token => Bearer acxansndue
+  //     const accessToken = authHeader.split(' ')[1]
+
+  //     // Check AT còn hạn hay không
+  //     const checkExpiredAT = JWTServices.isTokenExpired(accessToken)
+
+  //     // AT hết hạn
+  //     if (!checkExpiredAT) {
+  //       throw new UnauthorizedError('AccessToken is expired')
+  //     }
+
+  //     // AT còn hạn -> BlackList 
+
+
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
 
   // require role
   requireRole = (roles: Role[]) => (req: Request, res: Response, next: NextFunction) => {
