@@ -3,7 +3,6 @@ import { userSchema } from '~/api/v1/models/users.model'
 import { IUser } from '~/api/v1/types/user.type'
 import { Model } from 'mongoose'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
-import { ClientSession } from 'mongoose'
 
 export class UserRepository extends BaseRepository {
   private models = new Map<string, Model<IUser>>()

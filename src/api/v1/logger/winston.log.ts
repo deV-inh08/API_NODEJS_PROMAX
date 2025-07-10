@@ -1,16 +1,18 @@
+import path from 'path'
 import { transports, format, createLogger, Logger } from 'winston'
 import 'winston-daily-rotate-file'
 
 const { combine, timestamp, align, printf } = format
 class MyLogger {
   private logger: Logger
+  private logDir: string
   constructor() {
+    this.logDir = path.join(process.cwd(), 'src/api/v1/logs')
     const formatPrint = printf(({ level, message, timestamp, context }) => {
       return `${timestamp} --- ${level} --- ${context} --- ${message}`
     })
 
     this.logger = createLogger({
-      level: process.env.LOG_LEVEL || 'error',
       format: combine(
         timestamp({
           format: 'YYYY-MM-DD hh:mm:ss.SSS A'
@@ -21,7 +23,7 @@ class MyLogger {
       transports: [
         new transports.Console(),
         new transports.DailyRotateFile({
-          dirname: '/src/api/v1/logs/',
+          dirname: this.logDir,
           filename: 'application-%DATE%.info.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true, // backup zip
@@ -35,7 +37,7 @@ class MyLogger {
           level: 'info'
         }),
         new transports.DailyRotateFile({
-          dirname: '/src/api/v1/logs/',
+          dirname: this.logDir,
           filename: 'application-%DATE%.error.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true, // backup zip
