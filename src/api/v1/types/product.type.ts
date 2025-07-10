@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 
 // Base Product Interface
-interface IProduct {
+export interface IProduct {
   _id: Types.ObjectId
   product_name: string
   product_thumb: string
@@ -49,12 +49,12 @@ interface IProduct {
 //   updatedAt: new Date("2024-01-20")
 // }
 
-interface IProductVariation {
+export interface IProductVariation {
   name: string // size, color, style
   options: string[] // ['S', 'M', 'L'] or ['Red', 'Blue']
 }
 
-interface IClothing {
+export interface IClothing {
   brand: string
   size: string
   material: string
@@ -71,7 +71,7 @@ interface IClothing {
 //   style: "Casual"
 // }
 
-interface IElectronics {
+export interface IElectronics {
   brand: string
   model: string
   warranty: string // "2 years"
@@ -98,7 +98,7 @@ interface IElectronics {
 //   }
 // }
 
-interface IFurniture {
+export interface IFurniture {
   brand: string
   material: string
   dimensions: {
