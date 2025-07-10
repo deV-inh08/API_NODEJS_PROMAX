@@ -45,7 +45,10 @@ export class ForgotPasswordController {
     try {
       const body: resetPasswordZodType = req.body
       await this.forgotPasswordServices.resetPassword(body)
-      const successResponse = SuccessResponse.ok(null, 'Password reset successfully. Please login with your new password')
+      const successResponse = SuccessResponse.ok(
+        null,
+        'Password reset successfully. Please login with your new password'
+      )
       successResponse.send(res)
     } catch (error) {
       next(error)

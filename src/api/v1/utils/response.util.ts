@@ -1,5 +1,6 @@
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 import { ISuccessResponse } from '~/api/v1/types/response.type'
+import { MyLogger, myLogger } from '~/api/v1/logger/winston.log'
 
 // ==================== SUCCESS RESPONSE ====================
 export class SuccessResponse<T = any> {
@@ -50,12 +51,18 @@ export class ErrorResponse extends Error {
   public isOperational: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public details?: any
+  private logger = myLogger
 
   constructor(message: string, statusCode: number, errorType: string = 'GENERIC_ERROR', isOperational: boolean = true) {
     super(message)
     this.statusCode = statusCode
     this.errorType = errorType
     this.isOperational = isOperational
+    this.logger.error(this.message, {
+      context: '/path',
+      message: this.message,
+      requestId: 'AAAAB111'
+    })
   }
 }
 

@@ -7,7 +7,6 @@ const routerApiV1 = Router()
 // Router cho 'Auth'
 routerApiV1.use('/auth', authRouter)
 
-
 // Route cho ForgotPassword & OTP
 routerApiV1.use('/forgot-password', forgotPasswordRouter)
 

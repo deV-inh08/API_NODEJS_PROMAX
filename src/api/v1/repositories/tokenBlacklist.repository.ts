@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
-import { tokenBlackListsSchema } from "~/api/v1/models/tokensBlackList.model";
-import { BaseRepository } from "~/api/v1/repositories/base.repository";
-import { IBlackListsType } from "~/api/v1/types/tokensBlackList.type";
+import mongoose from 'mongoose'
+import { tokenBlackListsSchema } from '~/api/v1/models/tokensBlackList.model'
+import { BaseRepository } from '~/api/v1/repositories/base.repository'
+import { IBlackListsType } from '~/api/v1/types/tokensBlackList.type'
 import crypto from 'crypto'
 
 export class TokenBlacklistRepository extends BaseRepository {
-
   private models = new Map<string, mongoose.Model<IBlackListsType>>()
   // get BlackList Model
   async getBlackListModel() {
@@ -20,11 +19,7 @@ export class TokenBlacklistRepository extends BaseRepository {
   }
 
   // add AT to BList
-  async addBlackList(data: {
-    userId: string,
-    token: string,
-    expiresAt: Date
-  }) {
+  async addBlackList(data: { userId: string; token: string; expiresAt: Date }) {
     const BlackListModel = await this.getBlackListModel()
 
     // hash token
@@ -46,7 +41,7 @@ export class TokenBlacklistRepository extends BaseRepository {
 
     const blacklistedToken = await BlackListModel.findOne({
       token: hashToken,
-      expiresAt: { $gt: new Date() }  // Chỉ check tokens chưa expire
+      expiresAt: { $gt: new Date() } // Chỉ check tokens chưa expire
     })
 
     return blacklistedToken

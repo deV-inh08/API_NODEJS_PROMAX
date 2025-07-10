@@ -84,8 +84,7 @@ export class AuthMiddleWare {
   //       throw new UnauthorizedError('AccessToken is expired')
   //     }
 
-  //     // AT còn hạn -> BlackList 
-
+  //     // AT còn hạn -> BlackList
 
   //   } catch (error) {
   //     next(error)

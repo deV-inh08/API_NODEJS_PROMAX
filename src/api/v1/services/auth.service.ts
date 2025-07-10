@@ -290,7 +290,6 @@ export class AuthService {
 
     await this.refreshTokenRepository.deactiveTokenById(tokenId)
 
-
     return {
       message: 'Logout user success'
     }

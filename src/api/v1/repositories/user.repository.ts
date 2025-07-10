@@ -140,10 +140,13 @@ export class UserRepository extends BaseRepository {
   // set isOTPVerify is true
   async verifyOTP(userId: string) {
     const UserModel = await this.getUserModel()
-    return UserModel.updateOne({
-      _id: userId
-    }, {
-      isOTPVerified: true
-    })
+    return UserModel.updateOne(
+      {
+        _id: userId
+      },
+      {
+        isOTPVerified: true
+      }
+    )
   }
 }
