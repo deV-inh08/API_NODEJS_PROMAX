@@ -2,7 +2,7 @@ import { Types } from 'mongoose'
 
 // Base Product Interface
 export interface IProduct {
-  _id: Types.ObjectId
+  _id?: Types.ObjectId
   product_name: string
   product_thumb: string
   product_description: string
@@ -55,6 +55,7 @@ export interface IProductVariation {
 }
 
 export interface IClothing {
+  _id: Types.ObjectId
   brand: string
   size: string
   material: string
@@ -72,6 +73,7 @@ export interface IClothing {
 // }
 
 export interface IElectronics {
+  _id: Types.ObjectId
   brand: string
   model: string
   warranty: string // "2 years"
@@ -87,7 +89,7 @@ export interface IElectronics {
 //   warranty: "1 year limited warranty",
 //   specifications: {
 //     "Display": "6.7-inch Super Retina XDR",
-//     "Chip": "A17 Pro", 
+//     "Chip": "A17 Pro",
 //     "Camera": "48MP Main + 12MP Ultra Wide + 12MP Telephoto",
 //     "Storage": "256GB",
 //     "RAM": "8GB",

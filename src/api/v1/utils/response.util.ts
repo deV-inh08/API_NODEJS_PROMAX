@@ -1,3 +1,4 @@
+import { Response } from 'express'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 import { ISuccessResponse } from '~/api/v1/types/response.type'
 import { MyLogger, myLogger } from '~/api/v1/logger/winston.log'
@@ -38,7 +39,7 @@ export class SuccessResponse<T = any> {
   }
 
   // Method to send response via Express Response object
-  send(res: any): void {
+  send(res: Response): void {
     res.status(this.response.statusCode).json(this.response)
   }
 }

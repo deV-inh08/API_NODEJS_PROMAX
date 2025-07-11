@@ -54,19 +54,25 @@ class MyLogger {
     })
   }
 
-  info(message: string, params?: {
-    context: string,
-    requestId: string,
-    message: string
-  }) {
+  info(
+    message: string,
+    params?: {
+      context: string
+      requestId: string
+      message: string
+    }
+  ) {
     this.logger.info(message, { params })
   }
 
-  error(message: string, params?: {
-    context: string,
-    requestId: string,
-    message: string
-  }) {
+  error(
+    message: string,
+    params?: {
+      context: string
+      requestId: string
+      message: string
+    }
+  ) {
     this.logger.error(message, { params })
   }
 
@@ -80,7 +86,4 @@ class MyLogger {
 }
 
 const myLogger = new MyLogger()
-export {
-  MyLogger,
-  myLogger
-}
+export { MyLogger, myLogger }
