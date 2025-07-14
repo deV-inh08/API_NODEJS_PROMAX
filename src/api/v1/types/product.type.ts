@@ -10,7 +10,7 @@ export interface IProduct {
   product_quantity: number
   product_type: 'Electronics' | 'Clothing' | 'Furniture' // more ....
   product_shop: Types.ObjectId // trỏ tới id của shop nào có product này
-  product_attributes: any
+  product_attributes: IClothing | IElectronics | IFurniture
   product_ratingsAverage?: number // 4.7/5 star
   product_ratingsCount?: number // Số lượng đánh giá: 120 reviews
   product_variations?: IProductVariation[]
@@ -57,7 +57,7 @@ export interface IProductVariation {
 export interface IClothing {
   _id: Types.ObjectId
   brand: string
-  size: string
+  size: string[]
   material: string
   color?: string
   style?: string
@@ -66,7 +66,7 @@ export interface IClothing {
 // const clothingExample = {
 //   _id: ObjectId("60d5ecb54b24b73b9c8d5678"),
 //   brand: "Nike",
-//   size: "L",
+//   size: "L" || ['L', 'X', 'M'],
 //   material: "100% Cotton",
 //   color: "Navy Blue",
 //   style: "Casual"
@@ -108,8 +108,8 @@ export interface IFurniture {
     width: number
     height: number
     unit: 'cm' | 'inch'
+    weight: number
   }
-  weight?: number
 }
 // VÍ DỤ FURNITURE THỰC TẾ:
 // const furnitureExample = {

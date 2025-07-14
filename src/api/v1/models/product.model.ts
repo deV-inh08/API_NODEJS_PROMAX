@@ -117,11 +117,9 @@ export const clothingSchema = new Schema<IClothing>({
     trim: true
   },
   size: {
-    type: String,
-    max: [3, 'Size must have 3 characters'],
-    uppercase: true,
+    type: [String],
     required: true,
-    trim: true
+    uppercase: true
   },
   material: {
     type: String,

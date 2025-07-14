@@ -1,7 +1,7 @@
-import { Model } from "mongoose";
-import { productSchema } from "~/api/v1/models/product.model";
-import { BaseRepository } from "~/api/v1/repositories/base.repository";
-import { IProduct } from "~/api/v1/types/product.type";
+import { Model } from 'mongoose'
+import { productSchema } from '~/api/v1/models/product.model'
+import { BaseRepository } from '~/api/v1/repositories/base.repository'
+import { IProduct } from '~/api/v1/types/product.type'
 
 export class ProductRepository extends BaseRepository {
   private models = new Map<string, Model<IProduct>>()
@@ -13,9 +13,13 @@ export class ProductRepository extends BaseRepository {
       const productModel = connection.model<IProduct>('Product', productSchema)
       this.models.set(dbName, productModel)
     }
-    return this.models.get(dbName)
+    return this.models.get(dbName)!
   }
 
-
   // create Product
+  async createProduct(productData: IProduct) {
+    const ProductModel = await this.getProductModel()!
+    const product = new ProductModel(productData)
+    return await product.save()
+  }
 }

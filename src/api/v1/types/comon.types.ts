@@ -1,5 +1,5 @@
 export type Gender = 'male' | 'female' | 'other'
-export type Status = 'active' | 'inActive' | 'suspended' | 'deleted'
+export type Status = 'active' | 'inactive' | 'suspended' | 'deleted'
 export type Role = 'seller' | 'admin' | 'customer'
 export type Currency = 'VND' | 'USD'
 export type Language = 'VI' | 'US'
