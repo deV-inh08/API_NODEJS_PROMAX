@@ -1,6 +1,3 @@
-import { Types } from 'mongoose'
-import { productSchema, clothingSchema, electronicSchema } from '~/api/v1/models/product.model'
-import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { IClothing, IElectronics, IFurniture, IProduct, IProductVariation } from '~/api/v1/types/product.type'
 import { BadRequestError, ValidationError } from '~/api/v1/utils/response.util'
@@ -21,7 +18,7 @@ class ProductFactory {
     }
   }
 
-  private static createElectronicProduct() {}
+  private static createElectronicProduct() { }
 
   private static async createClothingProduct(baseProduct: IProduct) {
     const { product_attributes } = baseProduct
@@ -29,7 +26,7 @@ class ProductFactory {
     return baseProduct
   }
 
-  private static createFurnitureProduct() {}
+  private static createFurnitureProduct() { }
 
   private static async validateAttributeClothingProduct(attributes: IClothing) {
     if (!attributes.size || attributes.size.length === 0) {

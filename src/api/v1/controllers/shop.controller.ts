@@ -11,7 +11,7 @@ export class ShopController {
   }
 
   // Regiter seller
-  async registerSeller(req: Request, res: Response, next: NextFunction) {
+  registerSeller = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const shopBody: shopRegistrationZodType = req.body
       const decodedAT = req.decoded_accessToken!
