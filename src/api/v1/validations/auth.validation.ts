@@ -1,6 +1,6 @@
 import z from 'zod'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
-import { JWTServices } from '~/api/v1/utils/jwt.util'
+import { JWTServices } from '~/api/v1/services/jwt.service'
 
 export const registerSchema = z.object({
   body: z.object({

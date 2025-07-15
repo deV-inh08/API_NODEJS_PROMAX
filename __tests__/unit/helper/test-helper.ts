@@ -2,7 +2,7 @@
 import { getUserModel, getRefreshTokenModel } from '../models/simple-model'
 import { Role } from '~/api/v1/types/comon.types'
 import { registerZodType } from '~/api/v1/validations/auth.validation'
-import { JWTServices } from '~/api/v1/utils/jwt.util'
+import { JWTServices } from '~/api/v1/services/jwt.service'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
 import { app } from '~/index'
 

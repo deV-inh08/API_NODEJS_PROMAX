@@ -4,7 +4,7 @@ import { BadRequestError, NotFoundError, TooManyRequest, UnauthorizedError } fro
 import { OTP } from '~/api/v1/constants/otp.constant'
 import { OTPServices } from '~/api/v1/utils/otp.util'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
-import { EmailServices } from '~/api/v1/utils/email.util'
+import { EmailServices } from '~/api/v1/services/email.service'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'
 

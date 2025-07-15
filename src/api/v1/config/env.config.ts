@@ -31,7 +31,10 @@ const configSchemaEnv = z.object({
   JWT_REFRESH_TOKEN_SECRET: z.string().default('test_refresh_secret_key_123456'),
   ALGORITHM: z.string().default('HS256'),
   EMAIL_ADMIN: z.string().default('test@gmail.com'),
-  EMAIL_APP_PASSWORD: z.string().default('email_app_password')
+  EMAIL_APP_PASSWORD: z.string().default('email_app_password'),
+  TWILIO_ACCOUNT_SID: z.string().default('abcdddd'),
+  TWILIO_AUTH_TOKEN: z.string().default('hahahha'),
+  TWILIO_PHONE_NUMBER: z.string().default('000000')
 })
 
 // from schema -> object {isSuccess, data: {} }

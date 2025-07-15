@@ -1,7 +1,7 @@
 import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { changePasswordZodType, loginZodType, registerZodType } from '~/api/v1/validations/auth.validation'
 import { BcryptServices } from '~/api/v1/utils/bcrypt.util'
-import { JWTServices } from '~/api/v1/utils/jwt.util'
+import { JWTServices } from '~/api/v1/services/jwt.service'
 import { ConflictError, UnauthorizedError } from '~/api/v1/utils/response.util'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { RefreshTokenRepository } from '~/api/v1/repositories/refreshToken.repository'

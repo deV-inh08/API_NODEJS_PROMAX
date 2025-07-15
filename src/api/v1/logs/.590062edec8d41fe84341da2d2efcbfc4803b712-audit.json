@@ -14,6 +14,21 @@
             "date": 1752472929506,
             "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-14-13.error.log",
             "hash": "86627ef08dfa347d3d8a83a0fa5471f8fe43d248bcfef2525e6fb8ae45094d5f"
+        },
+        {
+            "date": 1752553387270,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-11.error.log",
+            "hash": "72a651ec8251d46a03293f00cfee362983127d2eaebb18530f8561471446b46b"
+        },
+        {
+            "date": 1752556989370,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-12.error.log",
+            "hash": "bc17e64306d34f282313ec531e4385561a7b333de0a583e3d3905c4ef5a60907"
+        },
+        {
+            "date": 1752559223279,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-13.error.log",
+            "hash": "30b0e895d1bb8168219a13a34f74114a20cbdfd4ec136f72bd17298080a7ef9c"
         }
     ],
     "hashType": "sha256"

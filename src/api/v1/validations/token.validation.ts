@@ -1,5 +1,5 @@
 import z from 'zod'
-import { JWTServices } from '~/api/v1/utils/jwt.util'
+import { JWTServices } from '~/api/v1/services/jwt.service'
 
 export const refreshTokenSchema = z.object({
   body: z.object({

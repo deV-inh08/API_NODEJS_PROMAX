@@ -39,11 +39,25 @@ export const shopSchema = new Schema<IShop>(
       enum: ['individual', 'company'],
       default: 'individual'
     },
+    owner_info: {
+      full_name: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      avatar: {
+        type: String // URL to uploaded avatar
+      }
+    },
     tax_id: {
       type: String,
       sparse: true
     },
-    phone: {
+    shop_phone: {
+      type: String,
+      required: true
+    },
+    shop_email: {
       type: String,
       required: true
     },
@@ -67,6 +81,16 @@ export const shopSchema = new Schema<IShop>(
     total_sales: {
       type: Number,
       default: 0
+    },
+    shop_email_verified: {
+      type: Boolean,
+      default: false,
+      // Mục đích: Xác minh email shop để nhận orders, customer communications
+    },
+    shop_phone_verified: {
+      type: Boolean,
+      default: false,
+      // Mục đích: Xác minh phone shop để shipper/customer liên hệ
     },
     is_verified: {
       type: Boolean,
