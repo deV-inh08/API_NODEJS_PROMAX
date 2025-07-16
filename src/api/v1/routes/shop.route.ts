@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { ShopController } from '~/api/v1/controllers/shop.controller'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
-import { shopRegistrationSchema } from '~/api/v1/validations/shop.validation'
+import { shopRegistrationSchema, verifyEmailSchema, verifyPhoneSchema } from '~/api/v1/validations/shop.validation'
 
 const shopRouter = Router()
 const shopController = new ShopController()
@@ -15,10 +15,21 @@ const authMiddleWare = new AuthMiddleWare()
  */
 
 shopRouter.post(
-  '/register',
+  '/upgrade/initiate',
   authMiddleWare.verifyAT,
-  validationReq(shopRegistrationSchema),
-  shopController.registerSeller
+  validationReq(shopRegistrationSchema)
+)
+
+shopRouter.post(
+  '/upgrade/verify-email',
+  authMiddleWare.verifyAT,
+  validationReq(verifyEmailSchema)
+)
+
+shopRouter.post(
+  '/upgrade/verify-phone',
+  authMiddleWare.verifyAT,
+  validationReq(verifyPhoneSchema)
 )
 
 export default shopRouter

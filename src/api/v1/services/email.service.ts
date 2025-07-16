@@ -190,5 +190,4 @@ export class EmailServices {
       return false
     }
   }
-
 }

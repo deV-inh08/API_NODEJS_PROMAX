@@ -18,7 +18,7 @@ class ProductFactory {
     }
   }
 
-  private static createElectronicProduct() { }
+  private static createElectronicProduct() {}
 
   private static async createClothingProduct(baseProduct: IProduct) {
     const { product_attributes } = baseProduct
@@ -26,7 +26,7 @@ class ProductFactory {
     return baseProduct
   }
 
-  private static createFurnitureProduct() { }
+  private static createFurnitureProduct() {}
 
   private static async validateAttributeClothingProduct(attributes: IClothing) {
     if (!attributes.size || attributes.size.length === 0) {

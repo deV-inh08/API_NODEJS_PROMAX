@@ -11,7 +11,7 @@ export interface IShop {
   shop_banner?: string
   business_type: 'individual' | 'company'
   owner_info: {
-    full_name: string,
+    full_name: string
     avatar?: string
   }
   tax_id?: string
@@ -36,7 +36,6 @@ export interface IShop {
   updatedAt?: Date
 }
 
-
 // ✅ PENDING SHOP REGISTRATION TYPE
 export interface IPendingShopRegistration {
   userId: string
@@ -44,7 +43,7 @@ export interface IPendingShopRegistration {
     shop_name: string
     shop_description?: string
     owner_info: {
-      full_name: string,
+      full_name: string
       avatar?: string
     }
     shop_email: string

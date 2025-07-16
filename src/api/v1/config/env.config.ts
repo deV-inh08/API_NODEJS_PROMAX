@@ -32,9 +32,17 @@ const configSchemaEnv = z.object({
   ALGORITHM: z.string().default('HS256'),
   EMAIL_ADMIN: z.string().default('test@gmail.com'),
   EMAIL_APP_PASSWORD: z.string().default('email_app_password'),
+  FIREBASE_API_KEY: z.string().default('firebase'),
+  FIREBASE_AUTH_DOMAIN: z.string().default('firebase'),
+  FIREBASE_PROJECT_ID: z.string().default('firebase'),
+  FIREBASE_STORAGE: z.string().default('firebase'),
+  FIREBASE_MESSAGING_SENDER_ID: z.string().default('firebase'),
+  FIREBASE_APP_ID: z.string().default('firebase'),
+  FIREBASE_MEASUREMENT_ID: z.string().default('firebase'),
   TWILIO_ACCOUNT_SID: z.string().default('abcdddd'),
   TWILIO_AUTH_TOKEN: z.string().default('hahahha'),
-  TWILIO_PHONE_NUMBER: z.string().default('000000')
+  TWILIO_PHONE_NUMBER: z.string().default('000000'),
+  TWILIO_SERVICES_SID: z.string().default('jakasldsal')
 })
 
 // from schema -> object {isSuccess, data: {} }

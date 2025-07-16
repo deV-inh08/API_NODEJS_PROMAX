@@ -29,6 +29,36 @@
             "date": 1752559223270,
             "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-13.info.log",
             "hash": "c2d3f2ae75aeb5d51169c97119f60229170ff0f4e25ead7a9795556be16c7f35"
+        },
+        {
+            "date": 1752573157257,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-16.info.log",
+            "hash": "b9d9242178faa9ef34759858e54388dc9bd4a229e1520b112c6af0689446a761"
+        },
+        {
+            "date": 1752573611220,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-17.info.log",
+            "hash": "afd94c2a24e596b804d6d030244327da6e7348067a4824342613be1f29385e6c"
+        },
+        {
+            "date": 1752577326765,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-15-18.info.log",
+            "hash": "349badc3a6501ae2a8489e3370ef2ca17cec3fbb6dd40cedfc76fb6ccafc48ea"
+        },
+        {
+            "date": 1752645222153,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-16-12.info.log",
+            "hash": "638016207ae7d26f13dcca0078056682a57788c23fefad140b7e6819bb584847"
+        },
+        {
+            "date": 1752645910680,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-16-13.info.log",
+            "hash": "b34ee4ba58f6a5e125d34fd2277b58389237cae6b47ddb3b3ab7c32987f9c70a"
+        },
+        {
+            "date": 1752649203912,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-16-14.info.log",
+            "hash": "283403478859f6b96ede3faf094a3c3d0f087f35bcc17431cb7e66a8d473dbd4"
         }
     ],
     "hashType": "sha256"

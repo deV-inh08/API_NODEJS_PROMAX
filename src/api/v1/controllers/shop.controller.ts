@@ -24,39 +24,51 @@ export class ShopController {
   //   }
   // }
 
-  // ✅ Step 1: Initiate shop upgrade (send dual OTP)
-  initiateShopUpgrade = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const shopData: shopRegistrationZodType = req.body
-      const decodedAT = req.decoded_accessToken!
-      const userId = decodedAT.id
+  // // ✅ Step 1: Initiate shop upgrade (send dual OTP)
+  // initiateShopUpgrade = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const shopData: shopRegistrationZodType = req.body
+  //     const decodedAT = req.decoded_accessToken!
+  //     const userId = decodedAT.id
 
-      const result = await this.shopServices.initiateShopUpgrade(userId, shopData)
+  //     const result = await this.shopServices.initiateShopUpgrade(userId, shopData)
 
-      const successResponse = SuccessResponse.ok(result, 'Business verification codes sent successfully')
-      successResponse.send(res)
-    } catch (error) {
-      next(error)
-    }
-  }
+  //     const successResponse = SuccessResponse.ok(result, 'Business verification codes sent successfully')
+  //     successResponse.send(res)
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
 
-  // ✅ Step 2: Verify business contacts and create shop
-  verifyBusinessContactsAndCreateShop = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { sessionId, phoneOTP } = req.body
-      const decodedAT = req.decoded_accessToken!
-      const userId = decodedAT.id
+  // // ✅ Step 2: Verify email and send phone OTP
+  // verifyEmailAndSendPhoneOTP = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const { sessionId, emailOTP } = req.body
+  //     const decodedAT = req.decoded_accessToken!
+  //     const userId = decodedAT.id
 
-      const result = await this.shopServices.verifyPhoneAndCreateShop(
-        sessionId,
-        phoneOTP,
-        userId
-      )
+  //     const result = await this.shopServices.verifyEmailAndSendPhoneOTP(sessionId, emailOTP, userId)
 
-      const successResponse = SuccessResponse.created(result, 'Shop created successfully!')
-      successResponse.send(res)
-    } catch (error) {
-      next(error)
-    }
-  }
+  //     const successResponse = SuccessResponse.ok(result, 'Email verified! Phone verification code sent')
+  //     successResponse.send(res)
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
+
+  // // ✅ Step 3: Verify business contacts and create shop
+  // verifyBusinessContactsAndCreateShop = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const { sessionId, phoneOTP } = req.body
+  //     const decodedAT = req.decoded_accessToken!
+  //     const userId = decodedAT.id
+
+  //     const result = await this.shopServices.verifyPhoneAndCreateShop(sessionId, phoneOTP, userId)
+
+  //     const successResponse = SuccessResponse.created(result, 'Shop created successfully!')
+  //     successResponse.send(res)
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
 }

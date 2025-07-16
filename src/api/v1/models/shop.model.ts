@@ -84,12 +84,12 @@ export const shopSchema = new Schema<IShop>(
     },
     shop_email_verified: {
       type: Boolean,
-      default: false,
+      default: false
       // Mục đích: Xác minh email shop để nhận orders, customer communications
     },
     shop_phone_verified: {
       type: Boolean,
-      default: false,
+      default: false
       // Mục đích: Xác minh phone shop để shipper/customer liên hệ
     },
     is_verified: {

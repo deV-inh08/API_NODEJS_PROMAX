@@ -11,10 +11,12 @@ export const shopRegistrationSchema = z.object({
       .trim(),
 
     owner_info: z.object({
-      full_name: z.string({
-        required_error: 'FullName ower is require'
-      }).max(50),
-      avatar: z.string()
+      full_name: z
+        .string({
+          required_error: 'FullName ower is require'
+        })
+        .max(50),
+      avatar: z.string().optional()
     }),
 
     shop_description: z.string().max(500, 'Shop description cannot exceed 500 characters').trim().optional(),
@@ -31,9 +33,10 @@ export const shopRegistrationSchema = z.object({
       })
       .regex(/^[0-9+\-\s()]+$/, 'Invalid phone number format'),
 
-    shop_email: z.string({
-      required_error: 'Email is required'
-    })
+    shop_email: z
+      .string({
+        required_error: 'Email is required'
+      })
       .email({ message: 'Invalid email format' })
       .toLowerCase()
       .trim(),
@@ -47,3 +50,22 @@ export const shopRegistrationSchema = z.object({
   })
 })
 export type shopRegistrationZodType = z.infer<typeof shopRegistrationSchema>['body']
+
+// ✅ Step 2: Verify email and send phone OTP
+export const verifyEmailSchema = z.object({
+  body: z.object({
+    sessionId: z.string().min(1, 'Session ID is required'),
+    emailOTP: z.string().length(6, 'Email OTP must be 6 digits')
+  })
+})
+
+export type verifyEmailZodType = z.infer<typeof verifyEmailSchema>['body']
+
+// ✅ Step 3: Verify phone and create shop
+export const verifyPhoneSchema = z.object({
+  body: z.object({
+    sessionId: z.string().min(1, 'Session ID is required'),
+    phoneOTP: z.string().length(6, 'Phone OTP must be 6 digits')
+  })
+})
+export type verifyPhoneZodType = z.infer<typeof verifyPhoneSchema>['body']

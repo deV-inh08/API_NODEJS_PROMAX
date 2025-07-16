@@ -38,17 +38,21 @@ export class ShopRepository extends BaseRepository {
   }
 
   // update shop verify status
-  async updateShopVerification(shopId: string, verification: {
-    shop_email_verified?: boolean
-    shop_phone_verified?: boolean
-  }) {
+  async updateShopVerification(
+    shopId: string,
+    verification: {
+      shop_email_verified?: boolean
+      shop_phone_verified?: boolean
+    }
+  ) {
     const ShopModel = await this.getShopModel()
     return ShopModel.findByIdAndUpdate(
-      shopId, {
-      ...verification,
-      is_verified: true,
-      verified_at: new Date()
-    },
+      shopId,
+      {
+        ...verification,
+        is_verified: true,
+        verified_at: new Date()
+      },
       {
         new: true
       }
