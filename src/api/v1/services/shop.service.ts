@@ -2,7 +2,7 @@ import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { OTPServices } from '~/api/v1/utils/otp.util'
-import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
 import { shopRegistrationZodType } from '~/api/v1/validations/shop.validation'
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 import { IPendingShopRegistration, IShop } from '~/api/v1/types/shop.type'
@@ -17,6 +17,70 @@ export class ShopServices {
   constructor() {
     this.shopRepository = new ShopRepository()
     this.userRepository = new UserRepository()
+  }
+
+  registerShop = async (shopData: shopRegistrationZodType, userId: string) => {
+    // check shop_name is exists
+    const existingShop = await this.shopRepository.findShopByName(shopData.shop_name)
+    if (existingShop) {
+      throw new ConflictError('Shop name already exists')
+    }
+
+    // format phone & email
+    const shop_phone = this.validateAndFormatPhone(shopData.shop_phone)
+    const shop_email = shopData.shop_email.toLowerCase().trim()
+    const isValidEmail = this.isValidEmail(shop_email)
+    if (!isValidEmail) {
+      throw new ValidationError('Email is not valid')
+    }
+
+    // generate Email OTP
+    const emailOTP = OTPServices.generateOTP()
+
+    // hash email OTP
+    const hashEmailOTP = await OTPServices.hashOTP(emailOTP)
+
+    // create sessionID
+    const sessionId = this.generateSessionId(userId)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+
+    // create pending Data
+    const pendingData: IPendingShopRegistration = {
+      userId,
+      shopData: {
+        ...shopData,
+        shop_email,
+        shop_phone,
+      },
+      currentStep: 'email_verification',
+      shop_email_OTP: {
+        createAt: new Date(),
+        hashOTP: hashEmailOTP,
+        expired: new Date(Date.now() + 5 * 60 * 1000),
+        verify: false
+      },
+      shop_phone_OTP: {
+        createAt: new Date(),
+        hashOTP: "",
+        expired: new Date(),
+        verify: false
+      },
+      createdAt: new Date(),
+      expiresAt
+    }
+
+    // Store pending registration
+    this.pendingRegistrations.set(sessionId, pendingData)
+
+    //  Send EMAIL OTP
+    await EmailServices.sendShopVerificationEmail(shop_email, emailOTP, shopData.shop_name)
+
+    return {
+      sessionId,
+      shopData: pendingData.shopData,
+      currentStep: 'email_verification',
+      message: 'Email verification code sent to your business email',
+    }
   }
 
   // send dual otp

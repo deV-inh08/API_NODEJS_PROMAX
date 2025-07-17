@@ -10,19 +10,19 @@ export class ShopController {
     this.shopServices = new ShopServices()
   }
 
-  // Regiter seller
-  // registerSeller = async (req: Request, res: Response, next: NextFunction) => {
-  //   try {
-  //     const shopBody: shopRegistrationZodType = req.body
-  //     const decodedAT = req.decoded_accessToken!
-  //     const userId = decodedAT.id
-  //     const result = await this.shopServices.registerShop(userId, shopBody)
-  //     const successResponse = SuccessResponse.created(result, 'Seller registration successful. Your shop is active')
-  //     successResponse.send(res)
-  //   } catch (error) {
-  //     next(error)
-  //   }
-  // }
+  // Register shop
+  registerShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const shopData: shopRegistrationZodType = req.body
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
 
   // // ✅ Step 1: Initiate shop upgrade (send dual OTP)
   // initiateShopUpgrade = async (req: Request, res: Response, next: NextFunction) => {

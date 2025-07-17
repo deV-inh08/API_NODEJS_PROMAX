@@ -16,6 +16,14 @@ export const shopSchema = new Schema<IShop>(
       trim: true,
       maxlength: 100
     },
+    shop_phone: {
+      type: String,
+      required: true
+    },
+    shop_email: {
+      type: String,
+      required: true
+    },
     shop_slug: {
       type: String,
       required: true,
@@ -53,14 +61,7 @@ export const shopSchema = new Schema<IShop>(
       type: String,
       sparse: true
     },
-    shop_phone: {
-      type: String,
-      required: true
-    },
-    shop_email: {
-      type: String,
-      required: true
-    },
+
     address: {
       street: String,
       city: String,
@@ -82,15 +83,13 @@ export const shopSchema = new Schema<IShop>(
       type: Number,
       default: 0
     },
-    shop_email_verified: {
+    is_verify_email: {
       type: Boolean,
       default: false
-      // Mục đích: Xác minh email shop để nhận orders, customer communications
     },
-    shop_phone_verified: {
+    is_verify_phone: {
       type: Boolean,
       default: false
-      // Mục đích: Xác minh phone shop để shipper/customer liên hệ
     },
     is_verified: {
       type: Boolean,
