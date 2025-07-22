@@ -72,11 +72,6 @@ export class AuthController {
       const { refreshToken }: logoutZodType = req.body
       const accessToken = req.originalAccessToken!
       const decodedAT = req.decoded_accessToken
-      // const authHeader = req.headers.authorization
-      // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      //   throw new UnauthorizedError('AccessToken is required in Authorization header')
-      // }
-      // const accessToken = authHeader.split(' ')[1]
 
       if (!decodedAT) {
         throw new UnauthorizedError('Not found decodedAT')

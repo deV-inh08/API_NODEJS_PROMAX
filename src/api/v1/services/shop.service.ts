@@ -3,7 +3,7 @@ import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { OTPServices } from '~/api/v1/utils/otp.util'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
-import { shopRegistrationZodType } from '~/api/v1/validations/shop.validation'
+import { shopRegistrationZodType, verifyEmailZodType } from '~/api/v1/validations/shop.validation'
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 import { IPendingShopRegistration, IShop } from '~/api/v1/types/shop.type'
 import { EmailServices } from '~/api/v1/services/email.service'
@@ -57,13 +57,15 @@ export class ShopServices {
         createAt: new Date(),
         hashOTP: hashEmailOTP,
         expired: new Date(Date.now() + 5 * 60 * 1000),
-        verify: false
+        verify: false,
+        attempts: 0
       },
       shop_phone_OTP: {
-        createAt: new Date(),
+        createAt: undefined,
         hashOTP: "",
-        expired: new Date(),
-        verify: false
+        expired: undefined,
+        verify: false,
+        attempts: 0
       },
       createdAt: new Date(),
       expiresAt
@@ -81,6 +83,63 @@ export class ShopServices {
       currentStep: 'email_verification',
       message: 'Email verification code sent to your business email',
     }
+  }
+
+
+  verifyEmailShop = async (body: verifyEmailZodType, userId: string) => {
+    const { sessionId, emailOTP } = body
+    const checkSessionId = this.pendingRegistrations.has(sessionId)
+    if (!checkSessionId) {
+      throw new BadRequestError('SessionId is not exists ')
+    }
+    const pendingData = this.pendingRegistrations.get(sessionId)
+    if (!pendingData || pendingData.userId !== userId) {
+      throw new BadRequestError('Invalid or expired verification session')
+    }
+
+    if (new Date() > pendingData.shop_email_OTP.expired!) {
+      throw new BadRequestError('Email OTP has expired')
+    }
+
+    // ✅ KIỂM TRA ĐÃ VERIFY CHƯA
+    if (pendingData.shop_email_OTP.verify) {
+      throw new BadRequestError('Email already verified')
+    }
+
+    // ✅ KIỂM TRA SỐ LẦN THỬ
+    if (pendingData.shop_email_OTP.attempts! >= 5) {
+      throw new BadRequestError('Too many failed attempts. Please restart registration.')
+    }
+
+    const verifyOTPEmail = await OTPServices.verifyOTP(emailOTP, pendingData.shop_email_OTP.hashOTP)
+    if (!verifyOTPEmail) {
+      pendingData.shop_email_OTP.attempts! += 1
+      this.pendingRegistrations.set(sessionId, pendingData)
+      throw new BadRequestError(`Invalid email OTP. ${5 - pendingData.shop_email_OTP.attempts!} attempts remaining.`)
+    }
+
+    pendingData.shop_email_OTP.verify = true
+    pendingData.currentStep = 'phone_verification'
+
+    // generate Email OTP
+    const phoneOTP = OTPServices.generateOTP()
+
+    // hash email OTP
+    const hashPhoneOTP = await OTPServices.hashOTP(phoneOTP)
+
+    // update shopPhoneOTP
+    pendingData.shop_phone_OTP = {
+      hashOTP: hashPhoneOTP,
+      verify: false,
+      expired: new Date(Date.now() + 5 * 60 * 1000),
+      createAt: new Date(),
+      attempts: 0
+    }
+
+    // set pedingData
+    this.pendingRegistrations.set(sessionId, pendingData)
+
+    // send OTP to sms
   }
 
   // send dual otp

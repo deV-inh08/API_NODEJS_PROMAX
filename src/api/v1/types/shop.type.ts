@@ -55,15 +55,17 @@ export interface IPendingShopRegistration {
   shopData: Pick<IShop, keyof shopRegistrationZodType>
   shop_email_OTP: {
     hashOTP: string
-    expired: Date
-    createAt: Date
+    expired?: Date
+    createAt?: Date
     verify: boolean
+    attempts: number
   }
   shop_phone_OTP: {
     hashOTP: string,
-    expired: Date,
-    createAt: Date
+    expired?: Date,
+    createAt?: Date
     verify: boolean
+    attempts: number
   }
   currentStep: 'email_verification' | 'phone_verification' | 'completed'
   createdAt: Date

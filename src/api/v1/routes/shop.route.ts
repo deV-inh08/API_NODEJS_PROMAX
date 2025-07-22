@@ -15,9 +15,10 @@ const authMiddleWare = new AuthMiddleWare()
  */
 
 shopRouter.post(
-  '/upgrade/initiate',
+  '/upgrade/register-shop',
   authMiddleWare.verifyAT,
-  validationReq(shopRegistrationSchema)
+  validationReq(shopRegistrationSchema),
+  shopController.registerShop
 )
 
 shopRouter.post(
