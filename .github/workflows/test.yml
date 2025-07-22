@@ -91,7 +91,6 @@ jobs:
           JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
           JWT_REFRESH_TOKEN_EXPIRES_IN: 30d
           ALGORITHM: HS256
-
       - name: 📊 Upload coverage
         if: success()
         uses: codecov/codecov-action@v4
