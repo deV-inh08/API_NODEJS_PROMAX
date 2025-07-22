@@ -1,4 +1,4 @@
-import envConfig from "~/api/v1/config/env.config"
+import envConfig from '~/api/v1/config/env.config'
 
 export const firebaseConfig = {
   apiKey: envConfig.FIREBASE_API_KEY,

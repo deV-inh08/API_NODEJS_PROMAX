@@ -58,4 +58,44 @@ export class ShopRepository extends BaseRepository {
       }
     ).lean()
   }
+
+  // update email verify
+  async updateEmailShopVerify(
+    userId: string,
+    data: {
+      shop_email: string
+      is_verify_email: boolean
+    }
+  ) {
+    const ShopModel = this.getShopModel()
+    return (await ShopModel).updateOne(
+      {
+        user_id: userId
+      },
+      {
+        shop_email: data.shop_email,
+        is_verify_email: data.is_verify_email
+      }
+    )
+  }
+
+  // update email verify
+  async updatePhoneShopVerify(
+    userId: string,
+    data: {
+      shop_phone: string
+      is_verify_phone: boolean
+    }
+  ) {
+    const ShopModel = this.getShopModel()
+    return (await ShopModel).updateOne(
+      {
+        user_id: userId
+      },
+      {
+        shop_phone: data.shop_phone,
+        is_verify_phone: data.is_verify_phone
+      }
+    )
+  }
 }

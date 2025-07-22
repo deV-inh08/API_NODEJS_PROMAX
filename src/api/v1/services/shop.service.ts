@@ -1,13 +1,20 @@
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 import { UserRepository } from '~/api/v1/repositories/user.repository'
+import { FirebaseSerivices } from '~/api/v1/services/firebase.service'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
+
 import { OTPServices } from '~/api/v1/utils/otp.util'
-import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
-import { shopRegistrationZodType, verifyEmailZodType } from '~/api/v1/validations/shop.validation'
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError
+} from '~/api/v1/utils/response.util'
+import { shopRegistrationZodType, verifyEmailZodType, verifyPhoneZodType } from '~/api/v1/validations/shop.validation'
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 import { IPendingShopRegistration, IShop } from '~/api/v1/types/shop.type'
 import { EmailServices } from '~/api/v1/services/email.service'
-import { SMSServices } from '~/api/v1/utils/sms.util'
 
 export class ShopServices {
   private userRepository: UserRepository
@@ -27,7 +34,7 @@ export class ShopServices {
     }
 
     // format phone & email
-    const shop_phone = this.validateAndFormatPhone(shopData.shop_phone)
+    const shop_phone = this.normalizePhone(shopData.shop_phone)
     const shop_email = shopData.shop_email.toLowerCase().trim()
     const isValidEmail = this.isValidEmail(shop_email)
     if (!isValidEmail) {
@@ -50,7 +57,7 @@ export class ShopServices {
       shopData: {
         ...shopData,
         shop_email,
-        shop_phone,
+        shop_phone
       },
       currentStep: 'email_verification',
       shop_email_OTP: {
@@ -62,7 +69,7 @@ export class ShopServices {
       },
       shop_phone_OTP: {
         createAt: undefined,
-        hashOTP: "",
+        hashOTP: '',
         expired: undefined,
         verify: false,
         attempts: 0
@@ -81,18 +88,16 @@ export class ShopServices {
       sessionId,
       shopData: pendingData.shopData,
       currentStep: 'email_verification',
-      message: 'Email verification code sent to your business email',
+      message: 'Email verification code sent to your business email'
     }
   }
 
-
   verifyEmailShop = async (body: verifyEmailZodType, userId: string) => {
-    const { sessionId, emailOTP } = body
-    const checkSessionId = this.pendingRegistrations.has(sessionId)
+    const checkSessionId = this.pendingRegistrations.has(body.sessionId)
     if (!checkSessionId) {
       throw new BadRequestError('SessionId is not exists ')
     }
-    const pendingData = this.pendingRegistrations.get(sessionId)
+    const pendingData = this.pendingRegistrations.get(body.sessionId)
     if (!pendingData || pendingData.userId !== userId) {
       throw new BadRequestError('Invalid or expired verification session')
     }
@@ -111,395 +116,124 @@ export class ShopServices {
       throw new BadRequestError('Too many failed attempts. Please restart registration.')
     }
 
-    const verifyOTPEmail = await OTPServices.verifyOTP(emailOTP, pendingData.shop_email_OTP.hashOTP)
+    const verifyOTPEmail = await OTPServices.verifyOTP(body.emailOTP, pendingData.shop_email_OTP.hashOTP)
     if (!verifyOTPEmail) {
       pendingData.shop_email_OTP.attempts! += 1
-      this.pendingRegistrations.set(sessionId, pendingData)
+      this.pendingRegistrations.set(body.sessionId, pendingData)
       throw new BadRequestError(`Invalid email OTP. ${5 - pendingData.shop_email_OTP.attempts!} attempts remaining.`)
     }
 
     pendingData.shop_email_OTP.verify = true
     pendingData.currentStep = 'phone_verification'
 
-    // generate Email OTP
-    const phoneOTP = OTPServices.generateOTP()
-
-    // hash email OTP
-    const hashPhoneOTP = await OTPServices.hashOTP(phoneOTP)
-
-    // update shopPhoneOTP
-    pendingData.shop_phone_OTP = {
-      hashOTP: hashPhoneOTP,
-      verify: false,
-      expired: new Date(Date.now() + 5 * 60 * 1000),
-      createAt: new Date(),
-      attempts: 0
+    // create sessionID
+    this.pendingRegistrations.set(body.sessionId, pendingData)
+    return {
+      sessionId: body.sessionId,
+      currentStep: 'phone_verification',
+      message: 'Email verified! Now verify your phone number with Firebase.',
+      phoneNumber: pendingData.shopData.shop_phone
     }
-
-    // set pedingData
-    this.pendingRegistrations.set(sessionId, pendingData)
-
-    // send OTP to sms
   }
 
-  // send dual otp
-  // async initiateShopUpgrade(userId: string, shopData: shopRegistrationZodType) {
-  //   const existingShop = await this.shopRepository.findShopByName(shopData.shop_name)
-  //   if (existingShop) {
-  //     throw new ConflictError('Shop name already exists')
-  //   }
+  verifyPhoneNumberShop = async (body: verifyPhoneZodType, userId: string) => {
+    const pendingData = this.pendingRegistrations.get(body.sessionId)!
+    const shop_phone = pendingData.shopData.shop_phone
+    if (!pendingData || pendingData.userId !== userId) {
+      throw new BadRequestError('Invalid or expired verification session')
+    }
 
-  //   // format phone & email
-  //   const formattedPhone = this.validateAndFormatPhone(shopData.shop_phone)
-  //   const businessEmail = shopData.shop_email.toLowerCase().trim()
-  //   const isValidEmail = this.isValidEmail(shopData.shop_email.toLowerCase().trim())
-  //   if (!isValidEmail) {
-  //     throw new UnauthorizedError('Email is not valid')
-  //   }
+    if (pendingData.currentStep !== 'phone_verification') {
+      throw new BadRequestError('Invalid verification step')
+    }
 
-  //   // generate OTP
-  //   const emailOTP = OTPServices.generateOTP()
+    if (!pendingData.shop_email_OTP.verify) {
+      throw new BadRequestError('Email must be verified first')
+    }
 
-  //   //  Hash OTPs
-  //   const hashedEmailOTP = await OTPServices.hashOTP(emailOTP)
+    // check user exists
+    const user = this.userRepository.getUserById(userId)
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
 
-  //   // Create session for EMAIL verification
-  //   const sessionId = this.generateSessionId(userId)
-  //   const expiresAt = new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
+    console.log('firebaseIdToken', body.firebaseIdToken);
 
-  //   const pendingData: IPendingShopRegistration = {
-  //     userId,
-  //     shopData: {
-  //       ...shopData,
-  //       shop_email: businessEmail,
-  //       shop_phone: formattedPhone
-  //     },
-  //     emailOTP: {
-  //       code: hashedEmailOTP,
-  //       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  //       verified: false,
-  //       attempts: 0
-  //     },
-  //     phoneOTP: {
-  //       code: '', // Not generated yet
-  //       expiresAt: new Date(),
-  //       verified: false,
-  //       attempts: 0
-  //     },
-  //     currentStep: 'email_verification', // Track current step
-  //     createdAt: new Date(),
-  //     expiresAt
-  //   }
-  //   console.log('pendingData', pendingData)
+    const firebaseResult = await FirebaseSerivices.verifyPhoneTokenId(body.firebaseIdToken, shop_phone)
+    if (!firebaseResult.isValid) {
+      throw new UnauthorizedError('Phone verification failed')
+    }
 
-  //   // 7. Store pending registration
-  //   this.pendingRegistrations.set(sessionId, pendingData)
+    // Mark phone verified
+    pendingData.shop_phone_OTP.verify = true
+    pendingData.currentStep = 'completed'
+    this.pendingRegistrations.set(body.sessionId, pendingData)
 
-  //   // 8. Send EMAIL OTP only
-  //   await EmailServices.sendShopVerificationEmail(businessEmail, emailOTP, shopData.shop_name)
-  //   return {
-  //     sessionId,
-  //     message: 'Email verification code sent to your business email',
-  //     expiresIn: 30,
-  //     currentStep: 'email_verification',
-  //     contacts: {
-  //       email: businessEmail,
-  //       phone: formattedPhone
-  //     },
-  //     nextStep: 'verify_email'
-  //   }
-  // }
+    // ✅ BOTH VERIFIED → CREATE SHOP
+    const newShop = await this.createVerifiedShop(pendingData)
 
-  // // ✅ STEP 2: Verify email and send phone OTP
-  // async verifyEmailAndSendPhoneOTP(sessionId: string, emailOTP: string, userId: string) {
-  //   try {
-  //     // 1. Get pending registration
-  //     const pending = this.pendingRegistrations.get(sessionId)
-  //     if (!pending || pending.userId !== userId) {
-  //       throw new BadRequestError('Invalid or expired verification session')
-  //     }
-
-  //     // 2. Check if we're in the right step
-  //     if (pending.currentStep !== 'email_verification') {
-  //       throw new BadRequestError('Invalid verification step')
-  //     }
-
-  //     // 3. Verify email OTP
-  //     const emailValid = await OTPServices.verifyOTP(emailOTP, pending.emailOTP.code)
-  //     if (!emailValid) {
-  //       pending.emailOTP.attempts++
-  //       this.pendingRegistrations.set(sessionId, pending)
-  //       throw new BadRequestError(`Invalid email OTP. ${5 - pending.emailOTP.attempts} attempts remaining.`)
-  //     }
-
-  //     // 4. Mark email as verified
-  //     pending.emailOTP.verified = true
-  //     pending.currentStep = 'phone_verification'
-
-  //     // 5. Generate phone OTP
-  //     const phoneOTP = OTPServices.generateOTP()
-  //     const hashedPhoneOTP = await OTPServices.hashOTP(phoneOTP)
-
-  //     pending.phoneOTP = {
-  //       code: hashedPhoneOTP,
-  //       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  //       verified: false,
-  //       attempts: 0
-  //     }
-
-  //     // 6. Update session
-  //     this.pendingRegistrations.set(sessionId, pending)
-
-  //     // 7. Send phone OTP
-  //     let sendOTPPhoneResult
-  //     console.log('shop_phone', pending.shopData.shop_phone)
-  //     try {
-  //       sendOTPPhoneResult = await SMSServices.sendOTP(
-  //         pending.shopData.shop_phone,
-  //         phoneOTP,
-  //         pending.shopData.shop_name
-  //       )
-
-  //       console.log('📱 SMS Result:', sendOTPPhoneResult)
-  //     } catch (smsError) {
-  //       console.error('❌ SMS Error:', smsError)
-
-  //       // ✅ Mock SMS nếu gửi thật thất bại (để test tiếp)
-  //       console.log('🔧 SMS failed, using mock mode for testing...')
-  //       console.log(`📱 Phone OTP for ${pending.shopData.shop_phone}: ${phoneOTP}`)
-
-  //       sendOTPPhoneResult = {
-  //         success: true,
-  //         messageId: `mock_after_error_${Date.now()}`
-  //       }
-  //     }
-
-  //     if (!sendOTPPhoneResult.success) {
-  //       throw new BadRequestError('Failed to send phone OTP. Please try again.')
-  //     }
-
-  //     return {
-  //       sessionId,
-  //       message: 'Email verified! Phone verification code sent',
-  //       currentStep: 'phone_verification',
-  //       contacts: {
-  //         email: pending.shopData.shop_email,
-  //         phone: pending.shopData.shop_phone
-  //       },
-  //       nextStep: 'verify_phone'
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof UnauthorizedError) {
-  //       throw error
-  //     }
-  //     throw new BadRequestError('Verified email failed')
-  //   }
-  // }
-
-  // // ✅ STEP 3: Verify phone and create shop
-  // async verifyPhoneAndCreateShop(sessionId: string, phoneOTP: string, userId: string) {
-  //   try {
-  //     // 1. Get pending registration
-  //     const pending = this.pendingRegistrations.get(sessionId)
-  //     console.log('pending phone', pending)
-  //     if (!pending || pending.userId !== userId) {
-  //       throw new BadRequestError('Invalid or expired verification session')
-  //     }
-
-  //     // 2. Check if we're in the right step
-  //     if (pending.currentStep !== 'phone_verification') {
-  //       throw new BadRequestError('Invalid verification step')
-  //     }
-
-  //     // 3. Ensure email is verified
-  //     if (!pending.emailOTP.verified) {
-  //       throw new BadRequestError('Email must be verified first')
-  //     }
-
-  //     // 4. Verify phone OTP
-  //     const phoneValid = await OTPServices.verifyOTP(phoneOTP, pending.phoneOTP.code)
-  //     if (!phoneValid) {
-  //       pending.phoneOTP.attempts++
-  //       this.pendingRegistrations.set(sessionId, pending)
-  //       throw new BadRequestError(`Invalid phone OTP. ${5 - pending.phoneOTP.attempts} attempts remaining.`)
-  //     }
-
-  //     // 5. Both verified - Create shop
-  //     const newShop = await this.createVerifiedShop(pending)
-
-  //     console.log('newShop', newShop)
-
-  //     // 6. Clean up
-  //     this.pendingRegistrations.delete(sessionId)
-
-  //     // 7. Send welcome email
-  //     // await EmailServices.sendShopWelcomeEmail(pending.shopData.shop_email, newShop)
-
-  //     return {
-  //       shop: {
-  //         id: newShop._id,
-  //         shop_name: newShop.shop_name,
-  //         shop_slug: newShop.shop_slug,
-  //         owner_full_name: newShop.owner_info.full_name,
-  //         status: newShop.status
-  //       },
-  //       user: {
-  //         id: userId,
-  //         newRole: 'seller'
-  //       },
-  //       message: 'Shop created successfully! You can now start creating products.',
-  //       nextSteps: [
-  //         'Upload shop logo and banner',
-  //         'Create your first product',
-  //         'Set up shop policies',
-  //         'Complete business verification for higher limits'
-  //       ]
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof UnauthorizedError) {
-  //       throw error
-  //     }
-  //     throw new BadRequestError('Verified phone number failed')
-  //   }
-  // }
-
-  // // ✅ Helper: Create verified shop in database
-  // private async createVerifiedShop(pending: IPendingShopRegistration) {
-  //   const now = new Date()
-
-  //   const shopData = {
-  //     user_id: convertStringToObjectId(pending.userId),
-  //     shop_name: pending.shopData.shop_name,
-  //     shop_slug: pending.shopData.shop_name,
-  //     shop_description: pending.shopData.shop_description,
-  //     // shop_logo?: string
-  //     // shop_banner?: string
-  //     business_type: pending.shopData.business_type,
-  //     owner_info: {
-  //       full_name: pending.shopData.owner_info.full_name,
-  //       avatar: pending.shopData.owner_info.avatar
-  //     },
-  //     tax_id: pending.shopData.tax_id,
-  //     address: pending.shopData.address,
-  //     shop_phone: pending.shopData.shop_phone,
-  //     shop_email: pending.shopData.shop_email,
-
-  //     shop_email_verified: true,
-  //     shop_phone_verified: true,
-  //     is_verified: true,
-  //     verified_at: now,
-  //     status: 'active' as const,
-  //     createdAt: now
-  //   }
-
-  //   return await this.shopRepository.createShop(shopData)
-  // }
-
-  // register seller
-  // registerShop = async (userId: string, shopBody: shopRegistrationZodType) => {
-  //   try {
-  //     // check if user exits
-  //     const user = await this.userRepository.getUserById(userId)
-  //     console.log('user', user)
-  //     if (!user) {
-  //       throw new NotFoundError('User not found')
-  //     }
-
-  //     // check role
-  //     if (user.role == 'seller' || user.role == 'admin') {
-  //       throw new ConflictError('User is ready a seller')
-  //     }
-
-  //     // Check shopName is exists
-  //     const isShopNameExists = await this.shopRepository.findShopByName(shopBody.shop_name)
-  //     if (isShopNameExists) {
-  //       throw new ConflictError('Shop name already exists')
-  //     }
-
-  //     // Genera OTP
-  //     const _MINUTES = 5 * 60 * 1000 // 5 munites
-  //     const otp = OTPServices.generateOTP()
-  //     const hashOTP = await OTPServices.hashOTP(otp)
-  //     const otpExp = new Date(Date.now() + _MINUTES)
-
-  //     // Send OTP SMS: 7VY9P4R267FB9CJU1R1UZTFV
-
-  //     // Create shop
-  //     const shopData = {
-  //       user_id: convertStringToObjectId(userId),
-  //       shop_name: shopBody.shop_name,
-  //       shop_slug: shopBody.shop_name,
-  //       shop_description: shopBody.shop_description,
-  //       shop_logo: shopBody.shop_logo,
-  //       business_type: shopBody.business_type,
-  //       tax_id: shopBody.tax_id,
-  //       phone: shopBody.phone,
-  //       address: shopBody.address,
-  //       shop_ratings: 0,
-  //       total_products: 0,
-  //       total_sales: 0,
-  //       is_verified: false,
-  //       status: 'active' as const
-  //     }
-
-  //     const newShop = await this.shopRepository.createShop(shopData)
-
-  //     return {
-  //       shop: {
-  //         id: newShop._id,
-  //         shop_name: newShop.shop_name,
-  //         shop_slug: newShop.shop_slug,
-  //         shop_description: newShop.shop_description,
-  //         is_verified: newShop.is_verified,
-  //         status: newShop.status
-  //       },
-  //       user: {
-  //         id: userId,
-  //         role: 'seller'
-  //       }
-  //     }
-  //   } catch (error) {
-  //     throw new BadRequestError('Register shop failed')
-  //   }
-  // }
+    // Cleanup
+    this.pendingRegistrations.delete(body.sessionId)
+    return {
+      shop: {
+        id: newShop._id,
+        shop_name: newShop.shop_name,
+        shop_slug: newShop.shop_slug,
+        status: newShop.status
+      },
+      message: 'Shop created successfully! Both email and phone verified.'
+    }
+  }
 
   // ✅ Utility helpers
   private generateSessionId(userId: string): string {
     return `shop_${userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+  }
+  // ✅ Helper: Create shop khi cả 2 đều verified
+  private async createVerifiedShop(pending: IPendingShopRegistration) {
+    const shopData = {
+      user_id: convertStringToObjectId(pending.userId),
+      shop_name: pending.shopData.shop_name,
+      shop_slug: this.generateSlug(pending.shopData.shop_name),
+      shop_description: pending.shopData.shop_description,
+      business_type: pending.shopData.business_type,
+      owner_info: pending.shopData.owner_info,
+      tax_id: pending.shopData.tax_id,
+      address: pending.shopData.address,
+      shop_phone: pending.shopData.shop_phone,
+      shop_email: pending.shopData.shop_email,
+      is_verify_email: true,
+      is_verify_phone: true,
+      is_verified: true,
+      verified_at: new Date(),
+      status: 'active' as const
+    }
 
-  // validate and format phonenumber
-  private validateAndFormatPhone(phone: string): string {
-    console.log('🔍 Input phone:', phone)
+    return await this.shopRepository.createShop(shopData)
+  }
 
-    // Remove all non-digit characters except +
-    let cleaned = phone.replace(/[^\d+]/g, '')
-    console.log('🧹 Cleaned phone:', cleaned)
+  /**
+   * validate and format phonenumber
+   *  ✅ Normalize phone number (0703288627 -> +84703288627)
+   */
+  private normalizePhone(phone: string): string {
+    const cleaned = phone.replace(/[^\d+]/g, '')
 
-    // Handle Vietnamese numbers
     if (cleaned.startsWith('0')) {
-      // Convert 0703288627 -> +84703288627
-      cleaned = '+84' + cleaned.substring(1)
+      return '+84' + cleaned.substring(1)
     } else if (cleaned.startsWith('84') && !cleaned.startsWith('+84')) {
-      // Convert 84703288627 -> +84703288627
-      cleaned = '+' + cleaned
+      return '+' + cleaned
     } else if (!cleaned.startsWith('+')) {
-      // Add +84 prefix if missing
-      cleaned = '+84' + cleaned
+      return '+84' + cleaned
     }
 
-    console.log('✅ Final formatted phone:', cleaned)
-
-    // Validate with libphonenumber-js
-    if (!isValidPhoneNumber(cleaned, 'VN')) {
-      throw new BadRequestError(`Invalid Vietnam phone number: ${phone}. Expected format: 0703288627 or +84703288627`)
-    }
-
-    const phoneNumber = parsePhoneNumber(cleaned, 'VN')
-    const result = phoneNumber.format('E.164') // +84703288627
-
-    console.log('📱 E.164 format:', result)
-    return result
+    return cleaned
   }
 
   private isValidEmail(email: string): boolean {

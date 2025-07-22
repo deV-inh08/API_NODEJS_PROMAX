@@ -61,8 +61,8 @@ export interface IPendingShopRegistration {
     attempts: number
   }
   shop_phone_OTP: {
-    hashOTP: string,
-    expired?: Date,
+    hashOTP: string
+    expired?: Date
     createAt?: Date
     verify: boolean
     attempts: number

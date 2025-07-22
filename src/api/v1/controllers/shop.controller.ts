@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { ShopServices } from '~/api/v1/services/shop.service'
 import { SuccessResponse } from '~/api/v1/utils/response.util'
-import { shopRegistrationZodType, verifyEmailZodType } from '~/api/v1/validations/shop.validation'
+import { shopRegistrationZodType, verifyEmailZodType, verifyPhoneZodType } from '~/api/v1/validations/shop.validation'
 
 export class ShopController {
   private shopServices: ShopServices
@@ -25,9 +25,29 @@ export class ShopController {
   }
 
   verifyEmailShop = async (req: Request, res: Response, next: NextFunction) => {
-    const body: verifyEmailZodType = req.body
-    const decodedAT = req.decoded_accessToken!
-    const userId = decodedAT.id
+    try {
+      const body: verifyEmailZodType = req.body
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+      const result = await this.shopServices.verifyEmailShop(body, userId)
+      const successResponse = SuccessResponse.ok(result, 'Verify email successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  verifyPhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body: verifyPhoneZodType = req.body
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+      const result = await this.shopServices.verifyPhoneNumberShop(body, userId)
+      const successResponse = SuccessResponse.ok(result, 'Verify phone successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
   }
 
   // // ✅ Step 1: Initiate shop upgrade (send dual OTP)

@@ -24,13 +24,15 @@ shopRouter.post(
 shopRouter.post(
   '/upgrade/verify-email',
   authMiddleWare.verifyAT,
-  validationReq(verifyEmailSchema)
+  validationReq(verifyEmailSchema),
+  shopController.verifyEmailShop
 )
 
 shopRouter.post(
   '/upgrade/verify-phone',
   authMiddleWare.verifyAT,
-  validationReq(verifyPhoneSchema)
+  validationReq(verifyPhoneSchema),
+  shopController.verifyPhoneNumber
 )
 
 export default shopRouter
