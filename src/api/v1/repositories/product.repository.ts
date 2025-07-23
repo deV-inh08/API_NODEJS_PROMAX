@@ -2,11 +2,12 @@ import { Model } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IProduct } from '~/api/v1/types/product.type'
+import { CreateProductType } from '~/api/v1/validations/product.validation'
 
 export class ProductRepository extends BaseRepository {
   private models = new Map<string, Model<IProduct>>()
 
-  private async getProductModel() {
+  private async getProductModel(): Promise<Model<IProduct>> {
     const dbName = this.dbName
     if (!this.models.has(dbName)) {
       const connection = await this.getConnection()
@@ -17,8 +18,8 @@ export class ProductRepository extends BaseRepository {
   }
 
   // create Product
-  async createProduct(productData: IProduct) {
-    const ProductModel = await this.getProductModel()!
+  async createProduct(productData: CreateProductType) {
+    const ProductModel = await this.getProductModel()
     const product = new ProductModel(productData)
     return await product.save()
   }

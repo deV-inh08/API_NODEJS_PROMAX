@@ -37,6 +37,13 @@ export class ShopRepository extends BaseRepository {
     return await ShopModel.findById(shopId).lean()
   }
 
+  async findShopByUserId(userId: string): Promise<IShop | null> {
+    const ShopModel = await this.getShopModel()
+    return await ShopModel.findOne({
+      user_id: userId
+    }).lean()
+  }
+
   // update shop verify status
   async updateShopVerification(
     shopId: string,

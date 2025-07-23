@@ -12,8 +12,7 @@ import {
   ValidationError
 } from '~/api/v1/utils/response.util'
 import { shopRegistrationZodType, verifyEmailZodType, verifyPhoneZodType } from '~/api/v1/validations/shop.validation'
-import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
-import { IPendingShopRegistration, IShop } from '~/api/v1/types/shop.type'
+import { IPendingShopRegistration } from '~/api/v1/types/shop.type'
 import { EmailServices } from '~/api/v1/services/email.service'
 
 export class ShopServices {
@@ -157,7 +156,7 @@ export class ShopServices {
       throw new NotFoundError('User not found')
     }
 
-    console.log('firebaseIdToken', body.firebaseIdToken);
+    console.log('firebaseIdToken', body.firebaseIdToken)
 
     const firebaseResult = await FirebaseSerivices.verifyPhoneTokenId(body.firebaseIdToken, shop_phone)
     if (!firebaseResult.isValid) {
