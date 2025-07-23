@@ -9,8 +9,8 @@ export interface IProduct {
   product_price: number
   product_quantity: number
   product_type: 'Electronics' | 'Clothing' | 'Furniture' // more ....
-  product_shop: Types.ObjectId // trỏ tới id của shop nào có product này
-  product_attributes: IClothingAttributes | IElectronicsAttributes | IFurnitureAttributes
+  shop_id: Types.ObjectId // trỏ tới id của shop nào có product này
+  attributes_id: Types.ObjectId
   product_ratingsAverage?: number // 4.7/5 star
   product_ratingsCount?: number // Số lượng đánh giá: 120 reviews
   product_variations?: IProductVariation[]
@@ -64,10 +64,12 @@ export interface IClothingAttributes {
 
 export interface IClothing extends IClothingAttributes {
   _id: Types.ObjectId
+  product_id: Types.ObjectId
 }
 // VÍ DỤ CLOTHING THỰC TẾ:
 // const clothingExample = {
 //   _id: ObjectId("60d5ecb54b24b73b9c8d5678"),
+//  product_id: ObjectId("60d5ecb54b24b73b9c8d5678")
 //   brand: "Nike",
 //   size: "L" || ['L', 'X', 'M'],
 //   material: "100% Cotton",
@@ -85,10 +87,12 @@ export interface IElectronicsAttributes {
 }
 export interface IElectronics extends IElectronicsAttributes {
   _id: Types.ObjectId
+  product_id: Types.ObjectId
 }
 // VÍ DỤ ELECTRONICS THỰC TẾ:
 // const electronicsExample = {
 //   _id: ObjectId("60d5ecb54b24b73b9c8d5678"),
+// product_id: ObjectId("60d5ecb54b24b73b9c8d5678")
 //   brand: "Apple",
 //   model: "iPhone 15 Pro Max",
 //   warranty: "1 year limited warranty",
@@ -119,11 +123,13 @@ export interface IFurnitureAttributes {
 
 export interface IFurniture extends IFurnitureAttributes {
   _id: Types.ObjectId
+  product_id: Types.ObjectId
 }
 
 // VÍ DỤ FURNITURE THỰC TẾ:
 // const furnitureExample = {
 //   _id: ObjectId("60d5ecb54b24b73b9c8d5678"),
+// product_id: ObjectId("60d5ecb54b24b73b9c8d5678")
 //   brand: "IKEA",
 //   material: "Solid pine wood with clear lacquer finish",
 //   dimensions: {

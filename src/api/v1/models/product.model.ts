@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose'
-import { IClothing, IElectronics, IProduct } from '~/api/v1/types/product.type'
+import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
 
 export const productSchema = new Schema<IProduct>(
   {
@@ -8,7 +8,7 @@ export const productSchema = new Schema<IProduct>(
       required: [true, 'Product name is required'],
       trim: true,
       maxlength: [200, 'Productname cannot exeed 200 characters'],
-      index: 'text' // for search
+      index: 'text'
     },
 
     product_thumb: {
@@ -47,16 +47,13 @@ export const productSchema = new Schema<IProduct>(
       },
       index: true
     },
-    product_shop: {
+    shop_id: {
       type: Schema.Types.ObjectId,
       ref: 'Shop',
       required: [true, 'Product shop is required'],
       index: true
     },
-    product_attributes: {
-      type: Schema.Types.Mixed,
-      required: [true, 'Product attributes are required']
-    },
+    attributes_id: { type: Schema.Types.ObjectId, required: false, default: null },
     product_ratingsAverage: {
       type: Number,
       default: 0,
@@ -103,43 +100,70 @@ export const productSchema = new Schema<IProduct>(
     }
   },
   {
-    collection: 'Products',
+    collection: 'Product',
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
 )
 
-export const clothingSchema = new Schema<IClothing>({
-  brand: {
-    type: String,
-    required: true,
-    trim: true
+export const furnitureSchema = new Schema<IFurniture>(
+  {
+    product_id: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    brand: { type: String, required: true },
+    material: { type: String, required: true },
+    dimensions: {
+      length: { type: Number, required: true },
+      width: { type: Number, required: true },
+      height: { type: Number, required: true },
+      unit: { type: String, enum: ['cm', 'inch'], default: 'cm' },
+      weight: { type: Number, required: true }
+    }
   },
-  size: {
-    type: [String],
-    required: true,
-    uppercase: true
-  },
-  material: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  color: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  style: {
-    type: String,
-    required: true,
-    trim: true
+  {
+    collection: 'Furniture',
+    timestamps: true
   }
-})
+)
+
+export const clothingSchema = new Schema<IClothing>(
+  {
+    product_id: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    brand: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    size: {
+      type: [String],
+      required: true,
+      uppercase: true
+    },
+    material: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    color: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    style: {
+      type: String,
+      required: true,
+      trim: true
+    }
+  },
+  {
+    collection: 'Clothing',
+    timestamps: true
+  }
+)
 
 export const electronicSchema = new Schema<IElectronics>(
   {
+    product_id: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     brand: {
       type: String,
       required: true,
@@ -164,6 +188,7 @@ export const electronicSchema = new Schema<IElectronics>(
     }
   },
   {
+    collection: 'Electronic',
     timestamps: true
   }
 )

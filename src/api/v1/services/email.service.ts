@@ -32,10 +32,8 @@ export class EmailServices {
 
     try {
       await this.transporter.sendMail(mailOptions)
-      console.log('Send Email Success')
       return true
     } catch (error) {
-      console.log('Send Email error', error)
       return false
     }
   }

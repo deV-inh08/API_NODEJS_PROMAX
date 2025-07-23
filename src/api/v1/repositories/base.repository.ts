@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import envConfig from '~/api/v1/config/env.config'
 import dbManager from '~/api/v1/db/dbName.mongo'
 
 export abstract class BaseRepository {

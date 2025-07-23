@@ -34,7 +34,7 @@ const configSchemaEnv = z.object({
   EMAIL_APP_PASSWORD: z.string().default('email_app_password'),
   FIREBASE_PROJECT_ID: z.string().default('asdasdas'),
   FIREBASE_CLIENT_EMAIL: z.string().default('asdasdas'),
-  FIREBASE_PRIVATE_KEY: z.string().default('asdasdas'),
+  FIREBASE_PRIVATE_KEY: z.string().default('asdasdas')
 })
 
 // from schema -> object {isSuccess, data: {} }

@@ -188,12 +188,14 @@ export class ShopServices {
   private generateSessionId(userId: string): string {
     return `shop_${userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
+
   private generateSlug(name: string): string {
     return name
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
   }
+
   // ✅ Helper: Create shop khi cả 2 đều verified
   private async createVerifiedShop(pending: IPendingShopRegistration) {
     const shopData = {
@@ -223,7 +225,6 @@ export class ShopServices {
    */
   private normalizePhone(phone: string): string {
     const cleaned = phone.replace(/[^\d+]/g, '')
-
     if (cleaned.startsWith('0')) {
       return '+84' + cleaned.substring(1)
     } else if (cleaned.startsWith('84') && !cleaned.startsWith('+84')) {
@@ -231,7 +232,6 @@ export class ShopServices {
     } else if (!cleaned.startsWith('+')) {
       return '+84' + cleaned
     }
-
     return cleaned
   }
 

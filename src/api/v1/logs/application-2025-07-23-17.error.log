@@ -1,0 +1,6 @@
+2025-07-23 05:04:17.510 PM --- error --- undefined --- 	Create product failed
+2025-07-23 05:21:59.818 PM --- error --- undefined --- 	Access Token expired
+2025-07-23 05:22:14.400 PM --- error --- undefined --- 	Validation failed
+2025-07-23 05:24:09.690 PM --- error --- undefined --- 	Validation failed
+2025-07-23 05:31:09.336 PM --- error --- undefined --- 	Failed to create Electronics attributes: document must have an _id before saving
+2025-07-23 05:31:09.378 PM --- error --- undefined --- 	Create product failed

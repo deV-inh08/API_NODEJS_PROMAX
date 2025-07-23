@@ -1,44 +1,13 @@
 import z from 'zod'
 
-// // Create Product Interface (cho API input)
-// export interface ICreateProduct {
-//   product_name: string
-//   product_thumb: string
-//   product_description: string
-//   product_price: number
-//   product_quantity: number
-//   product_type: 'Electronics' | 'Clothing' | 'Furniture'
-//   product_attributes: IClothingAttributes | IElectronicsAttributes | IFurnitureAttributes
-//   isPublished?: boolean
-// }
-
-// // Type-safe discriminated unions cho từng loại sản phẩm
-// export interface ICreateElectronicsProduct extends Omit<ICreateProduct, 'product_type' | 'product_attributes'> {
-//   product_type: 'Electronics'
-//   product_attributes: IElectronicsAttributes
-// }
-
-// export interface ICreateClothingProduct extends Omit<ICreateProduct, 'product_type' | 'product_attributes'> {
-//   product_type: 'Clothing'
-//   product_attributes: IClothingAttributes
-// }
-
-// export interface ICreateFurnitureProduct extends Omit<ICreateProduct, 'product_type' | 'product_attributes'> {
-//   product_type: 'Furniture'
-//   product_attributes: IFurnitureAttributes
-// }
-
-// // Union type cho tất cả các loại create product
-// export type CreateProductInput = ICreateElectronicsProduct | ICreateClothingProduct | ICreateFurnitureProduct
-
 // Individual attribute schemas for each product type
 const electronicsAttributesSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
   model: z.string().min(1, 'Model is required'),
   warranty: z.string().regex(/^(\d+)\s+(month|months|year|years)$/i, 'Invalid warranty format'),
-  // specifications: z
-  //   .record(z.string())
-  //   .refine((specs) => Object.keys(specs).length > 0, 'At least one specification required')
+  specifications: z
+    .record(z.string())
+    .refine((specs) => Object.keys(specs).length > 0, 'At least one specification required')
 })
 
 const clothingAttributesSchema = z.object({
@@ -71,29 +40,10 @@ export const createProductSchema = z.object({
       product_price: z.number().positive().max(999999999),
       product_quantity: z.number().int().min(0),
       product_type: z.enum(['Electronics', 'Clothing', 'Furniture']),
-
-      // 🎯 KEY POINT: z.any() làm placeholder
-      product_attributes: z.any(),
-
-      isPublished: z.boolean().default(false)
+      isPublished: z.boolean().default(false),
+      product_attributes: z.record(z.any()) // ✅ Accept any object
     })
-    // 🎯 Discriminated union override z.any() thành specific schema
-    .and(
-      z.discriminatedUnion('product_type', [
-        z.object({
-          product_type: z.literal('Electronics'),
-          product_attributes: electronicsAttributesSchema
-        }),
-        z.object({
-          product_type: z.literal('Clothing'),
-          product_attributes: clothingAttributesSchema
-        }),
-        z.object({
-          product_type: z.literal('Furniture'),
-          product_attributes: furnitureAttributesSchema
-        })
-      ])
-    )
+
 })
 
 // ========== TYPE EXPORTS ==========

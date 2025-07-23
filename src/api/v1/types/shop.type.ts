@@ -28,18 +28,6 @@ export interface IShop {
   shop_ratings?: number
   total_products?: number
   total_sales?: number
-  // shop_email_OTP: {
-  //   hashOTP: string
-  //   expired: Date
-  //   createAt: Date
-  //   verify: boolean
-  // }
-  // shop_phone_OTP: {
-  //   hashOTP: string,
-  //   expired: Date,
-  //   createAt: Date
-  //   verify: boolean
-  // }
   is_verify_phone: boolean
   is_verify_email: boolean
   is_verified: boolean
