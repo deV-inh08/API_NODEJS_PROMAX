@@ -35,10 +35,6 @@ const configSchemaEnv = z.object({
   FIREBASE_PROJECT_ID: z.string().default('asdasdas'),
   FIREBASE_CLIENT_EMAIL: z.string().default('asdasdas'),
   FIREBASE_PRIVATE_KEY: z.string().default('asdasdas'),
-  TWILIO_ACCOUNT_SID: z.string().default('abcdddd'),
-  TWILIO_AUTH_TOKEN: z.string().default('hahahha'),
-  TWILIO_PHONE_NUMBER: z.string().default('000000'),
-  TWILIO_SERVICES_SID: z.string().default('jakasldsal')
 })
 
 // from schema -> object {isSuccess, data: {} }
