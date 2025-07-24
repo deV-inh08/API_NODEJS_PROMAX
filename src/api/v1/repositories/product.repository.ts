@@ -1,8 +1,16 @@
 import { Model } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
-import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
-import { CreateProductType } from '~/api/v1/validations/product.validation'
+import {
+  IClothing,
+  IClothingAttributes,
+  IElectronics,
+  IElectronicsAttributes,
+  IFurniture,
+  IFurnitureAttributes,
+  IProduct
+} from '~/api/v1/types/product.type'
+import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
@@ -72,7 +80,7 @@ export class ProductRepository extends BaseRepository {
   }
 
   // create Product
-  async createProduct(productData: Omit<CreateProductType, 'product_attributes'>) {
+  async createProduct(productData: BaseProductType) {
     const ProductModel = await this.getProductModel()
     const product = new ProductModel(productData)
     return await product.save()
@@ -80,24 +88,19 @@ export class ProductRepository extends BaseRepository {
 
   async createProductAttributes(
     productType: string,
-    attributeData: any
+    attributeData: IElectronicsAttributes | IClothingAttributes | IFurnitureAttributes
   ): Promise<IElectronics | IClothing | IFurniture> {
     try {
       const AttributeModel = await this.getAttributeModel(productType)
       const attributes = new AttributeModel(attributeData)
       const savedAttributes = await attributes.save()
-
-      console.log(`✅ ${productType} attributes created: ${savedAttributes._id}`)
       return savedAttributes
     } catch (error: any) {
-      console.error(`❌ Error creating ${productType} attributes:`, error)
-
       // Handle validation errors
       if (error.name === 'ValidationError') {
         const validationErrors = Object.values(error.errors).map((err: any) => err.message)
         throw new BadRequestError(`Validation failed: ${validationErrors.join(', ')}`)
       }
-
       throw new BadRequestError(`Failed to create ${productType} attributes: ${error.message}`)
     }
   }
@@ -120,8 +123,6 @@ export class ProductRepository extends BaseRepository {
       if (result.modifiedCount === 0) {
         throw new BadRequestError('Failed to link product with attributes')
       }
-
-      console.log(`✅ Product ${productId} linked with attributes ${attributesId}`)
     } catch (error: any) {
       console.error('❌ Error linking product with attributes:', error)
       throw error
@@ -162,5 +163,101 @@ export class ProductRepository extends BaseRepository {
       console.error(`❌ Error deleting ${productType} attributes ${attributesId}:`, error)
       throw new BadRequestError(`Failed to delete attributes: ${error.message}`)
     }
+  }
+
+  async getAllDraftsForShop(userId: string) {
+    const options = { limit: 50, skip: 0 }
+    const ProductModel = await this.getProductModel()
+
+    const [products, totalCount] = await Promise.all([
+      ProductModel.aggregate([
+        {
+          $lookup: {
+            from: 'shops', // ← TÌM TRONG shops collection
+            localField: 'shop_id', // Field trong products
+            foreignField: '_id', // ← MATCH với field _id trong shops
+            as: 'shop_infor' // ← LƯU KẾT QUẢ VÀO shop_info
+          }
+        },
+        {
+          $match: {
+            'shop_infor.user_id': convertStringToObjectId(userId),
+            'shop_infor.status': 'active',
+            isDraft: true
+          }
+        },
+        {
+          $sort: {
+            createdAt: -1
+          },
+        },
+        {
+          $skip: options.skip
+        },
+        { $limit: options.limit },
+        {
+          $project: {
+            // ✅ Product fields cần thiết
+            _id: 1,
+            product_name: 1,
+            product_thumb: 1,
+            product_description: 1,
+            product_price: 1,
+            product_quantity: 1,
+            product_type: 1,
+            product_slug: 1,
+            isPublished: 1,
+            isDraft: 1,
+            createdAt: 1,
+            updatedAt: 1,
+
+            // ✅ Shop fields CẦN THIẾT THÔI
+            'shop_info._id': 1,
+            'shop_info.shop_name': 1,
+            'shop_info.shop_slug': 1
+
+          }
+        }
+      ]),
+      this.countShopDraftProducts(userId)
+    ])
+
+    console.log('products', products)
+
+    return {
+      products,
+      pagination: {
+        skip: options.skip,
+        limit: options.limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / options.limit)
+      }
+    }
+  }
+
+  async countShopDraftProducts(userId: string): Promise<number> {
+    const ProductModel = await this.getProductModel()
+
+    const result = await ProductModel.aggregate([
+      {
+        $lookup: {
+          from: 'shops',
+          localField: 'shop_id',
+          foreignField: '_id',
+          as: 'shop_infor'
+        },
+      },
+      {
+        $match: {
+          'shop_infor.user_id': convertStringToObjectId(userId),
+          'shop_infor.status': 'active',
+          isDraft: true
+        },
+      },
+      {
+        $count: 'total'
+      }
+    ])
+    return result[0]?.total || 0
   }
 }

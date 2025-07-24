@@ -15,7 +15,7 @@ export interface IProduct {
   product_ratingsCount?: number // Số lượng đánh giá: 120 reviews
   product_variations?: IProductVariation[]
   product_slug: string
-  isActive: boolean
+  isDraft: boolean
   isPublished: boolean
   createdAt: Date
   updatedAt: Date
@@ -58,7 +58,7 @@ export interface IClothingAttributes {
   brand: string
   size: string[]
   material: string
-  color?: string
+  color?: string[]
   style?: string
 }
 

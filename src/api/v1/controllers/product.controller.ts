@@ -16,14 +16,25 @@ export class ProductController {
       const decodeToken = req.decoded_accessToken!
       const userId = decodeToken.id
 
-      console.log('userId', userId)
-
       if (!userId) {
         throw new UnauthorizedError('User not authenticated')
       }
 
       const result = await this.productService.createProduct(body, userId)
-      console.log('result', result)
+      SuccessResponse.created(result, 'Product created succesfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  getAllDraftsForShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodeToken = req.decoded_accessToken!
+      const userId = decodeToken.id
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated')
+      }
+      const result = await this.productService.getAllDraftsForShop(userId)
       SuccessResponse.created(result, 'Product created succesfully').send(res)
     } catch (error) {
       next(error)

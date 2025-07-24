@@ -59,7 +59,7 @@ export const productSchema = new Schema<IProduct>(
       default: 0,
       min: [0, 'Rating cannot be less than 0'],
       max: [5, 'Rating cannot be more than 5'],
-      set: (v: number) => Math.round(v * 10) / 10 // Round to 1 decimal
+      set: (value: number) => Math.round(value * 10) / 10 // Round to 1 decimal
     },
     product_ratingsCount: {
       type: Number,
@@ -87,11 +87,13 @@ export const productSchema = new Schema<IProduct>(
       unique: true,
       index: true
     },
+
     // Status fields for better product management
-    isActive: {
+    isDraft: {
       type: Boolean,
       default: true,
-      index: true
+      index: true,
+      select: false // When we query (document.findOne) => attribute 'select' display none if value is 'false'
     },
     isPublished: {
       type: Boolean,
@@ -136,8 +138,7 @@ export const clothingSchema = new Schema<IClothing>(
     },
     size: {
       type: [String],
-      required: true,
-      uppercase: true
+      required: true
     },
     material: {
       type: String,

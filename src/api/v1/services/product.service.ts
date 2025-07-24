@@ -1,203 +1,15 @@
+import { Types } from 'mongoose'
 import { isClothingProduct, isElectronicsProduct, isFurnitureProduct } from '~/api/v1/helpers/product.helper'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
-import {
-  IClothing,
-  IClothingAttributes,
-  IElectronics,
-  IElectronicsAttributes,
-  IFurniture,
-  IFurnitureAttributes,
-  IProduct,
-  IProductVariation
-} from '~/api/v1/types/product.type'
+import { IClothingAttributes, IElectronicsAttributes, IFurnitureAttributes } from '~/api/v1/types/product.type'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
-import { CreateProductType } from '~/api/v1/validations/product.validation'
-
-// class ProductFactory {
-//   static async createProduct(productData: CreateProductType, shopId: string) {
-//     if (isElectronicsProduct(productData)) {
-//       return this.createElectronicsProduct(productData, shopId)
-//     } else if (isClothingProduct(productData)) {
-//       return this.createClothingProduct(productData, shopId)
-//     } else if (isFurnitureProduct(productData)) {
-//       return this.createFunitureProduct(productData, shopId)
-//     } else {
-//       throw new ValidationError(`Unsupported product type: ${productData}`)
-//     }
-//   }
-
-//   private static createElectronicsProduct(data: CreateProductType & { product_type: 'Electronics' }, shopId: string) {
-//     const electronicAttribute = this.validateAttributeElectronicProduct(data.product_attributes)
-//     return {
-//       ...data,
-//       shop_id: convertStringToObjectId(shopId),
-//       product_attributes: electronicAttribute,
-//       product_slug: this.generateSlug(data.product_name),
-//       isActive: true,
-//       isPublished: data.isPublished || false,
-//     }
-//   }
-
-//   private static createClothingProduct(data: CreateProductType & { product_type: 'Clothing' }, shopId: string) {
-//     const clothingAttribute = this.validateAttributeClothingProduct(data.product_attributes)
-//     return {
-//       ...data,
-//       shop_id: convertStringToObjectId(shopId),
-//       product_attributes: clothingAttribute,
-//       product_slug: this.generateSlug(data.product_name),
-//       isActive: true,
-//       isPublished: data.isPublished || false,
-//     }
-//   }
-
-//   private static createFunitureProduct(data: CreateProductType & { product_type: 'Furniture' }, shopId: string) {
-//     const funitureAttribute = this.validateAttributeFurnitureProduct(data.product_attributes)
-//     return {
-//       ...data,
-//       shop_id: convertStringToObjectId(shopId),
-//       product_attributes: funitureAttribute,
-//       product_slug: this.generateSlug(data.product_name),
-//       isActive: true,
-//       isPublished: data.isPublished || false
-//     }
-//   }
-
-//   private static validateAttributeClothingProduct(attributes: IClothingAttributes) {
-//     if (!attributes.size || attributes.size.length === 0) {
-//       throw new ValidationError('At least one size is required for clothing')
-//     }
-
-//     // không có chất liệu
-//     if (!attributes.material) {
-//       throw new ValidationError('Material is required for clothing')
-//     }
-
-//     return {
-//       brand: attributes.brand.trim(),
-//       size: attributes.size.map((s: string) => s.toUpperCase()),
-//       material: attributes.material.trim(),
-//       color: attributes.color?.trim(),
-//       style: attributes.style?.trim()
-//     }
-//   }
-
-//   private static validateAttributeElectronicProduct(attributes: IElectronicsAttributes) {
-//     if (!attributes.brand) throw new ValidationError('Brand is required for electronics')
-//     if (!attributes.model) throw new ValidationError('Model is required for electronics')
-//     if (!attributes.warranty) throw new ValidationError('Warranty is required for electronics')
-//     // Validate warranty format (e.g., "12 months", "2 years")
-//     const warrantyRegex = /^(\d+)\s+(month|months|year|years)$/i
-//     if (!warrantyRegex.test(attributes.warranty)) {
-//       throw new ValidationError('Invalid warranty format. Use "12 months" or "2 years"')
-//     }
-//     return {
-//       brand: attributes.brand.trim(),
-//       model: attributes.model.trim(),
-//       warranty: attributes.warranty.trim(),
-//       specifications: attributes.specifications
-//     }
-//   }
-//   private static validateAttributeFurnitureProduct(attributes: IFurnitureAttributes) {
-//     if (!attributes.dimensions) {
-//       throw new ValidationError('Dimensions are required for furniture')
-//     }
-//     const { height, length, width, weight, unit } = attributes.dimensions
-//     if (!length || !width || !height || !weight) {
-//       throw new ValidationError('Complete dimensions (L×W×H, weight) required for furniture')
-//     }
-//     // Validate reasonable dimensions (not too big/small)
-//     if (length > 500 || width > 500 || height > 500) {
-//       throw new ValidationError('Furniture dimensions seem too large (max 500cm)')
-//     }
-//     return {
-//       brand: attributes.brand.trim(),
-//       material: attributes.material.trim(),
-//       dimensions: {
-//         length: length,
-//         width: width,
-//         height: height,
-//         unit: unit || 'cm',
-//         weight: weight
-//       }
-//     }
-//   }
-
-//   private static generateSlug(productName: string): string {
-//     return (
-//       productName
-//         .toLowerCase()
-//         .replace(/[^a-z0-9\s]/g, '')
-//         .replace(/\s+/g, '-')
-//         .replace(/-+/g, '-')
-//         .replace(/^-|-$/g, '') +
-//       '-' +
-//       Date.now()
-//     )
-//   }
-// }
-
-// export class ProductService {
-//   private productRepository: ProductRepository
-//   private shopRepository: ShopRepository
-
-//   constructor() {
-//     this.productRepository = new ProductRepository()
-//     this.shopRepository = new ShopRepository()
-//   }
-
-//   createProduct = async (productData: CreateProductType, userId: string) => {
-//     try {
-//       const shop = await this.validateSellerShop(userId)
-
-//       const productEntity = await ProductFactory.createProduct(productData, shop._id.toString())
-//       if (!productEntity) {
-//         throw new BadRequestError('Do not create product')
-//       }
-//       // save to DB
-//       const saveProduct = await this.productRepository.createProduct(productEntity)
-//       return {
-//         id: saveProduct._id,
-//         product_name: saveProduct.product_name,
-//         product_type: saveProduct.product_type,
-//         product_slug: saveProduct.product_slug,
-//         product_variations: saveProduct.product_variations,
-//         isPublished: saveProduct.isPublished,
-//         createdAt: saveProduct.createdAt
-//       }
-//     } catch (error) {
-//       // Re-throw known errors
-//       if (error instanceof BadRequestError) {
-//         throw error
-//       }
-//       // Wrap unknown errors
-//       throw new BadRequestError('Failed to create product', error)
-//     }
-//   }
-
-//   async validateSellerShop(userId: string) {
-//     // validate shop
-//     const shop = await this.shopRepository.findShopByUserId(userId)
-
-//     if (!shop) {
-//       throw new NotFoundError('Shop not found. Please register as a seller')
-//     }
-
-//     if (!shop.is_verified) {
-//       throw new UnauthorizedError('Shop must be verified to create products. Please complete verification process.')
-//     }
-
-//     if (shop.status !== 'active') {
-//       throw new UnauthorizedError(`Shop is ${shop.status}. Only active shops can create products.`)
-//     }
-//     return shop
-//   }
-// }
-
+import { CreateProductType, BaseProductType } from '~/api/v1/validations/product.validation'
 
 class ProductFactory {
-  static createBaseProduct(productData: CreateProductType, shopId: string) {
+  // filter product_attributes
+  static createBaseProduct(productData: CreateProductType, shopId: string): BaseProductType {
     return {
       product_name: productData.product_name.trim(),
       product_thumb: productData.product_thumb,
@@ -207,24 +19,24 @@ class ProductFactory {
       product_type: productData.product_type,
       shop_id: convertStringToObjectId(shopId),
       product_slug: this.generateSlug(productData.product_name),
-      isActive: true,
-      isPublished: productData.isPublished || false,
-
-      // ❌ KHÔNG CÓ attributes_id - sẽ update sau
+      isDraft: true,
+      isPublished: productData.isPublished || false
     }
   }
 
   private static generateSlug(productName: string): string {
-    return productName
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') +
-      '-' + Date.now()
+    return (
+      productName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') +
+      '-' +
+      Date.now()
+    )
   }
 }
-
 
 class AttributeFactory {
   static createAttributes(productData: CreateProductType, productId: string) {
@@ -239,7 +51,7 @@ class AttributeFactory {
     }
   }
 
-  private static createElectronicsAttributes(attributes: any, productId: string) {
+  private static createElectronicsAttributes(attributes: IElectronicsAttributes, productId: string) {
     const validatedAttrs = this.validateElectronicsAttributes(attributes)
     return {
       product_id: convertStringToObjectId(productId),
@@ -250,7 +62,7 @@ class AttributeFactory {
     }
   }
 
-  private static createClothingAttributes(attributes: any, productId: string) {
+  private static createClothingAttributes(attributes: IClothingAttributes, productId: string) {
     const validatedAttrs = this.validateClothingAttributes(attributes)
     return {
       product_id: convertStringToObjectId(productId),
@@ -262,7 +74,7 @@ class AttributeFactory {
     }
   }
 
-  private static createFurnitureAttributes(attributes: any, productId: string) {
+  private static createFurnitureAttributes(attributes: IFurnitureAttributes, productId: string) {
     const validatedAttrs = this.validateFurnitureAttributes(attributes)
 
     return {
@@ -273,7 +85,7 @@ class AttributeFactory {
     }
   }
 
-  private static validateElectronicsAttributes(attributes: any) {
+  private static validateElectronicsAttributes(attributes: IElectronicsAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for electronics')
     }
@@ -306,7 +118,7 @@ class AttributeFactory {
     }
   }
 
-  private static validateClothingAttributes(attributes: any) {
+  private static validateClothingAttributes(attributes: IClothingAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for clothing')
     }
@@ -317,10 +129,11 @@ class AttributeFactory {
       throw new ValidationError('At least one size is required for clothing')
     }
 
-    const validSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36', '38', '40']
-    const invalidSizes = attributes.size.filter((size: string) =>
-      !validSizes.includes(size.toUpperCase())
-    )
+    const _CLOTHING_SIZE = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36', '38', '40']
+    const _SHOES_SIZE = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
+
+    const validSizes = [..._CLOTHING_SIZE, ..._SHOES_SIZE]
+    const invalidSizes = attributes.size.filter((size: string) => !validSizes.includes(size.toUpperCase()))
 
     if (invalidSizes.length > 0) {
       throw new ValidationError(`Invalid sizes: ${invalidSizes.join(', ')}`)
@@ -330,12 +143,12 @@ class AttributeFactory {
       brand: attributes.brand.trim(),
       size: attributes.size.map((s: string) => s.toUpperCase()),
       material: attributes.material.trim(),
-      color: attributes.color?.trim() || '',
+      color: attributes.color || [],
       style: attributes.style?.trim() || ''
     }
   }
 
-  private static validateFurnitureAttributes(attributes: any) {
+  private static validateFurnitureAttributes(attributes: IFurnitureAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for furniture')
     }
@@ -378,7 +191,6 @@ class AttributeFactory {
   }
 }
 
-
 export class ProductService {
   private productRepository: ProductRepository
   private shopRepository: ShopRepository
@@ -393,18 +205,9 @@ export class ProductService {
       // Step 1: Validate seller shop
       const shop = await this.validateSellerShop(userId)
 
-      // Step 2: Business validations
-
-      // Step 3: Check product limits
-
-      // Step 4: Check duplicate product name
-
-      // Step 5: Create product sequentially (no transaction)
+      // Step 2: Create product sequentially (no transaction)
       const result = await this.createProductSequential(productData, shop._id.toString())
-
-      console.log('result', result)
-
-
+      return result
     } catch (error) {
       throw new BadRequestError('Create product failed')
     }
@@ -429,9 +232,8 @@ export class ProductService {
     return shop
   }
 
-
   private async createProductSequential(productData: CreateProductType, shopId: string) {
-    let createdProduct = null
+    let createdProduct
     let createdAttributes
     try {
       // Step 1: Create base product first
@@ -440,20 +242,13 @@ export class ProductService {
 
       // Step 2: Create specific attributes
       const attributeData = AttributeFactory.createAttributes(productData, createdProduct._id.toString())
-      createdAttributes = await this.productRepository.createProductAttributes(
-        productData.product_type,
-        attributeData
-      )
-
-      console.log('✅ Attributes created:', createdAttributes._id)
+      createdAttributes = await this.productRepository.createProductAttributes(productData.product_type, attributeData)
 
       // Step 3: Update product with attributes_id
       await this.productRepository.updateProductAttributesId(
         createdProduct._id.toString(),
         createdAttributes._id.toString()
       )
-
-      console.log('✅ Product linked with attributes')
 
       return {
         product: {
@@ -462,7 +257,6 @@ export class ProductService {
         },
         attributes: createdAttributes
       }
-
     } catch (error) {
       // 🔥 MANUAL CLEANUP nếu có lỗi
       console.error('❌ Error during product creation:', error)
@@ -474,7 +268,6 @@ export class ProductService {
             productData.product_type,
             createdAttributes._id.toString()
           )
-          console.log('🧹 Cleaned up orphaned attributes')
         } catch (cleanupError) {
           console.error('⚠️ Failed to cleanup attributes:', cleanupError)
         }
@@ -490,6 +283,15 @@ export class ProductService {
       }
 
       throw error
+    }
+  }
+
+  async getAllDraftsForShop(userId: string) {
+    try {
+      const result = this.productRepository.getAllDraftsForShop(userId)
+      return result
+    } catch (error) {
+      throw new BadRequestError('Get all Draft is failed')
     }
   }
 }

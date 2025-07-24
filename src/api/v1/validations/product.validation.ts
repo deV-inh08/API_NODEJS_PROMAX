@@ -1,3 +1,4 @@
+import { Types } from 'mongoose'
 import z from 'zod'
 
 // Individual attribute schemas for each product type
@@ -14,7 +15,7 @@ const clothingAttributesSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
   size: z.array(z.string()).min(1, 'At least one size required'),
   material: z.string().min(1, 'Material is required'),
-  color: z.string().optional(),
+  color: z.array(z.string()).optional(),
   style: z.string().optional()
 })
 
@@ -32,22 +33,25 @@ const furnitureAttributesSchema = z.object({
 
 // 🎯 Main validation schema với discriminated union
 export const createProductSchema = z.object({
-  body: z
-    .object({
-      product_name: z.string().min(3).max(200).trim(),
-      product_thumb: z.string().url(),
-      product_description: z.string().min(10).max(2000).trim(),
-      product_price: z.number().positive().max(999999999),
-      product_quantity: z.number().int().min(0),
-      product_type: z.enum(['Electronics', 'Clothing', 'Furniture']),
-      isPublished: z.boolean().default(false),
-      product_attributes: z.record(z.any()) // ✅ Accept any object
-    })
-
+  body: z.object({
+    product_name: z.string().min(3).max(200).trim(),
+    product_thumb: z.string().url(),
+    product_description: z.string().min(10).max(2000).trim(),
+    product_price: z.number().positive().max(999999999),
+    product_quantity: z.number().int().min(0),
+    product_type: z.enum(['Electronics', 'Clothing', 'Furniture']),
+    isPublished: z.boolean().default(false),
+    isDraft: z.boolean().default(true),
+    product_attributes: z.record(z.any()) // ✅ Accept any object
+  })
 })
 
 // ========== TYPE EXPORTS ==========
 export type CreateProductType = z.infer<typeof createProductSchema>['body']
+export type BaseProductType = Omit<CreateProductType, 'product_attributes'> & {
+  shop_id: Types.ObjectId
+  product_slug: string
+}
 
 // Type-safe attribute extractors
 export type ElectronicsAttributes = z.infer<typeof electronicsAttributesSchema>

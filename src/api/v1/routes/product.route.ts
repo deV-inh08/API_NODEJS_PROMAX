@@ -14,3 +14,5 @@ productRouter.post(
   validationReq(createProductSchema),
   productController.createProduct
 )
+
+productRouter.get('/all-drafts', authMiddleware.verifyAT, productController.getAllDraftsForShop)
