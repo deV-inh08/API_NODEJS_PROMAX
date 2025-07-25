@@ -105,5 +105,4 @@ export class ShopRepository extends BaseRepository {
       }
     )
   }
-
 }

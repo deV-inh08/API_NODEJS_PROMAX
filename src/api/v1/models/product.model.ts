@@ -24,7 +24,8 @@ export const productSchema = new Schema<IProduct>(
     product_description: {
       type: String,
       required: [true, 'Product description is required'],
-      maxlength: [2000, 'Description cannot exceed 2000 characters']
+      maxlength: [2000, 'Description cannot exceed 2000 characters'],
+      index: 'text'
     },
     product_price: {
       type: Number,
@@ -106,6 +107,25 @@ export const productSchema = new Schema<IProduct>(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
+  }
+)
+
+productSchema.index({
+  isPublished: 1,
+  isDraft: 1
+})
+
+productSchema.index(
+  {
+    product_name: 'text',
+    product_description: 'text'
+  },
+  {
+    weights: {
+      product_name: 10,
+      product_description: 5
+    },
+    name: 'product_text_search'
   }
 )
 

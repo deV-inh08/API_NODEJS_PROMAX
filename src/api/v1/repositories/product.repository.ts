@@ -348,15 +348,18 @@ export class ProductRepository extends BaseRepository {
 
   async updatePublishProductByShop(productId: string, shop_id: string) {
     const ProductModel = await this.getProductModel()
-    const result = await ProductModel.updateOne({
-      _id: convertStringToObjectId(productId),
-      shop_id: shop_id,
-      isDraft: true
-    }, {
-      isDraft: false,
-      isPublished: true,
-      updatedAt: new Date()
-    })
+    const result = await ProductModel.updateOne(
+      {
+        _id: convertStringToObjectId(productId),
+        shop_id: shop_id,
+        isDraft: true
+      },
+      {
+        isDraft: false,
+        isPublished: true,
+        updatedAt: new Date()
+      }
+    )
 
     // 0: don't update | 1: updated
     if (!result.modifiedCount) {
@@ -370,17 +373,19 @@ export class ProductRepository extends BaseRepository {
 
   async updateUnPublishedProductForShop(productId: string, shop_id: string) {
     const ProductModel = await this.getProductModel()
-    const result = await ProductModel.updateOne({
-      _id: convertStringToObjectId(productId),
-      shop_id: shop_id,
-      isPublished: true
-    }, {
-      isDraft: true,
-      isPublished: false,
-      updatedAt: new Date()
-    })
+    const result = await ProductModel.updateOne(
+      {
+        _id: convertStringToObjectId(productId),
+        shop_id: shop_id,
+        isPublished: true
+      },
+      {
+        isDraft: true,
+        isPublished: false,
+        updatedAt: new Date()
+      }
+    )
 
-    console.log('result', 'result');
     // 0: don't update | 1: updated
     if (!result.modifiedCount) {
       throw new NotFoundError('Product not found or already published')
@@ -388,6 +393,51 @@ export class ProductRepository extends BaseRepository {
 
     return {
       result: result.matchedCount
+    }
+  }
+
+  async searchProducts(params: { query: string; category?: string; page: number; limit: number }) {
+    const ProductModel = await this.getProductModel()
+    // ✅ BUILD SEARCH QUERY
+    // const searchQuery: {
+    //   product_type?: string
+    //   isPublished: boolean
+    //   isDraft: boolean
+    //   $text: {
+    //     $search: string
+    //     $caseSensitive: boolean
+    //   }
+    // } = {
+    //   isPublished: true,
+    //   isDraft: false,
+    //   $text: {
+    //     $search: params.query,
+    //     $caseSensitive: false
+    //   }
+    // }
+    // // ✅ ADD FILTERS
+    // if (params.category) {
+    //   searchQuery.product_type = params.category
+    // }
+    const products = await ProductModel.find(
+      {
+        isPublished: true,
+        $text: {
+          $search: params.query
+        }
+      }, {
+      score: { $meta: 'textScore' }
+    })
+      .sort({ score: { $meta: 'textScore' } }) // Sort by relevance
+      .lean()
+
+    return {
+      products,
+      searchQuery: params.query,
+      pagination: {
+        page: params.page,
+        limit: params.limit
+      }
     }
   }
 }

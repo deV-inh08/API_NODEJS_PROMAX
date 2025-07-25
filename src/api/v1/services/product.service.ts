@@ -327,4 +327,18 @@ export class ProductService {
       throw new BadRequestError('Published product is failed')
     }
   }
+
+  async searchProducts(searchParams: {
+    query: string;
+    category?: string;
+    page: number;
+    limit: number;
+  }) {
+    try {
+      const result = await this.productRepository.searchProducts(searchParams)
+      return result
+    } catch (error) {
+      throw new BadRequestError('Search failed')
+    }
+  }
 }

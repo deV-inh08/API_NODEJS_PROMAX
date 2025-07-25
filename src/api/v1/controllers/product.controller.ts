@@ -88,4 +88,28 @@ export class ProductController {
       next(error)
     }
   }
+
+  searchProducts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const searchParams = {
+        query: req.query.q as string,
+        category: req.query.category as string,
+        page: Number(req.query.page) || 1,
+        limit: Number(req.query.page) || 20
+      }
+
+      console.log(searchParams.query);
+      // Validate search query
+      if (!searchParams.query || searchParams.query.trim().length < 2) {
+        return SuccessResponse.ok(
+          { products: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+          'Search query too short'
+        ).send(res)
+      }
+      const result = await this.productService.searchProducts(searchParams)
+      SuccessResponse.ok(result, 'Search completed successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
