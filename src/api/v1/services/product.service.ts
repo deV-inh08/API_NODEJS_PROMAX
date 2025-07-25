@@ -1,4 +1,5 @@
 import { Types } from 'mongoose'
+import { resourceLimits } from 'worker_threads'
 import { isClothingProduct, isElectronicsProduct, isFurnitureProduct } from '~/api/v1/helpers/product.helper'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
@@ -292,5 +293,14 @@ export class ProductService {
     }
   }
 
-  async publishProductByShop() {}
+  async getAllPublishedForShop(userId: string) {
+    try {
+      const result = this.productRepository.getAllPublishedForShop(userId)
+      return result
+    } catch (error) {
+      throw new BadRequestError('Get all Draft is failed')
+    }
+  }
+
+  async publishProductByShop() { }
 }

@@ -146,7 +146,7 @@ export const clothingSchema = new Schema<IClothing>(
       trim: true
     },
     color: {
-      type: String,
+      type: [String],
       required: true,
       trim: true
     },

@@ -16,3 +16,5 @@ productRouter.post(
 )
 
 productRouter.get('/all-drafts', authMiddleware.verifyAT, productController.getAllDraftsForShop)
+
+productRouter.get('/all-published', authMiddleware.verifyAT, productController.getAllPublishedForShop)

@@ -214,7 +214,73 @@ export class ProductRepository extends BaseRepository {
       this.countShopDraftProducts(userId)
     ])
 
-    console.log('products', products)
+
+    return {
+      products,
+      pagination: {
+        skip: options.skip,
+        limit: options.limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / options.limit)
+      }
+    }
+  }
+
+  async getAllPublishedForShop(userId: string) {
+    const options = { limit: 50, skip: 0 }
+    const ProductModel = await this.getProductModel()
+
+    const [products, totalCount] = await Promise.all([
+      ProductModel.aggregate([
+        {
+          $lookup: {
+            from: 'shops', // ← TÌM TRONG shops collection
+            localField: 'shop_id', // Field trong products
+            foreignField: '_id', // ← MATCH với field _id trong shops
+            as: 'shop_infor' // ← LƯU KẾT QUẢ VÀO shop_info
+          }
+        },
+        {
+          $match: {
+            'shop_infor.user_id': convertStringToObjectId(userId),
+            'shop_infor.status': 'active',
+            isPublished: true
+          }
+        },
+        {
+          $sort: {
+            createdAt: -1
+          }
+        },
+        {
+          $skip: options.skip
+        },
+        { $limit: options.limit },
+        {
+          $project: {
+            // ✅ Product fields cần thiết
+            _id: 1,
+            product_name: 1,
+            product_thumb: 1,
+            product_description: 1,
+            product_price: 1,
+            product_quantity: 1,
+            product_type: 1,
+            product_slug: 1,
+            isPublished: 1,
+            isDraft: 1,
+            createdAt: 1,
+            updatedAt: 1,
+
+            // ✅ Shop fields CẦN THIẾT THÔI
+            'shop_info._id': 1,
+            'shop_info.shop_name': 1,
+            'shop_info.shop_slug': 1
+          }
+        }
+      ]),
+      this.countShopPublishedProducts(userId)
+    ])
 
     return {
       products,
@@ -246,6 +312,32 @@ export class ProductRepository extends BaseRepository {
           'shop_infor.user_id': convertStringToObjectId(userId),
           'shop_infor.status': 'active',
           isDraft: true
+        }
+      },
+      {
+        $count: 'total'
+      }
+    ])
+    return result[0]?.total || 0
+  }
+
+  async countShopPublishedProducts(userId: string): Promise<number> {
+    const ProductModel = await this.getProductModel()
+
+    const result = await ProductModel.aggregate([
+      {
+        $lookup: {
+          from: 'shops',
+          localField: 'shop_id',
+          foreignField: '_id',
+          as: 'shop_infor'
+        }
+      },
+      {
+        $match: {
+          'shop_infor.user_id': convertStringToObjectId(userId),
+          'shop_infor.status': 'active',
+          isPublished: true
         }
       },
       {

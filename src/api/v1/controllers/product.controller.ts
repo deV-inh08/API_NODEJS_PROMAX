@@ -35,7 +35,18 @@ export class ProductController {
         throw new UnauthorizedError('User not authenticated')
       }
       const result = await this.productService.getAllDraftsForShop(userId)
-      SuccessResponse.created(result, 'Product created succesfully').send(res)
+      SuccessResponse.ok(result, 'Get all drafts succesfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  getAllPublishedForShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken!
+      const user_id = decodedAT.id
+      const result = await this.productService.getAllPublishedForShop(user_id)
+      SuccessResponse.ok(result, 'Get all published product succesfully').send(res)
     } catch (error) {
       next(error)
     }
