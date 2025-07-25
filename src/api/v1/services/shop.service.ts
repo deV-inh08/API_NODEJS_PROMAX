@@ -156,8 +156,6 @@ export class ShopServices {
       throw new NotFoundError('User not found')
     }
 
-    console.log('firebaseIdToken', body.firebaseIdToken)
-
     const firebaseResult = await FirebaseSerivices.verifyPhoneTokenId(body.firebaseIdToken, shop_phone)
     if (!firebaseResult.isValid) {
       throw new UnauthorizedError('Phone verification failed')

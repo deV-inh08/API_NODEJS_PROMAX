@@ -1,4 +1,5 @@
 import { Types } from 'mongoose'
+import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
 
 // Base Product Interface
 export interface IProduct {
@@ -54,15 +55,7 @@ export interface IProductVariation {
   options: string[] // ['S', 'M', 'L'] or ['Red', 'Blue']
 }
 
-export interface IClothingAttributes {
-  brand: string
-  size: string[]
-  material: string
-  color?: string[]
-  style?: string
-}
-
-export interface IClothing extends IClothingAttributes {
+export interface IClothing extends ClothingAttributes {
   _id: Types.ObjectId
   product_id: Types.ObjectId
 }
@@ -77,15 +70,7 @@ export interface IClothing extends IClothingAttributes {
 //   style: "Casual"
 // }
 
-export interface IElectronicsAttributes {
-  brand: string
-  model: string
-  warranty: string // "2 years"
-  specifications: {
-    [key: string]: string // flexible specs
-  }
-}
-export interface IElectronics extends IElectronicsAttributes {
+export interface IElectronics extends ElectronicsAttributes {
   _id: Types.ObjectId
   product_id: Types.ObjectId
 }
@@ -109,19 +94,7 @@ export interface IElectronics extends IElectronicsAttributes {
 //   }
 // }
 
-export interface IFurnitureAttributes {
-  brand: string
-  material: string
-  dimensions: {
-    length: number
-    width: number
-    height: number
-    unit: 'cm' | 'inch'
-    weight: number
-  }
-}
-
-export interface IFurniture extends IFurnitureAttributes {
+export interface IFurniture extends FurnitureAttributes {
   _id: Types.ObjectId
   product_id: Types.ObjectId
 }

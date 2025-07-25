@@ -2,10 +2,10 @@ import { Types } from 'mongoose'
 import { isClothingProduct, isElectronicsProduct, isFurnitureProduct } from '~/api/v1/helpers/product.helper'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
-import { IClothingAttributes, IElectronicsAttributes, IFurnitureAttributes } from '~/api/v1/types/product.type'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
 import { CreateProductType, BaseProductType } from '~/api/v1/validations/product.validation'
+import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
 
 class ProductFactory {
   // filter product_attributes
@@ -51,7 +51,7 @@ class AttributeFactory {
     }
   }
 
-  private static createElectronicsAttributes(attributes: IElectronicsAttributes, productId: string) {
+  private static createElectronicsAttributes(attributes: ElectronicsAttributes, productId: string) {
     const validatedAttrs = this.validateElectronicsAttributes(attributes)
     return {
       product_id: convertStringToObjectId(productId),
@@ -62,7 +62,7 @@ class AttributeFactory {
     }
   }
 
-  private static createClothingAttributes(attributes: IClothingAttributes, productId: string) {
+  private static createClothingAttributes(attributes: ClothingAttributes, productId: string) {
     const validatedAttrs = this.validateClothingAttributes(attributes)
     return {
       product_id: convertStringToObjectId(productId),
@@ -74,7 +74,7 @@ class AttributeFactory {
     }
   }
 
-  private static createFurnitureAttributes(attributes: IFurnitureAttributes, productId: string) {
+  private static createFurnitureAttributes(attributes: FurnitureAttributes, productId: string) {
     const validatedAttrs = this.validateFurnitureAttributes(attributes)
 
     return {
@@ -85,7 +85,7 @@ class AttributeFactory {
     }
   }
 
-  private static validateElectronicsAttributes(attributes: IElectronicsAttributes) {
+  private static validateElectronicsAttributes(attributes: ElectronicsAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for electronics')
     }
@@ -118,7 +118,7 @@ class AttributeFactory {
     }
   }
 
-  private static validateClothingAttributes(attributes: IClothingAttributes) {
+  private static validateClothingAttributes(attributes: ClothingAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for clothing')
     }
@@ -148,7 +148,7 @@ class AttributeFactory {
     }
   }
 
-  private static validateFurnitureAttributes(attributes: IFurnitureAttributes) {
+  private static validateFurnitureAttributes(attributes: FurnitureAttributes) {
     if (!attributes.brand?.trim()) {
       throw new ValidationError('Brand is required for furniture')
     }
@@ -258,9 +258,6 @@ export class ProductService {
         attributes: createdAttributes
       }
     } catch (error) {
-      // 🔥 MANUAL CLEANUP nếu có lỗi
-      console.error('❌ Error during product creation:', error)
-
       // Cleanup: Delete created documents nếu có lỗi
       if (createdAttributes) {
         try {
@@ -294,4 +291,6 @@ export class ProductService {
       throw new BadRequestError('Get all Draft is failed')
     }
   }
+
+  async publishProductByShop() {}
 }

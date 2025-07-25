@@ -1,0 +1,5 @@
+2025-07-25 12:03:27.183 PM --- error --- undefined --- 	Validation failed: Cast to string failed for value "[ 'White', 'Black', 'Red' ]" (type Array) at path "color"
+2025-07-25 12:03:27.217 PM --- error --- undefined --- 	Create product failed
+2025-07-25 12:19:18.139 PM --- error --- undefined --- 	Access Token expired
+2025-07-25 12:19:30.994 PM --- error --- undefined --- 	Validation failed: Cast to string failed for value "[ 'White', 'Black', 'Red' ]" (type Array) at path "color"
+2025-07-25 12:19:31.029 PM --- error --- undefined --- 	Create product failed

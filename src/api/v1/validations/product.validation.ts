@@ -15,7 +15,7 @@ const clothingAttributesSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
   size: z.array(z.string()).min(1, 'At least one size required'),
   material: z.string().min(1, 'Material is required'),
-  color: z.array(z.string()).optional(),
+  color: z.array(z.string()),
   style: z.string().optional()
 })
 

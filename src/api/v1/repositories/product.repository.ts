@@ -1,15 +1,8 @@
 import { Model } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
-import {
-  IClothing,
-  IClothingAttributes,
-  IElectronics,
-  IElectronicsAttributes,
-  IFurniture,
-  IFurnitureAttributes,
-  IProduct
-} from '~/api/v1/types/product.type'
+import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
+import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes } from '~/api/v1/validations/product.validation'
 import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
@@ -66,14 +59,14 @@ export class ProductRepository extends BaseRepository {
   }
 
   // 🏭 DYNAMIC ATTRIBUTE MODEL GETTER
-  private async getAttributeModel(productType: string): Promise<Model<any>> {
+  private async getAttributeModel(productType: string): Promise<Model<IElectronics | IClothing | IFurniture>> {
     switch (productType) {
       case 'Electronics':
-        return await this.getElectronicsModel()
+        return (await this.getElectronicsModel()) as Model<IElectronics | IClothing | IFurniture>
       case 'Clothing':
-        return await this.getClothingModel()
+        return (await this.getClothingModel()) as Model<IElectronics | IClothing | IFurniture>
       case 'Furniture':
-        return await this.getFurnitureModel()
+        return (await this.getFurnitureModel()) as Model<IElectronics | IClothing | IFurniture>
       default:
         throw new BadRequestError(`Unsupported product type: ${productType}`)
     }
@@ -88,7 +81,7 @@ export class ProductRepository extends BaseRepository {
 
   async createProductAttributes(
     productType: string,
-    attributeData: IElectronicsAttributes | IClothingAttributes | IFurnitureAttributes
+    attributeData: ClothingAttributes | ElectronicsAttributes | FurnitureAttributes
   ): Promise<IElectronics | IClothing | IFurniture> {
     try {
       const AttributeModel = await this.getAttributeModel(productType)
@@ -189,7 +182,7 @@ export class ProductRepository extends BaseRepository {
         {
           $sort: {
             createdAt: -1
-          },
+          }
         },
         {
           $skip: options.skip
@@ -215,7 +208,6 @@ export class ProductRepository extends BaseRepository {
             'shop_info._id': 1,
             'shop_info.shop_name': 1,
             'shop_info.shop_slug': 1
-
           }
         }
       ]),
@@ -235,6 +227,8 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
+  async publishProductByShop() { }
+
   async countShopDraftProducts(userId: string): Promise<number> {
     const ProductModel = await this.getProductModel()
 
@@ -245,14 +239,14 @@ export class ProductRepository extends BaseRepository {
           localField: 'shop_id',
           foreignField: '_id',
           as: 'shop_infor'
-        },
+        }
       },
       {
         $match: {
           'shop_infor.user_id': convertStringToObjectId(userId),
           'shop_infor.status': 'active',
           isDraft: true
-        },
+        }
       },
       {
         $count: 'total'
