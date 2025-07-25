@@ -302,12 +302,29 @@ export class ProductService {
     }
   }
 
-  async publishProductByShop(product_id: string, userId: string) {
-    const shop = await this.shopRepository.findShopByUserId(userId)
-    if (!shop) {
-      throw new UnauthorizedError('shop not found')
+  async publishProductByShop(productId: string, userId: string) {
+    try {
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new UnauthorizedError('shop not found')
+      }
+      const result = await this.productRepository.updatePublishProductByShop(productId, convertObjectIdToString(shop._id))
+      return result
+    } catch (error) {
+      throw new BadRequestError('Published product is failed')
     }
-    const result = await this.productRepository.updatePublishProductByShop(product_id, convertObjectIdToString(shop._id))
-    return result
+  }
+
+  async updateUnPublishedProductForShop(productId: string, userId: string) {
+    try {
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new UnauthorizedError('shop not found')
+      }
+      const result = await this.productRepository.updateUnPublishedProductForShop(productId, convertObjectIdToString(shop._id))
+      return result
+    } catch (error) {
+      throw new BadRequestError('Published product is failed')
+    }
   }
 }

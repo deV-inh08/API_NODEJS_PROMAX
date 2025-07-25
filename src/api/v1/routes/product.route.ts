@@ -19,4 +19,6 @@ productRouter.get('/all-drafts', authMiddleware.verifyAT, productController.getA
 
 productRouter.get('/all-published', authMiddleware.verifyAT, productController.getAllPublishedForShop)
 
-productRouter.put('/:productId/publish', authMiddleware.verifyAT, productController.publishProductByShop)
+productRouter.put('/publish/:productId', authMiddleware.verifyAT, productController.publishProductByShop)
+
+productRouter.put('/unPublish/:productId', authMiddleware.verifyAT, productController.updateUnPublishedProductForShop)

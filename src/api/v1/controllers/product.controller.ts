@@ -71,4 +71,21 @@ export class ProductController {
       next(error)
     }
   }
+  updateUnPublishedProductForShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params // { productId: '68831462ab00440766ddf9de' }
+      console.log('productId', productId);
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated')
+      }
+
+      // call services
+      const result = await this.productService.updateUnPublishedProductForShop(productId, userId)
+      SuccessResponse.ok(result, 'Update Unpublished product succesfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }

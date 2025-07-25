@@ -364,7 +364,30 @@ export class ProductRepository extends BaseRepository {
     }
 
     return {
-      result: result.matchedCount,
+      result: result.matchedCount
+    }
+  }
+
+  async updateUnPublishedProductForShop(productId: string, shop_id: string) {
+    const ProductModel = await this.getProductModel()
+    const result = await ProductModel.updateOne({
+      _id: convertStringToObjectId(productId),
+      shop_id: shop_id,
+      isPublished: true
+    }, {
+      isDraft: true,
+      isPublished: false,
+      updatedAt: new Date()
+    })
+
+    console.log('result', 'result');
+    // 0: don't update | 1: updated
+    if (!result.modifiedCount) {
+      throw new NotFoundError('Product not found or already published')
+    }
+
+    return {
+      result: result.matchedCount
     }
   }
 }

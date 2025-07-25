@@ -104,6 +104,11 @@
             "date": 1753426134091,
             "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-25-13.info.log",
             "hash": "9f844006c402710014eb44cb4f266cf46538f907dd4729980640bf12e4302d98"
+        },
+        {
+            "date": 1753426805883,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-25-14.info.log",
+            "hash": "2234174bb5857c287bb1d7d4b7961e5d1818e47da693f669db4d60ec2e41634a"
         }
     ],
     "hashType": "sha256"
