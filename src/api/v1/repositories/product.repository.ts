@@ -214,7 +214,6 @@ export class ProductRepository extends BaseRepository {
       this.countShopDraftProducts(userId)
     ])
 
-
     return {
       products,
       pagination: {
@@ -345,5 +344,27 @@ export class ProductRepository extends BaseRepository {
       }
     ])
     return result[0]?.total || 0
+  }
+
+  async updatePublishProductByShop(productId: string, shop_id: string) {
+    const ProductModel = await this.getProductModel()
+    const result = await ProductModel.updateOne({
+      _id: convertStringToObjectId(productId),
+      shop_id: shop_id,
+      isDraft: true
+    }, {
+      isDraft: false,
+      isPublished: true,
+      updatedAt: new Date()
+    })
+
+    // 0: don't update | 1: updated
+    if (!result.modifiedCount) {
+      throw new NotFoundError('Product not found or already published')
+    }
+
+    return {
+      result: result.matchedCount,
+    }
   }
 }

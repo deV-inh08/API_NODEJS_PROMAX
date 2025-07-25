@@ -44,9 +44,29 @@ export class ProductController {
   getAllPublishedForShop = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const decodedAT = req.decoded_accessToken!
-      const user_id = decodedAT.id
-      const result = await this.productService.getAllPublishedForShop(user_id)
+      const userId = decodedAT.id
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated')
+      }
+      const result = await this.productService.getAllPublishedForShop(userId)
       SuccessResponse.ok(result, 'Get all published product succesfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  publishProductByShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params // { productId: '68831462ab00440766ddf9de' }
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated')
+      }
+
+      // call services
+      const result = await this.productService.publishProductByShop(productId, userId)
+      SuccessResponse.ok(result, 'Update published product succesfully').send(res)
     } catch (error) {
       next(error)
     }

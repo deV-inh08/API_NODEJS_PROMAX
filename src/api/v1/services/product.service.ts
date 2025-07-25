@@ -3,7 +3,7 @@ import { resourceLimits } from 'worker_threads'
 import { isClothingProduct, isElectronicsProduct, isFurnitureProduct } from '~/api/v1/helpers/product.helper'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
-import { convertStringToObjectId } from '~/api/v1/utils/common.util'
+import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
 import { CreateProductType, BaseProductType } from '~/api/v1/validations/product.validation'
 import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
@@ -302,5 +302,12 @@ export class ProductService {
     }
   }
 
-  async publishProductByShop() { }
+  async publishProductByShop(product_id: string, userId: string) {
+    const shop = await this.shopRepository.findShopByUserId(userId)
+    if (!shop) {
+      throw new UnauthorizedError('shop not found')
+    }
+    const result = await this.productRepository.updatePublishProductByShop(product_id, convertObjectIdToString(shop._id))
+    return result
+  }
 }
