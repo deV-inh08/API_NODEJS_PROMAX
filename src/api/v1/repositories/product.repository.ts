@@ -2,7 +2,7 @@ import { Model } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
-import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes } from '~/api/v1/validations/product.validation'
+import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
 import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
@@ -292,7 +292,6 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
-  async publishProductByShop() { }
 
   async countShopDraftProducts(userId: string): Promise<number> {
     const ProductModel = await this.getProductModel()
@@ -450,12 +449,111 @@ export class ProductRepository extends BaseRepository {
     return products
   }
 
-  async findProduct({ productId, unSelect }: { productId: string, unSelect: string[] }) {
+  async findProduct({ productId, unSelect }: { productId: string; unSelect: string[] }) {
     const ProductModel = await this.getProductModel()
-    console.log('productId', productId);
-    const product = await ProductModel.findById(productId)
-      .select(unGetSelectData(unSelect))
-      .lean()
+    const product = await ProductModel.findById(productId).select(unGetSelectData(unSelect)).lean()
     return product
+  }
+
+  async getProductForUpdate(productId: string, shopId: string) {
+    const ProductModel = await this.getProductModel()
+    const product = await ProductModel.findOne({
+      _id: convertStringToObjectId(productId),
+      shop_id: convertStringToObjectId(shopId)
+    }).lean()
+
+    if (!product) {
+      throw new NotFoundError('Product not found or you do not have permission')
+    }
+
+    let currentAttributes = null
+    if (product.attributes_id && product.product_type) {
+      const AttributeModel = await this.getAttributeModel(product.product_type)
+      currentAttributes = await AttributeModel.findById(product.attributes_id).lean()
+    }
+
+    return {
+      product,
+      currentAttributes
+    }
+  }
+
+
+  async updateProductBasic(productId: string, updateData: Partial<updateProductBodyZodType>) {
+    const ProductModel = await this.getProductModel()
+    const result = await ProductModel.findByIdAndUpdate(
+      convertStringToObjectId(productId),
+      {
+        ...updateData,
+        updatedAt: new Date()
+      },
+      {
+        new: true,  // Return updated document
+        lean: true  // Return plain object
+      }
+    )
+    if (!result) {
+      throw new NotFoundError('Product not found')
+    }
+
+    return result
+  }
+
+  async updateProductAttributes(
+    productType: string,
+    attributesId: string,
+    newAttributes: Record<string, any>,
+    currentAttributes: any = null
+  ) {
+    try {
+      const AttributeModel = await this.getAttributeModel(productType)
+      // Validate attributes
+      const mergedAttributes = {
+        ...currentAttributes,  // Keep existing data
+        ...newAttributes       // Override with new data
+      }
+      const result = await AttributeModel.findByIdAndUpdate(
+        convertStringToObjectId(attributesId),
+        {
+          ...mergedAttributes,
+          updatedAt: new Date()
+        },
+        {
+          new: true,
+          lean: true
+        }
+      )
+      if (!result) {
+        throw new NotFoundError(`${productType} attributes not found`)
+      }
+      return result
+    } catch (error) {
+      throw new BadRequestError(`Invalid ${productType} attributes: ${error}`)
+    }
+  }
+
+  async createProductAttributesIfNotExists(
+    productId: string,
+    productType: string,
+    attributeData: Record<string, any>
+  ) {
+    try {
+
+      // Create new attributes
+      const AttributeModel = await this.getAttributeModel(productType)
+      const newAttributes = new AttributeModel({
+        product_id: convertStringToObjectId(productId),
+        ...attributeData
+      })
+
+      const savedAttributes = await newAttributes.save()
+
+      // Update product với attributes_id mới
+      await this.updateProductAttributesId(productId, savedAttributes._id.toString())
+
+      return savedAttributes
+    } catch (error: any) {
+      throw new BadRequestError(`Failed to create ${productType} attributes: ${error.message}`)
+    }
   }
 }

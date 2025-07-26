@@ -5,7 +5,7 @@ import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
-import { CreateProductType, BaseProductType } from '~/api/v1/validations/product.validation'
+import { CreateProductType, BaseProductType, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
 import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
 
 class ProductFactory {
@@ -233,6 +233,39 @@ export class ProductService {
     return shop
   }
 
+  // 🔧 Helper methods
+  private hasBasicFieldUpdate(updateData: updateProductBodyZodType): boolean {
+    return !!(
+      updateData.product_name ||
+      updateData.product_thumb ||
+      updateData.product_description ||
+      updateData.product_price !== undefined ||
+      updateData.product_quantity !== undefined
+    )
+  }
+
+  private extractBasicFields(updateData: updateProductBodyZodType) {
+    const basicFields: any = {}
+    if (updateData.product_name) basicFields.product_name = updateData.product_name
+    if (updateData.product_thumb) basicFields.product_thumb = updateData.product_thumb
+    if (updateData.product_description) basicFields.product_description = updateData.product_description
+    if (updateData.product_price !== undefined) basicFields.product_price = updateData.product_price
+    if (updateData.product_quantity !== undefined) basicFields.product_quantity = updateData.product_quantity
+    return basicFields
+  }
+
+  private generateUpdateMessage(hasBasicUpdate: boolean, hasAttributeUpdate: boolean): string {
+    if (hasBasicUpdate && hasAttributeUpdate) {
+      return 'Product information and attributes updated successfully'
+    } else if (hasBasicUpdate) {
+      return 'Product information updated successfully'
+    } else if (hasAttributeUpdate) {
+      return 'Product attributes updated successfully'
+    } else {
+      return 'No changes made'
+    }
+  }
+
   private async createProductSequential(productData: CreateProductType, shopId: string) {
     let createdProduct
     let createdAttributes
@@ -362,6 +395,90 @@ export class ProductService {
       return await this.productRepository.findProduct({ productId, unSelect: ['__v', 'product_variations'] })
     } catch (error) {
       throw new BadRequestError('Find product failed')
+    }
+  }
+
+  updateProduct = async (productId: string, updateData: updateProductBodyZodType, userId: string) => {
+    try {
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new UnauthorizedError('Shop not found. Only shop owners can update products')
+      }
+      const { product, currentAttributes } = await this.productRepository.getProductForUpdate(
+        productId,
+        convertObjectIdToString(shop._id)
+      )
+      if ('product_type' in updateData) {
+        throw new BadRequestError('Cannot change product_type. Create a new product instead.')
+      }
+
+      const hasBasicUpdate = this.hasBasicFieldUpdate(updateData)
+      const hasAttributeUpdate = updateData.product_attributes && Object.keys(updateData.product_attributes).length > 0
+
+      let updatedProduct = product
+      let updatedAttributes = currentAttributes
+
+      if (hasBasicUpdate && !hasAttributeUpdate) {
+        const basicFields = this.extractBasicFields(updateData)
+        updatedProduct = await this.productRepository.updateProductBasic(productId, basicFields)
+      } else if (!hasBasicUpdate && hasAttributeUpdate) {
+
+        if (product.attributes_id && currentAttributes) {
+          // Update existing attributes
+          updatedAttributes = await this.productRepository.updateProductAttributes(
+            product.product_type,
+            product.attributes_id.toString(),
+            updateData.product_attributes!,
+            currentAttributes
+          )
+        } else {
+          // Create new attributes if not exists
+          updatedAttributes = await this.productRepository.createProductAttributesIfNotExists(
+            productId,
+            product.product_type,
+            updateData.product_attributes!
+          )
+        }
+      } else if (hasBasicUpdate && hasAttributeUpdate) {
+        console.log('🔄 Strategy: Update Both Product & Attributes')
+
+        // Update basic fields first
+        const basicFields = this.extractBasicFields(updateData)
+        updatedProduct = await this.productRepository.updateProductBasic(productId, basicFields)
+
+        // Then update attributes
+        if (product.attributes_id && currentAttributes) {
+          updatedAttributes = await this.productRepository.updateProductAttributes(
+            product.product_type,
+            product.attributes_id.toString(),
+            updateData.product_attributes!,
+            currentAttributes
+          )
+        } else {
+          updatedAttributes = await this.productRepository.createProductAttributesIfNotExists(
+            productId,
+            product.product_type,
+            updateData.product_attributes!
+          )
+        }
+      }
+      else {
+        throw new BadRequestError('No valid fields to update after cleaning null/undefined values')
+      }
+      return {
+        product: updatedProduct,
+        attributes: updatedAttributes,
+        updateSummary: {
+          productUpdated: hasBasicUpdate,
+          attributesUpdated: hasAttributeUpdate,
+          fieldsUpdated: {
+            product: hasBasicUpdate ? Object.keys(this.extractBasicFields(updateData)) : [],
+            attributes: hasAttributeUpdate ? Object.keys(updateData.product_attributes!) : []
+          }
+        }
+      }
+    } catch (error) {
+      throw new BadRequestError('Update product failed')
     }
   }
 }

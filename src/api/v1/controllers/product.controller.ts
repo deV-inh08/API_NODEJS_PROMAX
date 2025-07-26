@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { ProductService } from '~/api/v1/services/product.service'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { CreateProductType } from '~/api/v1/validations/product.validation'
+import { CreateProductType, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
 
 export class ProductController {
   private productService: ProductService
@@ -126,6 +126,25 @@ export class ProductController {
       const { productId } = req.params
       const result = await this.productService.findProduct(productId)
       SuccessResponse.ok(result, 'Find Product is successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params
+      const updateData: updateProductBodyZodType = req.body
+      const decodedAT = req.decoded_accessToken!
+      const userId = decodedAT.id
+
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated')
+      }
+
+      const result = await this.productService.updateProduct(productId, updateData, userId)
+
+      SuccessResponse.ok(result, 'Product updated successfully').send(res)
     } catch (error) {
       next(error)
     }

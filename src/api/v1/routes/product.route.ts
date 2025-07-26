@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { ProductController } from '~/api/v1/controllers/product.controller'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
-import { validationReq } from '~/api/v1/middlewares/validation.middleware'
-import { createProductSchema } from '~/api/v1/validations/product.validation'
+import { validateUpdateProduct, validationReq } from '~/api/v1/middlewares/validation.middleware'
+import { createProductSchema, updateProductSchema } from '~/api/v1/validations/product.validation'
 
 export const productRouter = Router()
 const authMiddleware = new AuthMiddleWare()
@@ -19,12 +19,19 @@ productRouter.get('/all-drafts', authMiddleware.verifyAT, productController.getA
 
 productRouter.get('/all-published', authMiddleware.verifyAT, productController.getAllPublishedForShop)
 
-productRouter.put('/publish/:productId', authMiddleware.verifyAT, productController.publishProductByShop)
+productRouter.patch('/publish/:productId', authMiddleware.verifyAT, productController.publishProductByShop)
 
-productRouter.put('/unPublish/:productId', authMiddleware.verifyAT, productController.updateUnPublishedProductForShop)
+productRouter.patch('/unPublish/:productId', authMiddleware.verifyAT, productController.updateUnPublishedProductForShop)
 
 productRouter.get('/search', productController.searchProducts)
 
 productRouter.get('/find', productController.findAllProducts)
 
 productRouter.get('/find/:productId', productController.findProduct)
+
+productRouter.patch(
+  '/update/:productId',
+  authMiddleware.verifyAT,
+  validationReq(updateProductSchema),
+  productController.updateProduct
+)

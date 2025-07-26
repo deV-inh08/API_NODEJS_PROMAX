@@ -1,5 +1,4 @@
 import { Schema } from 'mongoose'
-import { trim } from 'zod/v4'
 import { ICartItem } from '~/api/v1/types/cart.type'
 
 export const cartSchema = new Schema<ICartItem>({

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { IElectronics } from '~/api/v1/types/product.type'
 
 export const convertObjectIdToString = (ObjectId: mongoose.Types.ObjectId) => {
   return ObjectId.toString()
@@ -37,4 +38,26 @@ export const getSelectData = (select: string[]) => {
 
 export const unGetSelectData = (select: string[]) => {
   return Object.fromEntries(select.map((e) => [e, 0]))
+}
+
+// 🧹 Helper function để clean null/undefined
+export function cleanNullUndefined(obj: Record<string, unknown>): Record<string, unknown> {
+  if (obj === null || obj === undefined) return {}
+  if (typeof obj !== 'object' || Array.isArray(obj)) return obj
+
+  const cleaned: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+        const cleanedValue = cleanNullUndefined(value as Record<string, unknown>)
+        if (Object.keys(cleanedValue).length > 0) {
+          cleaned[key] = cleanedValue
+        }
+      } else {
+        cleaned[key] = value
+      }
+    }
+  }
+  return cleaned
 }
