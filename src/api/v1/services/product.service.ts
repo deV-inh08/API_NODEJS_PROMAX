@@ -344,12 +344,24 @@ export class ProductService {
   }
 
   async findAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
-    return await this.productRepository.findAllProducts({
-      limit,
-      sort,
-      page,
-      filter,
-      select: ['product_name', 'product_price', 'product_thumb']
-    })
+    try {
+      return await this.productRepository.findAllProducts({
+        limit,
+        sort,
+        page,
+        filter,
+        select: ['product_name', 'product_price', 'product_thumb']
+      })
+    } catch (error) {
+      throw new BadRequestError('Find all products failed')
+    }
+  }
+
+  async findProduct(productId: string) {
+    try {
+      return await this.productRepository.findProduct({ productId, unSelect: ['__v', 'product_variations'] })
+    } catch (error) {
+      throw new BadRequestError('Find product failed')
+    }
   }
 }

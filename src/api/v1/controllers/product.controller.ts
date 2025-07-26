@@ -74,7 +74,6 @@ export class ProductController {
   updateUnPublishedProductForShop = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { productId } = req.params // { productId: '68831462ab00440766ddf9de' }
-      console.log('productId', productId)
       const decodedAT = req.decoded_accessToken!
       const userId = decodedAT.id
       if (!userId) {
@@ -115,7 +114,18 @@ export class ProductController {
   findAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.productService.findAllProducts({})
-      SuccessResponse.ok(result, 'Find All Products is successfully').send(res)
+      SuccessResponse.ok(result, 'Find All Products are successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // product detail
+  findProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { productId } = req.params
+      const result = await this.productService.findProduct(productId)
+      SuccessResponse.ok(result, 'Find Product is successfully').send(res)
     } catch (error) {
       next(error)
     }

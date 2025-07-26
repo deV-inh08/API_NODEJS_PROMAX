@@ -6,7 +6,7 @@ import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes } from '
 import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
-import { convertStringToObjectId, getSelectData } from '~/api/v1/utils/common.util'
+import { convertStringToObjectId, getSelectData, unGetSelectData } from '~/api/v1/utils/common.util'
 
 export class ProductRepository extends BaseRepository {
   private models = {
@@ -448,5 +448,14 @@ export class ProductRepository extends BaseRepository {
       .select(getSelectData(select))
       .lean()
     return products
+  }
+
+  async findProduct({ productId, unSelect }: { productId: string, unSelect: string[] }) {
+    const ProductModel = await this.getProductModel()
+    console.log('productId', productId);
+    const product = await ProductModel.findById(productId)
+      .select(unGetSelectData(unSelect))
+      .lean()
+    return product
   }
 }
