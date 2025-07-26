@@ -24,3 +24,5 @@ productRouter.put('/publish/:productId', authMiddleware.verifyAT, productControl
 productRouter.put('/unPublish/:productId', authMiddleware.verifyAT, productController.updateUnPublishedProductForShop)
 
 productRouter.get('/search', productController.searchProducts)
+
+productRouter.get('/find', productController.findAllProducts)

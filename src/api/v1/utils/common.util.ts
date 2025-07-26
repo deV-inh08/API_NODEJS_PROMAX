@@ -30,3 +30,7 @@ export function formatToE164(vietnamPhoneNumber: string) {
 
   return cleaned
 }
+
+export const getSelectData = (select: string[]) => {
+  return Object.fromEntries(select.map((e) => [e, 1]))
+}

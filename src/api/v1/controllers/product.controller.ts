@@ -74,7 +74,7 @@ export class ProductController {
   updateUnPublishedProductForShop = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { productId } = req.params // { productId: '68831462ab00440766ddf9de' }
-      console.log('productId', productId);
+      console.log('productId', productId)
       const decodedAT = req.decoded_accessToken!
       const userId = decodedAT.id
       if (!userId) {
@@ -98,7 +98,6 @@ export class ProductController {
         limit: Number(req.query.page) || 20
       }
 
-      console.log(searchParams.query);
       // Validate search query
       if (!searchParams.query || searchParams.query.trim().length < 2) {
         return SuccessResponse.ok(
@@ -108,6 +107,15 @@ export class ProductController {
       }
       const result = await this.productService.searchProducts(searchParams)
       SuccessResponse.ok(result, 'Search completed successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  findAllProducts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.productService.findAllProducts({})
+      SuccessResponse.ok(result, 'Find All Products is successfully').send(res)
     } catch (error) {
       next(error)
     }

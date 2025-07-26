@@ -6,7 +6,7 @@ import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes } from '
 import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
-import { convertStringToObjectId } from '~/api/v1/utils/common.util'
+import { convertStringToObjectId, getSelectData } from '~/api/v1/utils/common.util'
 
 export class ProductRepository extends BaseRepository {
   private models = {
@@ -398,39 +398,21 @@ export class ProductRepository extends BaseRepository {
 
   async searchProducts(params: { query: string; category?: string; page: number; limit: number }) {
     const ProductModel = await this.getProductModel()
-    // ✅ BUILD SEARCH QUERY
-    // const searchQuery: {
-    //   product_type?: string
-    //   isPublished: boolean
-    //   isDraft: boolean
-    //   $text: {
-    //     $search: string
-    //     $caseSensitive: boolean
-    //   }
-    // } = {
-    //   isPublished: true,
-    //   isDraft: false,
-    //   $text: {
-    //     $search: params.query,
-    //     $caseSensitive: false
-    //   }
-    // }
-    // // ✅ ADD FILTERS
-    // if (params.category) {
-    //   searchQuery.product_type = params.category
-    // }
     const products = await ProductModel.find(
       {
         isPublished: true,
+        isDraft: false,
         $text: {
-          $search: params.query
+          $search: params.query,
+          $caseSensitive: false
         }
-      }, {
-      score: { $meta: 'textScore' }
-    })
+      },
+      {
+        score: { $meta: 'textScore' }
+      }
+    )
       .sort({ score: { $meta: 'textScore' } }) // Sort by relevance
       .lean()
-
     return {
       products,
       searchQuery: params.query,
@@ -439,5 +421,32 @@ export class ProductRepository extends BaseRepository {
         limit: params.limit
       }
     }
+  }
+
+  async findAllProducts({
+    limit,
+    sort,
+    page,
+    filter,
+    select
+  }: {
+    limit: number
+    sort: string
+    page: number
+    filter: {
+      isPublished: boolean
+    }
+    select: string[]
+  }) {
+    const ProductModel = await this.getProductModel()
+    const skip = (page - 1) * limit
+    const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
+    const products = await ProductModel.find(filter)
+      .sort(sortBy as { _id: 1 | -1 })
+      .skip(skip)
+      .limit(limit)
+      .select(getSelectData(select))
+      .lean()
+    return products
   }
 }

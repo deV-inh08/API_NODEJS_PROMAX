@@ -308,7 +308,10 @@ export class ProductService {
       if (!shop) {
         throw new UnauthorizedError('shop not found')
       }
-      const result = await this.productRepository.updatePublishProductByShop(productId, convertObjectIdToString(shop._id))
+      const result = await this.productRepository.updatePublishProductByShop(
+        productId,
+        convertObjectIdToString(shop._id)
+      )
       return result
     } catch (error) {
       throw new BadRequestError('Published product is failed')
@@ -321,24 +324,32 @@ export class ProductService {
       if (!shop) {
         throw new UnauthorizedError('shop not found')
       }
-      const result = await this.productRepository.updateUnPublishedProductForShop(productId, convertObjectIdToString(shop._id))
+      const result = await this.productRepository.updateUnPublishedProductForShop(
+        productId,
+        convertObjectIdToString(shop._id)
+      )
       return result
     } catch (error) {
       throw new BadRequestError('Published product is failed')
     }
   }
 
-  async searchProducts(searchParams: {
-    query: string;
-    category?: string;
-    page: number;
-    limit: number;
-  }) {
+  async searchProducts(searchParams: { query: string; category?: string; page: number; limit: number }) {
     try {
       const result = await this.productRepository.searchProducts(searchParams)
       return result
     } catch (error) {
       throw new BadRequestError('Search failed')
     }
+  }
+
+  async findAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
+    return await this.productRepository.findAllProducts({
+      limit,
+      sort,
+      page,
+      filter,
+      select: ['product_name', 'product_price', 'product_thumb']
+    })
   }
 }
