@@ -1,10 +1,10 @@
-import mongoose, { Types } from "mongoose";
-import { InventotySchema } from "~/api/v1/models/inventory.model";
-import { BaseRepository } from "~/api/v1/repositories/base.repository";
-import { IInventory } from "~/api/v1/types/inventory.type";
+import mongoose, { Types } from 'mongoose'
+import { InventotySchema } from '~/api/v1/models/inventory.model'
+import { BaseRepository } from '~/api/v1/repositories/base.repository'
+import { IInventory } from '~/api/v1/types/inventory.type'
 
 export class InventoryRepository extends BaseRepository {
-  private models = new Map<string, mongoose.Model<IInventory>>
+  private models = new Map<string, mongoose.Model<IInventory>>()
   async getInventoryModel() {
     const dbName = this.dbName
     if (!this.models.has(dbName)) {
@@ -16,11 +16,7 @@ export class InventoryRepository extends BaseRepository {
   }
 
   // create inventory
-  async createInventory(body: {
-    productId: Types.ObjectId,
-    shopId: Types.ObjectId,
-    stock: number
-  }) {
+  async createInventory(body: { productId: Types.ObjectId; shopId: Types.ObjectId; stock: number }) {
     const InventoryModel = await this.getInventoryModel()
     const result = await InventoryModel.create({
       product_id: body.productId,
