@@ -33,7 +33,6 @@ export class RefreshTokenRepository extends BaseRepository {
   //  Database token validation
   async findActiveToken(userId: string, token: string) {
     const refreshTokenModel = await this.getRefreshTokenModel()
-    console.log(userId)
     return await refreshTokenModel
       .findOne({
         userId: userId,

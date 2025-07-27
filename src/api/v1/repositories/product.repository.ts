@@ -2,7 +2,12 @@ import { Model } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
-import { FurnitureAttributes, ClothingAttributes, ElectronicsAttributes, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
+import {
+  FurnitureAttributes,
+  ClothingAttributes,
+  ElectronicsAttributes,
+  updateProductBodyZodType
+} from '~/api/v1/validations/product.validation'
 import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
@@ -292,7 +297,6 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
-
   async countShopDraftProducts(userId: string): Promise<number> {
     const ProductModel = await this.getProductModel()
 
@@ -478,7 +482,6 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
-
   async updateProductBasic(productId: string, updateData: Partial<updateProductBodyZodType>) {
     const ProductModel = await this.getProductModel()
     const result = await ProductModel.findByIdAndUpdate(
@@ -488,8 +491,8 @@ export class ProductRepository extends BaseRepository {
         updatedAt: new Date()
       },
       {
-        new: true,  // Return updated document
-        lean: true  // Return plain object
+        new: true, // Return updated document
+        lean: true // Return plain object
       }
     )
     if (!result) {
@@ -509,8 +512,8 @@ export class ProductRepository extends BaseRepository {
       const AttributeModel = await this.getAttributeModel(productType)
       // Validate attributes
       const mergedAttributes = {
-        ...currentAttributes,  // Keep existing data
-        ...newAttributes       // Override with new data
+        ...currentAttributes, // Keep existing data
+        ...newAttributes // Override with new data
       }
       const result = await AttributeModel.findByIdAndUpdate(
         convertStringToObjectId(attributesId),
@@ -532,13 +535,8 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
-  async createProductAttributesIfNotExists(
-    productId: string,
-    productType: string,
-    attributeData: Record<string, any>
-  ) {
+  async createProductAttributesIfNotExists(productId: string, productType: string, attributeData: Record<string, any>) {
     try {
-
       // Create new attributes
       const AttributeModel = await this.getAttributeModel(productType)
       const newAttributes = new AttributeModel({

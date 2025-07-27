@@ -7,6 +7,7 @@ import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils
 import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } from '~/api/v1/utils/response.util'
 import { CreateProductType, BaseProductType, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
 import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
+import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
 
 class ProductFactory {
   // filter product_attributes
@@ -195,10 +196,12 @@ class AttributeFactory {
 export class ProductService {
   private productRepository: ProductRepository
   private shopRepository: ShopRepository
+  private inventoryRepository: InventoryRepository
 
   constructor() {
     this.productRepository = new ProductRepository()
     this.shopRepository = new ShopRepository()
+    this.inventoryRepository = new InventoryRepository()
   }
 
   createProduct = async (productData: CreateProductType, userId: string) => {
@@ -208,6 +211,12 @@ export class ProductService {
 
       // Step 2: Create product sequentially (no transaction)
       const result = await this.createProductSequential(productData, shop._id.toString())
+      const body = {
+        productId: result.product._id,
+        shopId: result.product.shop_id,
+        stock: result.product.product_quantity
+      }
+      await this.inventoryRepository.createInventory(body)
       return result
     } catch (error) {
       throw new BadRequestError('Create product failed')
@@ -254,18 +263,6 @@ export class ProductService {
     return basicFields
   }
 
-  private generateUpdateMessage(hasBasicUpdate: boolean, hasAttributeUpdate: boolean): string {
-    if (hasBasicUpdate && hasAttributeUpdate) {
-      return 'Product information and attributes updated successfully'
-    } else if (hasBasicUpdate) {
-      return 'Product information updated successfully'
-    } else if (hasAttributeUpdate) {
-      return 'Product attributes updated successfully'
-    } else {
-      return 'No changes made'
-    }
-  }
-
   private async createProductSequential(productData: CreateProductType, shopId: string) {
     let createdProduct
     let createdAttributes
@@ -292,7 +289,6 @@ export class ProductService {
         attributes: createdAttributes
       }
     } catch (error) {
-      // Cleanup: Delete created documents nếu có lỗi
       if (createdAttributes) {
         try {
           await this.productRepository.deleteProductAttributes(
@@ -307,7 +303,6 @@ export class ProductService {
       if (createdProduct) {
         try {
           await this.productRepository.deleteProduct(createdProduct._id.toString())
-          console.log('🧹 Cleaned up orphaned product')
         } catch (cleanupError) {
           console.error('⚠️ Failed to cleanup product:', cleanupError)
         }
@@ -422,7 +417,6 @@ export class ProductService {
         const basicFields = this.extractBasicFields(updateData)
         updatedProduct = await this.productRepository.updateProductBasic(productId, basicFields)
       } else if (!hasBasicUpdate && hasAttributeUpdate) {
-
         if (product.attributes_id && currentAttributes) {
           // Update existing attributes
           updatedAttributes = await this.productRepository.updateProductAttributes(
@@ -440,8 +434,6 @@ export class ProductService {
           )
         }
       } else if (hasBasicUpdate && hasAttributeUpdate) {
-        console.log('🔄 Strategy: Update Both Product & Attributes')
-
         // Update basic fields first
         const basicFields = this.extractBasicFields(updateData)
         updatedProduct = await this.productRepository.updateProductBasic(productId, basicFields)
@@ -461,8 +453,7 @@ export class ProductService {
             updateData.product_attributes!
           )
         }
-      }
-      else {
+      } else {
         throw new BadRequestError('No valid fields to update after cleaning null/undefined values')
       }
       return {
