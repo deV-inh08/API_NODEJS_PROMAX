@@ -3,6 +3,7 @@ import forgotPasswordRouter from '~/api/v1/routes/forgotPassword.route'
 import { Router } from 'express'
 import shopRouter from '~/api/v1/routes/shop.route'
 import { productRouter } from '~/api/v1/routes/product.route'
+import { discountRouter } from '~/api/v1/routes/discount.route'
 
 const routerApiV1 = Router()
 
@@ -17,5 +18,8 @@ routerApiV1.use('/forgot-password', forgotPasswordRouter)
 
 // Router cho 'Product'
 routerApiV1.use('/product', productRouter)
+
+// Router discount
+routerApiV1.use('/discount', discountRouter)
 
 export default routerApiV1

@@ -6,7 +6,7 @@ export const discountSchema = new Schema<IDiscount>({
     type: String,
     required: [true, 'discount_name is required']
   },
-  discount_desc: {
+  discount_description: {
     type: String,
     required: [true, 'discount_desc is required']
   },
