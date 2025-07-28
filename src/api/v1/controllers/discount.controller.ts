@@ -17,6 +17,7 @@ export class DiscountController {
       }
       const user_id = decodedAT.id
       const result = await this.discountServices.createDiscount(body, user_id)
+      console.log('result', result);
       const successResponse = SuccessResponse.created(result, 'create discount is successfully')
       successResponse.send(res)
     } catch (error) {

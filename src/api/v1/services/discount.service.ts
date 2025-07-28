@@ -32,6 +32,7 @@ export class DiscountServices {
         throw new BadRequestError('Discount exists!')
       }
       const newDiscount = await this.discountRepository.createDiscount({ ...payload, shop_id })
+      console.log('newDiscount', newDiscount);
       return newDiscount
     } catch (error) {
       throw new BadRequestError('create discount failed')

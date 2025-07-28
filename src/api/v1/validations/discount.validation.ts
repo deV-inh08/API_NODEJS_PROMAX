@@ -22,10 +22,10 @@ export const createDiscountSchema = z.object({
     discount_value: z.number({
       required_error: 'discount_value is required'
     }),
-    discount_start_date: z.date({
+    discount_start_date: z.string({
       required_error: 'discount_start_date is required'
     }),
-    discount_end_date: z.date({
+    discount_end_date: z.string({
       required_error: 'discount_end_date is required'
     }),
     discount_max_uses: z.number({

@@ -16,8 +16,8 @@ export interface IDiscount {
   discount_start_date: Date
   discount_end_date: Date
   discount_max_uses: number
-  discount_uses_count: number
-  discount_users_used: Types.ObjectId[]
+  discount_uses_count?: number
+  discount_users_used?: Types.ObjectId[]
   discount_max_uses_per_user: number
   discount_min_order_value: number
   discount_is_active: boolean

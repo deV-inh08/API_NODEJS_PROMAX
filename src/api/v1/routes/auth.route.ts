@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import { AuthController } from '~/api/v1/controllers/auth.controller'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
-import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
 import { changePasswordSchema, loginSchema, logoutSchema, registerSchema } from '~/api/v1/validations/auth.validation'
 import { refreshTokenSchema } from '~/api/v1/validations/token.validation'
