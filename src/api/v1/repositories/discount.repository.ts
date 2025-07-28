@@ -3,7 +3,7 @@ import { IDiscount } from '~/api/v1/types/discount.type'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { discountSchema } from '~/api/v1/models/discount.model'
 import { createDiscountZodType } from '~/api/v1/validations/discount.validation'
-import { unescape } from 'querystring'
+import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 
 export class DiscountRepository extends BaseRepository {
   private models = new Map<string, mongoose.Model<IDiscount>>()
@@ -40,8 +40,8 @@ export class DiscountRepository extends BaseRepository {
       discount_applies_to,
       discount_code,
       discount_description,
-      discount_start_date,
-      discount_end_date,
+      discount_start_date: new Date(discount_start_date),
+      discount_end_date: new Date(discount_end_date),
       discount_is_active,
       discount_max_uses,
       discount_max_uses_per_user,
@@ -49,9 +49,10 @@ export class DiscountRepository extends BaseRepository {
       discount_name,
       discount_type,
       discount_value,
-      shop_id,
+      shop_id: convertStringToObjectId(shop_id),
       discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids,
     })
+    console.log('newDiscount', newDiscount);
     return newDiscount
   }
 }

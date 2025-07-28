@@ -2,6 +2,12 @@ import { Schema } from 'mongoose'
 import { IDiscount } from '~/api/v1/types/discount.type'
 
 export const discountSchema = new Schema<IDiscount>({
+  shop_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'shops',
+    required: true,
+    unique: true
+  },
   discount_name: {
     type: String,
     required: [true, 'discount_name is required']
@@ -37,7 +43,8 @@ export const discountSchema = new Schema<IDiscount>({
   },
   discount_uses_count: {
     type: Number,
-    required: [true, 'discount_uses_count is required']
+    required: [true, 'discount_uses_count is required'],
+    default: 0
   },
   discount_users_used: {
     type: [String],
