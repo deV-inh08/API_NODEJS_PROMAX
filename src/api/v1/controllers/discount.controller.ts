@@ -25,11 +25,7 @@ export class DiscountController {
     }
   }
 
-  updateDiscount = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  updateDiscount = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const decodedAT = req.decoded_accessToken
       if (!decodedAT) {
@@ -40,6 +36,23 @@ export class DiscountController {
       const body: updateDiscountZodType = req.body
       const result = await this.discountServices.updateDiscount(body, userId, discountId)
       const successResponse = SuccessResponse.ok(result, 'update discount successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  getListProductByDiscount = async (req: Request, res: Response, next: NextFunction) => {}
+
+  getListDiscountByShop = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      if (!decodedAT) {
+        throw new UnauthorizedError('AccessToken is expired')
+      }
+      const userId = decodedAT.id
+      const result = await this.discountServices.getListDiscountByShop(userId)
+      const successResponse = SuccessResponse.ok(result, 'get list discounts successfully')
       successResponse.send(res)
     } catch (error) {
       next(error)

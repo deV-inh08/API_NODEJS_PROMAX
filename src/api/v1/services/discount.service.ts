@@ -1,7 +1,7 @@
 import { DiscountRepository } from '~/api/v1/repositories/discount.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
-import { BadRequestError, NotFoundError, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
 export class DiscountServices {
   private discountRepository: DiscountRepository
@@ -27,11 +27,11 @@ export class DiscountServices {
         throw new NotFoundError('Shop not found')
       }
       const shop_id = convertObjectIdToString(shop._id)
-      const foundDiscount = await this.discountRepository.findDiscountByShopId(discount_code, shop_id)
+      const foundDiscount = await this.discountRepository.findDiscountByCode(discount_code, shop_id)
       if (foundDiscount) {
         throw new BadRequestError('Discount exists!')
       }
-      const newDiscount = await this.discountRepository.createDiscount({ ...payload, shop_id })
+      const newDiscount = await this.discountRepository.createDiscount(payload, shop_id)
       return newDiscount
     } catch (error) {
       throw new BadRequestError('create discount failed')
@@ -65,6 +65,31 @@ export class DiscountServices {
       return updateDiscount
     } catch (error) {
       throw new BadRequestError('update discount failed')
+    }
+  }
+
+  getListDiscountByShop = async (userId: string) => {
+    try {
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new NotFoundError('Cannot found shop!')
+      }
+      const shop_id = convertObjectIdToString(shop._id)
+      const discounts = await this.discountRepository.findDiscountsByShopId(
+        {
+          discount_is_active: true,
+          shop_id
+        },
+        ['__v', 'shop_id'],
+        50,
+        1
+      )
+      if (!discounts) {
+        throw new NotFoundError('Cannot not found discounts')
+      }
+      return discounts
+    } catch (error) {
+      throw new BadRequestError('get list discount failed')
     }
   }
 }

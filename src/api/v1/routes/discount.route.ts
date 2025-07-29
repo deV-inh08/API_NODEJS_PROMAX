@@ -3,7 +3,6 @@ import { DiscountController } from '~/api/v1/controllers/discount.controller'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
 import { createDiscountSchema, updateDiscountSchema } from '~/api/v1/validations/discount.validation'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
-import { authLimiter } from '~/api/v1/middlewares/rateLimiter.middleware'
 
 export const discountRouter = Router()
 const discountController = new DiscountController()
@@ -22,3 +21,5 @@ discountRouter.post(
   validationReq(updateDiscountSchema),
   discountController.updateDiscount
 )
+
+discountRouter.get('/list-discounts', authMiddleware.verifyAT, discountController.getListDiscountByShop)

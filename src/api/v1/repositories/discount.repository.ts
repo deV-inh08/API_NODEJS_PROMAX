@@ -12,61 +12,38 @@ export class DiscountRepository extends BaseRepository {
     const dbName = this.dbName
     if (!this.models.has(dbName)) {
       const connection = await this.getConnection()
-      const discountModel = connection.model('Discount', discountSchema)
+      const discountModel = connection.model('Discounts', discountSchema)
       this.models.set(dbName, discountModel)
     }
     return this.models.get(dbName)!
   }
 
   // find discount
-  async findDiscountByShopId(discount_code: string, shop_id: string) {
+  async findDiscountByCode(discount_code: string, shop_id: string) {
     const DiscountModel = await this.getDiscountModel()
     const foundDisount = await DiscountModel.findOne({
       discount_code,
-      shop_id
+      shop_id: convertStringToObjectId(shop_id)
     }).lean()
     return foundDisount
   }
 
   // create discount
   async createDiscount(
-    payload: createDiscountZodType & {
-      shop_id: string
-    }
+    payload: createDiscountZodType,
+    shop_id: string
   ) {
     const DiscountModel = await this.getDiscountModel()
-    const {
-      discount_applies_to,
-      discount_code,
-      discount_description,
-      discount_end_date,
-      discount_is_active,
-      discount_max_uses,
-      discount_max_uses_per_user,
-      discount_min_order_value,
-      discount_name,
-      discount_product_ids,
-      discount_start_date,
-      discount_type,
-      discount_value,
-      shop_id
-    } = payload
-    const newDiscount = await DiscountModel.create({
-      discount_applies_to,
-      discount_code,
-      discount_description,
-      discount_start_date: new Date(discount_start_date),
-      discount_end_date: new Date(discount_end_date),
-      discount_is_active,
-      discount_max_uses,
-      discount_max_uses_per_user,
-      discount_min_order_value,
-      discount_name,
-      discount_type,
-      discount_value,
-      shop_id: convertStringToObjectId(shop_id),
-      discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids
-    })
+    const { discount_applies_to, discount_product_ids } = payload
+    const newDiscount = await DiscountModel.create(
+      {
+        ...payload,
+        shop_id: convertStringToObjectId(shop_id),
+        discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids,
+        discount_uses_count: 0,
+        discount_users_used: []
+      }
+    )
     return newDiscount
   }
 
@@ -81,6 +58,28 @@ export class DiscountRepository extends BaseRepository {
     return getDiscount
   }
 
+  async findDiscountsByShopId(
+    filter: {
+      shop_id: string
+      discount_is_active: boolean
+    },
+    unSelect: string[],
+    limit: number,
+    page: number,
+    sort = 'ctime'
+  ) {
+    const DiscountModel = await this.getDiscountModel()
+    const skip = (page - 1) * limit
+    const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
+    const discounts = await DiscountModel.find(filter)
+      .skip(+skip)
+      .limit(+limit)
+      .select(unGetSelectData(unSelect))
+      .sort(sortBy as { _id: 1 | -1 })
+      .lean()
+    return discounts
+  }
+
   async updateDiscount(
     payload: updateDiscountZodType & {
       _id: string
@@ -89,14 +88,15 @@ export class DiscountRepository extends BaseRepository {
     const DiscountModel = await this.getDiscountModel()
     const { _id } = payload
 
-    const updateDiscount = await DiscountModel.findByIdAndUpdate(_id,
+    const updateDiscount = await DiscountModel.findByIdAndUpdate(
+      _id,
       {
         ...payload,
-        updateAt: new Date()
+        updatedAt: new Date()
       },
       {
         new: true,
-        lean: true,
+        lean: true
       }
     )
     return updateDiscount
