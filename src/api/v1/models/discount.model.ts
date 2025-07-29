@@ -71,4 +71,7 @@ export const discountSchema = new Schema<IDiscount>({
     type: [String],
     default: []
   }
+}, {
+  timestamps: true,
+  collection: 'discounts'
 })
