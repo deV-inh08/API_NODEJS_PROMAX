@@ -1,4 +1,4 @@
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
@@ -438,6 +438,10 @@ export class ProductRepository extends BaseRepository {
     page: number
     filter: {
       isPublished: boolean
+      shop_id?: Types.ObjectId
+      _id?: {
+        $in: Types.ObjectId[]
+      }
     }
     select: string[]
   }) {

@@ -42,7 +42,21 @@ export class DiscountController {
     }
   }
 
-  getListProductByDiscount = async (req: Request, res: Response, next: NextFunction) => {}
+  getAllProductWithDiscountCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { discountCode } = req.params
+      const decodedAT = req.decoded_accessToken
+      if (!decodedAT) {
+        throw new UnauthorizedError('Accesstoken is expired. Please login by role shop')
+      }
+      const userId = decodedAT.id
+      const result = await this.discountServices.getAllProductWithDiscountCode(discountCode, userId)
+      const successResponse = SuccessResponse.ok(result, 'get list products by discount_code successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 
   getListDiscountByShop = async (req: Request, res: Response, next: NextFunction) => {
     try {

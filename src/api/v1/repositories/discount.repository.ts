@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { IDiscount } from '~/api/v1/types/discount.type'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { discountSchema } from '~/api/v1/models/discount.model'
@@ -19,31 +19,26 @@ export class DiscountRepository extends BaseRepository {
   }
 
   // find discount
-  async findDiscountByCode(discount_code: string, shop_id: string) {
+  async findDiscountByCode(discountCode: string, shop_id: Types.ObjectId) {
     const DiscountModel = await this.getDiscountModel()
     const foundDisount = await DiscountModel.findOne({
-      discount_code,
-      shop_id: convertStringToObjectId(shop_id)
+      shop_id: shop_id,
+      discount_code: discountCode
     }).lean()
     return foundDisount
   }
 
   // create discount
-  async createDiscount(
-    payload: createDiscountZodType,
-    shop_id: string
-  ) {
+  async createDiscount(payload: createDiscountZodType, shop_id: string) {
     const DiscountModel = await this.getDiscountModel()
     const { discount_applies_to, discount_product_ids } = payload
-    const newDiscount = await DiscountModel.create(
-      {
-        ...payload,
-        shop_id: convertStringToObjectId(shop_id),
-        discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids,
-        discount_uses_count: 0,
-        discount_users_used: []
-      }
-    )
+    const newDiscount = await DiscountModel.create({
+      ...payload,
+      shop_id: convertStringToObjectId(shop_id),
+      discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids,
+      discount_uses_count: 0,
+      discount_users_used: []
+    })
     return newDiscount
   }
 

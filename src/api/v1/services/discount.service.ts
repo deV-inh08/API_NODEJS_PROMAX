@@ -1,14 +1,17 @@
 import { DiscountRepository } from '~/api/v1/repositories/discount.repository'
+import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
-import { convertObjectIdToString } from '~/api/v1/utils/common.util'
+import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
 export class DiscountServices {
   private discountRepository: DiscountRepository
   private shopRepository: ShopRepository
+  private productRepository: ProductRepository
   constructor() {
     this.discountRepository = new DiscountRepository()
     this.shopRepository = new ShopRepository()
+    this.productRepository = new ProductRepository()
   }
 
   // create discount
@@ -26,12 +29,12 @@ export class DiscountServices {
       if (!shop) {
         throw new NotFoundError('Shop not found')
       }
-      const shop_id = convertObjectIdToString(shop._id)
+      const shop_id = shop._id
       const foundDiscount = await this.discountRepository.findDiscountByCode(discount_code, shop_id)
       if (foundDiscount) {
         throw new BadRequestError('Discount exists!')
       }
-      const newDiscount = await this.discountRepository.createDiscount(payload, shop_id)
+      const newDiscount = await this.discountRepository.createDiscount(payload, convertObjectIdToString(shop_id))
       return newDiscount
     } catch (error) {
       throw new BadRequestError('create discount failed')
@@ -90,6 +93,64 @@ export class DiscountServices {
       return discounts
     } catch (error) {
       throw new BadRequestError('get list discount failed')
+    }
+  }
+
+  getAllProductWithDiscountCode = async (
+    discountCode: string,
+    userId: string,
+    limit = 50,
+    sort = 'ctime',
+    page = 1
+  ) => {
+    try {
+      // find shop
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new NotFoundError('Cannot  find shop')
+      }
+      const shop_id = shop._id
+
+      // find discount collection
+      const foundDiscount = await this.discountRepository.findDiscountByCode(discountCode, shop_id)
+      if (!foundDiscount) {
+        throw new NotFoundError('Cannot find discount')
+      }
+
+      const { discount_applies_to, discount_product_ids } = foundDiscount
+      let products
+      if (discount_applies_to === 'all') {
+        products = await this.productRepository.findAllProducts({
+          filter: {
+            isPublished: true,
+            shop_id: shop_id
+          },
+          page,
+          limit,
+          sort,
+          select: ['product_name']
+        })
+        return products
+      } else if (discount_applies_to === 'specific') {
+        products = await this.productRepository.findAllProducts({
+          filter: {
+            _id: {
+              $in: discount_product_ids
+            },
+            isPublished: true,
+            shop_id: shop_id
+          },
+          page,
+          limit,
+          sort,
+          select: ['product_name']
+        })
+        return products
+      } else {
+        return []
+      }
+    } catch (error) {
+      throw new BadRequestError('get list products failed')
     }
   }
 }

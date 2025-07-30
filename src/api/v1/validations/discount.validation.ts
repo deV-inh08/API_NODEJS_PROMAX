@@ -8,10 +8,8 @@ export const createDiscountSchema = z.object({
     discount_value: z.number().positive(),
 
     // ✅ Transform string to Date
-    discount_start_date: z.string()
-      .transform((str) => new Date(str)),
-    discount_end_date: z.string()
-      .transform((str) => new Date(str)),
+    discount_start_date: z.string().transform((str) => new Date(str)),
+    discount_end_date: z.string().transform((str) => new Date(str)),
 
     discount_max_uses: z.number().positive(),
     discount_max_uses_per_user: z.number().positive(),
