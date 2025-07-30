@@ -1,6 +1,7 @@
 import { DiscountRepository } from '~/api/v1/repositories/discount.repository'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
+import { IProduct } from '~/api/v1/types/product.type'
 import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
@@ -151,6 +152,74 @@ export class DiscountServices {
       }
     } catch (error) {
       throw new BadRequestError('get list products failed')
+    }
+  }
+
+  applyDiscountAmount = async (discountCode: string, userId: string, products: IProduct[]) => {
+    try {
+      // get shop_id
+      const shop = await this.shopRepository.findShopByUserId(userId)
+      if (!shop) {
+        throw new NotFoundError('Cannot find shop')
+      }
+      const shop_id = shop._id
+      // get products by discountCode
+      const discount = await this.discountRepository.findDiscountByCode(discountCode, shop_id)
+      if (!discount) {
+        throw new NotFoundError('Cannot find discount')
+      }
+      const {
+        discount_is_active,
+        discount_max_uses,
+        discount_min_order_value,
+        discount_end_date,
+        discount_max_uses_per_user,
+        discount_users_used,
+        discount_type,
+        discount_value
+      } = discount
+
+      if (!discount_is_active) {
+        throw new BadRequestError('Discount is not active')
+      }
+
+      const now = new Date()
+      if (now > discount_end_date) {
+        throw new BadRequestError('Discount code has expired')
+      }
+
+      if (discount_max_uses <= 0) {
+        throw new BadRequestError('Discount code usage limit exceeded')
+      }
+
+      let totalOrder = 0
+      if (discount_min_order_value) {
+        totalOrder = products.reduce((result, product) => {
+          return result + (product.product_quantity * product.product_price)
+        }, 0)
+        if (discount_min_order_value > totalOrder) {
+          throw new BadRequestError(`Discount required a minimun order value ${discount_min_order_value}`)
+        }
+      }
+
+      if (discount_max_uses_per_user) {
+        const userUsedDiscount = discount_users_used?.filter((id) => convertObjectIdToString(id) == userId).length || 0
+        // Check xem đã vượt quá giới hạn chưa
+        if (userUsedDiscount >= discount_max_uses_per_user) {
+          throw new BadRequestError(
+            `You have reached the maximum usage limit (${discount_max_uses_per_user} times) for this discount`
+          )
+        }
+      }
+
+      const amount = discount_type === 'fixed_amount' ? discount_value : totalOrder * (discount_value / 100)
+      return {
+        totalOrder,
+        discount: amount,
+        totalPrice: totalOrder - amount
+      }
+    } catch (error) {
+      throw new BadRequestError('Apply discount amount failed')
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Response } from 'express'
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 import { ISuccessResponse } from '~/api/v1/types/response.type'
-import { MyLogger, myLogger } from '~/api/v1/logger/winston.log'
+import { myLogger } from '~/api/v1/logger/winston.log'
 
 // ==================== SUCCESS RESPONSE ====================
 export class SuccessResponse<T = any> {
