@@ -24,9 +24,10 @@ discountRouter.post(
 
 discountRouter.get('/list-discounts', authMiddleware.verifyAT, discountController.getListDiscountByShop)
 
-
 discountRouter.get(
   '/list-products/:discountCode',
   authMiddleware.verifyAT,
   discountController.getAllProductWithDiscountCode
 )
+
+discountRouter.delete('/delete', authMiddleware.verifyAT, discountController.deleteDiscount)

@@ -140,7 +140,6 @@ export class ProductRepository extends BaseRepository {
         console.log(`🗑️ Product ${productId} deleted successfully`)
       }
     } catch (error: any) {
-      console.error(`❌ Error deleting product ${productId}:`, error)
       throw new BadRequestError(`Failed to delete product: ${error.message}`)
     }
   }

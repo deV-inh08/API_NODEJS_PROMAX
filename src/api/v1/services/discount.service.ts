@@ -4,7 +4,11 @@ import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 import { IProduct } from '~/api/v1/types/product.type'
 import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
-import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
+import {
+  createDiscountZodType,
+  deleteDiscountZodType,
+  updateDiscountZodType
+} from '~/api/v1/validations/discount.validation'
 export class DiscountServices {
   private discountRepository: DiscountRepository
   private shopRepository: ShopRepository
@@ -81,10 +85,10 @@ export class DiscountServices {
       const shop_id = convertObjectIdToString(shop._id)
       const discounts = await this.discountRepository.findDiscountsByShopId(
         {
-          discount_is_active: true,
-          shop_id
+          shop_id: shop_id,
+          discount_is_active: true
         },
-        ['__v', 'shop_id'],
+        ['__v'],
         50,
         1
       )
@@ -195,7 +199,7 @@ export class DiscountServices {
       let totalOrder = 0
       if (discount_min_order_value) {
         totalOrder = products.reduce((result, product) => {
-          return result + (product.product_quantity * product.product_price)
+          return result + product.product_quantity * product.product_price
         }, 0)
         if (discount_min_order_value > totalOrder) {
           throw new BadRequestError(`Discount required a minimun order value ${discount_min_order_value}`)
@@ -220,6 +224,31 @@ export class DiscountServices {
       }
     } catch (error) {
       throw new BadRequestError('Apply discount amount failed')
+    }
+  }
+
+  deleteDiscount = async (userId: string, payload: deleteDiscountZodType) => {
+    try {
+      const discountCode = payload.discount_code
+      // find shop by userId
+      const shop = await this.shopRepository.findShopByUserId(userId)
+
+      if (!shop) {
+        throw new NotFoundError('Not found shop')
+      }
+      const shop_id = convertObjectIdToString(shop._id)
+
+      // check discount is exitsts
+      const discount = await this.discountRepository.findDiscountByCode(discountCode, shop_id)
+
+      if (!discount) {
+        throw new NotFoundError('Not found discount')
+      }
+
+      const result = await this.discountRepository.deleteDiscount(shop_id, discount.discount_code)
+      return result.deletedCount
+    } catch (error) {
+      throw new BadRequestError('Delete discount failed')
     }
   }
 }

@@ -43,7 +43,7 @@ export const createProductSchema = z.object({
     product_type: z.enum(['Electronics', 'Clothing', 'Furniture']),
     isPublished: z.boolean().default(false),
     isDraft: z.boolean().default(true),
-    product_attributes: z.record(z.any()) // ✅ Accept any object
+    product_attributes: z.record(z.any())
   })
 })
 
@@ -74,7 +74,6 @@ export const updateProductSchema = z.object({
       product_attributes: z.record(z.unknown()).optional()
     })
     .transform((data) => {
-      // 🧹 Clean null/undefined values
       const cleaned: {
         product_name?: string
         product_thumb?: string

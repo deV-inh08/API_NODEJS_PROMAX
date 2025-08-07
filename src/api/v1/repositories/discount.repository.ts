@@ -19,7 +19,7 @@ export class DiscountRepository extends BaseRepository {
   }
 
   // find discount
-  async findDiscountByCode(discountCode: string, shop_id: Types.ObjectId) {
+  async findDiscountByCode(discountCode: string, shop_id: Types.ObjectId | string) {
     const DiscountModel = await this.getDiscountModel()
     const foundDisount = await DiscountModel.findOne({
       shop_id: shop_id,
@@ -66,11 +66,14 @@ export class DiscountRepository extends BaseRepository {
     const DiscountModel = await this.getDiscountModel()
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
-    const discounts = await DiscountModel.find(filter)
-      .skip(+skip)
-      .limit(+limit)
+    const discounts = await DiscountModel.find({
+      shop_id: filter.shop_id,
+      discount_is_active: filter.discount_is_active
+    })
       .select(unGetSelectData(unSelect))
       .sort(sortBy as { _id: 1 | -1 })
+      .skip(skip)
+      .limit(limit)
       .lean()
     return discounts
   }
@@ -95,5 +98,13 @@ export class DiscountRepository extends BaseRepository {
       }
     )
     return updateDiscount
+  }
+
+  async deleteDiscount(shopId: string, discountCode: string) {
+    const DiscountModel = await this.getDiscountModel()
+    return await DiscountModel.deleteOne({
+      shop_id: shopId,
+      discount_code: discountCode
+    })
   }
 }

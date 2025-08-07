@@ -1,8 +1,11 @@
 import type { Request, Response, NextFunction } from 'express'
-import { ParamsDictionary } from 'express-serve-static-core'
 import { DiscountServices } from '~/api/v1/services/discount.service'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
+import {
+  createDiscountZodType,
+  updateDiscountZodType,
+  deleteDiscountZodType
+} from '~/api/v1/validations/discount.validation'
 export class DiscountController {
   private discountServices: DiscountServices
   constructor() {
@@ -67,6 +70,22 @@ export class DiscountController {
       const userId = decodedAT.id
       const result = await this.discountServices.getListDiscountByShop(userId)
       const successResponse = SuccessResponse.ok(result, 'get list discounts successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  deleteDiscount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      const discountCode: deleteDiscountZodType = req.body
+      if (!decodedAT) {
+        throw new UnauthorizedError('Access Token is expired')
+      }
+      const userId = decodedAT.id
+      const result = await this.discountServices.deleteDiscount(userId, discountCode)
+      const successResponse = SuccessResponse.ok(result, 'delete discount succesfully')
       successResponse.send(res)
     } catch (error) {
       next(error)

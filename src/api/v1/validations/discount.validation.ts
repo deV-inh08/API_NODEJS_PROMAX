@@ -73,3 +73,15 @@ export const updateDiscountSchema = z.object({
 })
 
 export type updateDiscountZodType = z.infer<typeof updateDiscountSchema>['body']
+
+export const deleteDiscountSchema = z.object({
+  body: z.object({
+    discount_code: z
+      .string({
+        required_error: 'Discount code is required'
+      })
+      .trim()
+  })
+})
+
+export type deleteDiscountZodType = z.infer<typeof deleteDiscountSchema>['body']
