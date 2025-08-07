@@ -1,10 +1,12 @@
 import type { Request, Response, NextFunction } from 'express'
 import { DiscountServices } from '~/api/v1/services/discount.service'
+import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
 import {
   createDiscountZodType,
   updateDiscountZodType,
-  deleteDiscountZodType
+  deleteDiscountZodType,
+  amountDiscountZodType
 } from '~/api/v1/validations/discount.validation'
 export class DiscountController {
   private discountServices: DiscountServices
@@ -70,6 +72,22 @@ export class DiscountController {
       const userId = decodedAT.id
       const result = await this.discountServices.getListDiscountByShop(userId)
       const successResponse = SuccessResponse.ok(result, 'get list discounts successfully')
+      successResponse.send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  discountAmount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      const payload: amountDiscountZodType = req.body
+      if (!decodedAT) {
+        throw new UnauthorizedError('AccessToken is expired')
+      }
+      const userId = decodedAT.id
+      const result = await this.discountServices.applyDiscountAmount(userId, payload)
+      const successResponse = SuccessResponse.ok(result, 'Apply discount amout is success')
       successResponse.send(res)
     } catch (error) {
       next(error)

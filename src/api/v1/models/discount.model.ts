@@ -7,7 +7,7 @@ export const discountSchema = new Schema<IDiscount>(
       type: Schema.Types.ObjectId,
       ref: 'shops',
       required: true,
-      unique: true
+      index: true
     },
     discount_name: {
       type: String,

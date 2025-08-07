@@ -6,16 +6,6 @@
     "auditLog": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\.590062edec8d41fe84341da2d2efcbfc4803b712-audit.json",
     "files": [
         {
-            "date": 1753337610165,
-            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-24-13.error.log",
-            "hash": "b313144ddbebaf07bab825ee1046c8bab13b8682619366f5a616bc8af89ae745"
-        },
-        {
-            "date": 1753341380390,
-            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-24-14.error.log",
-            "hash": "3fae997773c25e35ba9e02b22e480e9e7fd6d50e0e891c538e0e9a153f63d434"
-        },
-        {
             "date": 1753419495278,
             "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-07-25-11.error.log",
             "hash": "f9c09bc8790e9e68f29624d8e59e6fd02cd3ebf02bcf1cfda3512f5ed840ff7b"
@@ -124,6 +114,11 @@
             "date": 1754546426968,
             "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-08-07-13.error.log",
             "hash": "a2405b352a6555795804498f2f897edd80637f863ab42b4fe3cbe862b59069ba"
+        },
+        {
+            "date": 1754551020310,
+            "name": "D:\\projects\\API_Ecommerce\\src\\api\\v1\\logs\\application-2025-08-07-14.error.log",
+            "hash": "fa26a4b7f211d6f4a5014cf3140892164dbac0f423ab975c97b35c9ab2526682"
         }
     ],
     "hashType": "sha256"

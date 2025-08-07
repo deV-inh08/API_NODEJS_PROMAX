@@ -85,3 +85,17 @@ export const deleteDiscountSchema = z.object({
 })
 
 export type deleteDiscountZodType = z.infer<typeof deleteDiscountSchema>['body']
+
+
+export const amoutDiscountSchema = z.object({
+  body: z.object({
+    discount_code: z.string().trim(),
+    products: z.array(z.object({
+      _id: z.string().trim(),
+      product_quantity: z.number(),
+      product_price: z.number()
+    }))
+  })
+})
+
+export type amountDiscountZodType = z.infer<typeof amoutDiscountSchema>['body']

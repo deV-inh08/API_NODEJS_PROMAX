@@ -30,4 +30,6 @@ discountRouter.get(
   discountController.getAllProductWithDiscountCode
 )
 
+discountRouter.post('/amount', authMiddleware.verifyAT, discountController.discountAmount)
+
 discountRouter.delete('/delete', authMiddleware.verifyAT, discountController.deleteDiscount)

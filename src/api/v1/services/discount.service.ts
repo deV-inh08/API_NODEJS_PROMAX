@@ -24,7 +24,7 @@ export class DiscountServices {
     try {
       const { discount_end_date, discount_start_date, discount_code } = payload
       const now = new Date()
-      if (now > new Date(discount_end_date) || now < new Date(discount_start_date)) {
+      if (now > new Date(discount_end_date)) {
         throw new BadRequestError('Discount code has expired!')
       }
       if (new Date(discount_start_date) > new Date(discount_end_date)) {
@@ -34,11 +34,13 @@ export class DiscountServices {
       if (!shop) {
         throw new NotFoundError('Shop not found')
       }
+
       const shop_id = shop._id
       const foundDiscount = await this.discountRepository.findDiscountByCode(discount_code, shop_id)
       if (foundDiscount) {
         throw new BadRequestError('Discount exists!')
       }
+
       const newDiscount = await this.discountRepository.createDiscount(payload, convertObjectIdToString(shop_id))
       return newDiscount
     } catch (error) {
@@ -159,7 +161,15 @@ export class DiscountServices {
     }
   }
 
-  applyDiscountAmount = async (discountCode: string, userId: string, products: IProduct[]) => {
+  applyDiscountAmount = async (userId: string, payload: {
+    discount_code: string,
+    products: {
+      _id: string,
+      product_quantity: number,
+      product_price: number
+    }[]
+
+  }) => {
     try {
       // get shop_id
       const shop = await this.shopRepository.findShopByUserId(userId)
@@ -168,7 +178,7 @@ export class DiscountServices {
       }
       const shop_id = shop._id
       // get products by discountCode
-      const discount = await this.discountRepository.findDiscountByCode(discountCode, shop_id)
+      const discount = await this.discountRepository.findDiscountByCode(payload.discount_code, shop_id)
       if (!discount) {
         throw new NotFoundError('Cannot find discount')
       }
@@ -198,7 +208,7 @@ export class DiscountServices {
 
       let totalOrder = 0
       if (discount_min_order_value) {
-        totalOrder = products.reduce((result, product) => {
+        totalOrder = payload.products.reduce((result, product) => {
           return result + product.product_quantity * product.product_price
         }, 0)
         if (discount_min_order_value > totalOrder) {

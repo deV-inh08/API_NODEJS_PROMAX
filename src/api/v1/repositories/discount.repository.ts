@@ -3,7 +3,7 @@ import { IDiscount } from '~/api/v1/types/discount.type'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { discountSchema } from '~/api/v1/models/discount.model'
 import { createDiscountZodType, updateDiscountZodType } from '~/api/v1/validations/discount.validation'
-import { convertStringToObjectId, unGetSelectData } from '~/api/v1/utils/common.util'
+import { unGetSelectData } from '~/api/v1/utils/common.util'
 
 export class DiscountRepository extends BaseRepository {
   private models = new Map<string, mongoose.Model<IDiscount>>()
@@ -32,14 +32,16 @@ export class DiscountRepository extends BaseRepository {
   async createDiscount(payload: createDiscountZodType, shop_id: string) {
     const DiscountModel = await this.getDiscountModel()
     const { discount_applies_to, discount_product_ids } = payload
-    const newDiscount = await DiscountModel.create({
-      ...payload,
-      shop_id: convertStringToObjectId(shop_id),
-      discount_product_ids: discount_applies_to == 'all' ? [] : discount_product_ids,
-      discount_uses_count: 0,
-      discount_users_used: []
-    })
-    return newDiscount
+    try {
+      const newDiscount = await DiscountModel.create({
+        ...payload,
+        shop_id: shop_id,
+        discount_product_ids: discount_applies_to === 'all' ? [] : discount_product_ids
+      })
+      return newDiscount
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async findDiscountById(discountId: string, shopId: string, unSelectData: string[]) {
