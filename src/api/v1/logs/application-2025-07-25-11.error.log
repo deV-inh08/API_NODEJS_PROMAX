@@ -1,2 +1,0 @@
-2025-07-25 11:58:51.020 AM --- error --- undefined --- 	Validation failed: Cast to string failed for value "[ 'White', 'Black', 'Red' ]" (type Array) at path "color"
-2025-07-25 11:58:51.070 AM --- error --- undefined --- 	Create product failed

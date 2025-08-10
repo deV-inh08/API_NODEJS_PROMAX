@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
 import { DiscountServices } from '~/api/v1/services/discount.service'
-import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
 import {
   createDiscountZodType,

@@ -161,15 +161,17 @@ export class DiscountServices {
     }
   }
 
-  applyDiscountAmount = async (userId: string, payload: {
-    discount_code: string,
-    products: {
-      _id: string,
-      product_quantity: number,
-      product_price: number
-    }[]
-
-  }) => {
+  applyDiscountAmount = async (
+    userId: string,
+    payload: {
+      discount_code: string
+      products: {
+        _id: string
+        product_quantity: number
+        product_price: number
+      }[]
+    }
+  ) => {
     try {
       // get shop_id
       const shop = await this.shopRepository.findShopByUserId(userId)
