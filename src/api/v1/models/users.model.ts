@@ -3,7 +3,6 @@ import { IUser } from '~/api/v1/types/user.type'
 import { UserMessage } from '~/api/v1/constants/messages.constant'
 import { ISocialAccounts } from '~/api/v1/types/user.type'
 import { addressSchema } from '~/api/v1/models/address.model'
-import { cartSchema } from '~/api/v1/models/cart.model'
 import { GenderObject, StatusUser } from '~/api/v1/constants/common.constant'
 
 const socialAccountsSchema = new Schema<ISocialAccounts>({
@@ -115,7 +114,6 @@ export const userSchema = new Schema<IUser>({
   },
 
   address: [addressSchema],
-  cart: [cartSchema],
   wishList: [
     {
       type: mongoose.Types.ObjectId,

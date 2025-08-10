@@ -3,7 +3,7 @@ import mongoose, { Types } from 'mongoose'
 export interface ICartVariant {
   size: string
   color: string
-  style: string
+  style?: string
 }
 
 export interface ICartProducts {
@@ -19,7 +19,7 @@ export interface ICartProducts {
 export interface ICartItem extends Document {
   user_id: mongoose.Types.ObjectId
   cart_state: 'active' | 'pending' | 'failed'
-  cart_count_product: number
+  cart_count_products: number
   cart_total_item: number
   cart_products: ICartProducts[]
 }

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { ProductController } from '~/api/v1/controllers/product.controller'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
-import { validateUpdateProduct, validationReq } from '~/api/v1/middlewares/validation.middleware'
+import { validationReq } from '~/api/v1/middlewares/validation.middleware'
 import { createProductSchema, updateProductSchema } from '~/api/v1/validations/product.validation'
 
 export const productRouter = Router()

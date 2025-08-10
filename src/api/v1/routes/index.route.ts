@@ -4,6 +4,7 @@ import { Router } from 'express'
 import shopRouter from '~/api/v1/routes/shop.route'
 import { productRouter } from '~/api/v1/routes/product.route'
 import { discountRouter } from '~/api/v1/routes/discount.route'
+import { cartRouter } from '~/api/v1/routes/cart.route'
 
 const routerApiV1 = Router()
 
@@ -21,5 +22,8 @@ routerApiV1.use('/product', productRouter)
 
 // Router discount
 routerApiV1.use('/discount', discountRouter)
+
+// Route Cart
+routerApiV1.use('/cart', cartRouter)
 
 export default routerApiV1

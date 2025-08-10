@@ -3,6 +3,7 @@ import { userSchema } from '~/api/v1/models/users.model'
 import { IUser } from '~/api/v1/types/user.type'
 import { Model } from 'mongoose'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
+import { FlattenMaps } from 'mongoose'
 
 export class UserRepository extends BaseRepository {
   private models = new Map<string, Model<IUser>>()
@@ -34,7 +35,7 @@ export class UserRepository extends BaseRepository {
   }
 
   // get user by ID -> User Status Validation (Don't need password)
-  async getUserById(userId: string): Promise<IUser | null> {
+  async getUserById(userId: string): Promise<FlattenMaps<IUser> | null> {
     const UserModel = await this.getUserModel()
     return await UserModel.findOne(
       {
@@ -50,7 +51,7 @@ export class UserRepository extends BaseRepository {
   }
 
   // re-verify password user đã login
-  async getUserByIdWithPassword(userId: string): Promise<IUser | null> {
+  async getUserByIdWithPassword(userId: string): Promise<FlattenMaps<IUser> | null> {
     const UserModel = await this.getUserModel()
     return await UserModel.findOne({
       _id: userId

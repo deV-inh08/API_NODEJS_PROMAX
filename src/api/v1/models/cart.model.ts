@@ -12,8 +12,10 @@ const cartVariantSchema = new Schema<ICartVariant>({
   },
   style: {
     type: String,
-    required: true
+    required: false
   }
+}, {
+  _id: false
 })
 
 const cartProductsSchema = new Schema<ICartProducts>({
@@ -52,6 +54,8 @@ const cartProductsSchema = new Schema<ICartProducts>({
     type: cartVariantSchema,
     default: undefined
   }
+}, {
+  _id: false
 })
 
 export const cartSchema = new Schema<ICartItem>(
@@ -68,7 +72,7 @@ export const cartSchema = new Schema<ICartItem>(
       default: 'active',
       lowercase: true
     },
-    cart_count_product: {
+    cart_count_products: {
       type: Number,
       default: 0
     },

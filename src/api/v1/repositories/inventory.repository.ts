@@ -25,4 +25,13 @@ export class InventoryRepository extends BaseRepository {
     })
     return result
   }
+
+  // get stock by {product_id, shop_id}
+  async getInventory(body: { shopId: string; productId: string }) {
+    const InventoryModel = await this.getInventoryModel()
+    return await InventoryModel.findOne({
+      product_id: body.productId,
+      shop_id: body.shopId
+    }).lean()
+  }
 }
