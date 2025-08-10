@@ -1,62 +1,68 @@
 import { Schema } from 'mongoose'
 import { ICartItem, ICartProducts, ICartVariant } from '~/api/v1/types/cart.type'
 
-const cartVariantSchema = new Schema<ICartVariant>({
-  color: {
-    type: String,
-    required: true
+const cartVariantSchema = new Schema<ICartVariant>(
+  {
+    color: {
+      type: String,
+      required: true
+    },
+    size: {
+      type: String,
+      required: true
+    },
+    style: {
+      type: String,
+      required: false
+    }
   },
-  size: {
-    type: String,
-    required: true
-  },
-  style: {
-    type: String,
-    required: false
+  {
+    _id: false
   }
-}, {
-  _id: false
-})
+)
 
-const cartProductsSchema = new Schema<ICartProducts>({
-  product_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
+const cartProductsSchema = new Schema<ICartProducts>(
+  {
+    product_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true
+    },
+    shop_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'shops',
+      required: true
+    },
+    product_name: {
+      type: String,
+      trim: true,
+      required: true
+    },
+    product_price: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    product_quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      default: 0
+    },
+    product_stock: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    product_variant: {
+      type: cartVariantSchema,
+      default: undefined
+    }
   },
-  shop_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'shops',
-    required: true
-  },
-  product_name: {
-    type: String,
-    trim: true,
-    required: true
-  },
-  product_price: {
-    type: Number,
-    required: true,
-    default: 0
-  },
-  product_quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-    default: 0
-  },
-  product_stock: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  product_variant: {
-    type: cartVariantSchema,
-    default: undefined
+  {
+    _id: false
   }
-}, {
-  _id: false
-})
+)
 
 export const cartSchema = new Schema<ICartItem>(
   {

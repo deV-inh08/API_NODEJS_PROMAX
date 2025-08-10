@@ -1,11 +1,20 @@
-import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "~/api/v1/utils/response.util"
-import { addToCartZodType } from "~/api/v1/validations/cart.validation"
-import { UserRepository } from "~/api/v1/repositories/user.repository"
-import { ProductRepository } from "~/api/v1/repositories/product.repository"
-import { convertObjectIdToString, convertStringToObjectId } from "~/api/v1/utils/common.util"
-import { InventoryRepository } from "~/api/v1/repositories/inventory.repository"
-import { CartRepository } from "~/api/v1/repositories/cart.repository"
-import { ICartItem, ICartProducts, ICartVariant } from "~/api/v1/types/cart.type"
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '~/api/v1/utils/response.util'
+import { addToCartZodType } from '~/api/v1/validations/cart.validation'
+import { UserRepository } from '~/api/v1/repositories/user.repository'
+import { ProductRepository } from '~/api/v1/repositories/product.repository'
+import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
+import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
+import { CartRepository } from '~/api/v1/repositories/cart.repository'
+import { ICartProducts, ICartVariant } from '~/api/v1/types/cart.type'
+
+/**
+ * - Add product to cart
+ * - reduce product quantity
+ * - Increase  product quantity
+ * - Gell All product in Cart
+ * - Delete cart
+ * - Delete cart item
+ */
 
 export class CartService {
   private userRepository: UserRepository
@@ -72,7 +81,6 @@ export class CartService {
       // find cart by userId
       const userCart = await this.cartRepository.findCartByUserId(user_id)
 
-
       if (!userCart) {
         const result = await this.cartRepository.createCart({
           user_id: convertStringToObjectId(user_id),
@@ -81,17 +89,17 @@ export class CartService {
           cart_total_item: quantity,
           cart_products: [cartProductData]
         })
-        console.log('result', result);
         return {
           cart: result,
           message: 'Product added to cart successfully',
           isNewCart: true
         }
       } else {
-        const existingProductIndex = userCart.cart_products.findIndex((item) =>
-          item.product_id.toString() === productId &&
-          item.shop_id.toString() === shopId &&
-          this.isSameVariant(item.product_variant, body.variant)
+        const existingProductIndex = userCart.cart_products.findIndex(
+          (item) =>
+            item.product_id.toString() === productId &&
+            item.shop_id.toString() === shopId &&
+            this.isSameVariant(item.product_variant, body.variant)
         )
         // Update existing product
         if (existingProductIndex !== -1) {
@@ -123,6 +131,38 @@ export class CartService {
 
         return result
       }
+    } catch (error) {
+      throw new BadRequestError('Add To Cart Failed')
+    }
+  }
+
+
+  deleteAllProductFromCart = async (userId: string, cartId: string, body: {
+    productId: string,
+    shopId: string,
+    variant?: ICartVariant
+  }) => {
+    try {
+      const { productId, shopId, variant } = body
+
+      // Remove product from cart
+      const result = await this.cartRepository.removeProductFromCart(
+        userId,
+        cartId,
+        productId,
+        shopId,
+        variant
+      )
+
+      if (result.modifiedCount === 0) {
+        throw new NotFoundError('Product not found in cart')
+      }
+      // Recalculate totals
+      await this.cartRepository.recalculateCartTotals(userId)
+
+      // Get updated cart
+      const updatedCart = await this.cartRepository.findCartByUserId(userId)
+      return updatedCart
     } catch (error) {
       throw new BadRequestError('Add To Cart Failed')
     }
