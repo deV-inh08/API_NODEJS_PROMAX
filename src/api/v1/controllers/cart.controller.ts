@@ -1,7 +1,7 @@
 import type { Response, Request, NextFunction } from 'express'
 import { CartService } from '~/api/v1/services/cart.service'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { addToCartZodType, removeProductFromCartZodType } from '~/api/v1/validations/cart.validation'
+import { addToCartZodType, removeProductFromCartZodType, updateCartQuantityZodType } from '~/api/v1/validations/cart.validation'
 
 export class CartController {
   private cartService: CartService
@@ -49,6 +49,22 @@ export class CartController {
       const userId = decodedAT.id
       const result = await this.cartService.getListUserCart(userId)
       SuccessResponse.ok(result, 'Get list user cart successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  updateCartQuantity = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { cartId } = req.params
+      const decodedAT = req.decoded_accessToken
+      const body: updateCartQuantityZodType = req.body
+      if (!decodedAT) {
+        throw new UnauthorizedError('Access Token expired')
+      }
+      const userId = decodedAT.id
+      const result = await this.cartService.updateCartQuantity(userId, cartId, body)
+      SuccessResponse.ok(result, 'Update cart quantity successfully').send(res)
     } catch (error) {
       next(error)
     }

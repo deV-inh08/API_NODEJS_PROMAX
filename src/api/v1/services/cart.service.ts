@@ -1,11 +1,12 @@
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { addToCartZodType } from '~/api/v1/validations/cart.validation'
+import { addToCartZodType, updateCartQuantityZodType } from '~/api/v1/validations/cart.validation'
 import { UserRepository } from '~/api/v1/repositories/user.repository'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
 import { CartRepository } from '~/api/v1/repositories/cart.repository'
 import { ICartProducts, ICartVariant } from '~/api/v1/types/cart.type'
+import { ShopRepository } from '~/api/v1/repositories/shop.repository'
 
 /**
  * - Add product to cart
@@ -21,11 +22,13 @@ export class CartService {
   private productRepository: ProductRepository
   private inventoryRepository: InventoryRepository
   private cartRepository: CartRepository
+  private shopRepository: ShopRepository
   constructor() {
     this.cartRepository = new CartRepository()
     this.userRepository = new UserRepository()
     this.productRepository = new ProductRepository()
     this.inventoryRepository = new InventoryRepository()
+    this.shopRepository = new ShopRepository()
   }
 
   private isSameVariant(oldCartVariant: ICartVariant, newCartVariant: ICartVariant): boolean {
@@ -171,6 +174,51 @@ export class CartService {
       return result
     } catch (error) {
       throw new BadRequestError('Get List User Cart Failed')
+    }
+  }
+
+  updateCartQuantity = async (userId: string, cartId: string, body: updateCartQuantityZodType) => {
+    try {
+      const { productId, quantity, shopId, variant } = body
+      // validate user
+      const user = await this.userRepository.getUserById(userId)
+      if (!user) {
+        throw new NotFoundError('User not found')
+      }
+
+      // validate product
+      const product = await this.productRepository.findProduct({
+        productId: productId,
+        unSelect: ['__v']
+      })
+      if (!product || !product.isPublished) {
+        throw new NotFoundError('Product not found')
+      }
+
+      // validate shop
+      const shop = await this.shopRepository.findShopById(shopId)
+      if (!shop) {
+        throw new NotFoundError('Shop not found')
+      }
+
+      // check stock
+      const inventory = await this.inventoryRepository.getInventory({
+        shopId: convertObjectIdToString(shop._id), productId
+      })
+
+      if (!inventory) {
+        throw new NotFoundError('Invetory  not found')
+      }
+      const stock = inventory.inven_stock
+      if (quantity > stock) {
+        throw new BadRequestError(`Insufficient stock. Available: ${inventory.inven_stock}, Requested: ${quantity}`)
+      }
+
+      // update Cart Item Quantity
+      const result = await this.cartRepository.updateCartItemQuantity(userId, cartId, shopId, productId, quantity, variant)
+      return result
+    } catch (error) {
+      throw new BadRequestError('Update cart quantity failed')
     }
   }
 }

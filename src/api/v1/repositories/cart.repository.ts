@@ -3,6 +3,7 @@ import mongoose, { Types } from 'mongoose'
 import { ICartItem, ICartVariant } from '~/api/v1/types/cart.type'
 import { cartSchema } from '~/api/v1/models/cart.model'
 import { convertStringToObjectId } from '~/api/v1/utils/common.util'
+import { ICartProducts } from '~/api/v1/types/cart.type'
 export class CartRepository extends BaseRepository {
   private model = new Map<string, mongoose.Model<ICartItem>>()
 
@@ -103,5 +104,57 @@ export class CartRepository extends BaseRepository {
     return await CartModel.findOne({
       user_id: userId
     }).lean()
+  }
+
+  async updateCartItemQuantity(
+    userId: string,
+    cartId: string,
+    shopId: string,
+    productId: string,
+    newQuantity: number,
+    variant: ICartVariant
+  ) {
+    const CartModel = await this.getCartModel()
+    // Step 1: Tìm cart trước
+    const cart = await CartModel.findOne({
+      _id: convertStringToObjectId(cartId),
+      user_id: convertStringToObjectId(userId),
+      cart_state: 'active'
+    })
+
+    if (!cart) {
+      throw Error('Cart not found')
+    }
+
+    // Step 2: Tìm index của item cần update
+    const itemIndex = cart.cart_products.findIndex((item: ICartProducts) => {
+      const matchProduct = item.product_id.toString() === productId
+      const matchShop = item.shop_id.toString() === shopId
+      const matchSize = item.product_variant?.size === variant.size
+      const matchColor = item.product_variant?.color === variant.color
+      return matchProduct && matchShop && matchSize && matchColor
+    })
+
+    if (itemIndex === -1) {
+      throw Error('Item in cart not found')
+    }
+
+    const updateResult = await CartModel.updateOne(
+      {
+        _id: convertStringToObjectId(cartId)
+      },
+      {
+        $set: {
+          [`cart_products.${itemIndex}.product_quantity`]: newQuantity,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    if (updateResult.modifiedCount > 0) {
+      await this.recalculateCartTotals(userId)
+    }
+
+    return updateResult
   }
 }
