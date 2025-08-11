@@ -9,9 +9,12 @@ const authMiddleware = new AuthMiddleWare()
 const cartController = new CartController()
 
 cartRouter.post('/add', authMiddleware.verifyAT, validationReq(addToCartSchema), cartController.addToCart)
+
 cartRouter.delete(
   '/deleteAll/:cartId',
   authMiddleware.verifyAT,
   validationReq(removeProductFromCartSchema),
   cartController.deleteAllProductFromCart
 )
+
+cartRouter.get('/', authMiddleware.verifyAT, cartController.getListUserCart)

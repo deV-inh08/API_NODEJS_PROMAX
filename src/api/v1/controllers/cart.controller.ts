@@ -39,4 +39,18 @@ export class CartController {
       next(error)
     }
   }
+
+  getListUserCart = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      if (!decodedAT) {
+        throw new UnauthorizedError('Access Token expired')
+      }
+      const userId = decodedAT.id
+      const result = await this.cartService.getListUserCart(userId)
+      SuccessResponse.ok(result, 'Get list user cart successfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }

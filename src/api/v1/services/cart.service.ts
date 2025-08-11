@@ -136,23 +136,20 @@ export class CartService {
     }
   }
 
-
-  deleteAllProductFromCart = async (userId: string, cartId: string, body: {
-    productId: string,
-    shopId: string,
-    variant?: ICartVariant
-  }) => {
+  deleteAllProductFromCart = async (
+    userId: string,
+    cartId: string,
+    body: {
+      productId: string
+      shopId: string
+      variant?: ICartVariant
+    }
+  ) => {
     try {
       const { productId, shopId, variant } = body
 
       // Remove product from cart
-      const result = await this.cartRepository.removeProductFromCart(
-        userId,
-        cartId,
-        productId,
-        shopId,
-        variant
-      )
+      const result = await this.cartRepository.removeProductFromCart(userId, cartId, productId, shopId, variant)
 
       if (result.modifiedCount === 0) {
         throw new NotFoundError('Product not found in cart')
@@ -165,6 +162,15 @@ export class CartService {
       return updatedCart
     } catch (error) {
       throw new BadRequestError('Add To Cart Failed')
+    }
+  }
+
+  getListUserCart = async (userId: string) => {
+    try {
+      const result = await this.cartRepository.getListUserCart(userId)
+      return result
+    } catch (error) {
+      throw new BadRequestError('Get List User Cart Failed')
     }
   }
 }

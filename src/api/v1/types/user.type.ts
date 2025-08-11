@@ -31,9 +31,6 @@ export interface IUser extends Document {
   // Address
   address: IAddress[]
 
-  // Cart
-  cart: ICartItem[]
-
   // Wish list
   wishList: mongoose.Types.ObjectId[] // trỏ đến ID Product
 
@@ -62,8 +59,6 @@ export interface IUser extends Document {
   // methods
   getFullName(): string
   isActive(): boolean
-  clearCart(): void
-  removeProductFromCart(productId: string): void
 }
 export interface IChangePassword {
   currentPassword: string

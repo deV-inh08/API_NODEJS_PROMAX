@@ -315,7 +315,6 @@ export class AuthService {
     // hash newPassword
     const hashNewPassword = await BcryptServices.hashPassword(newPassword)
 
-    console.log('hashNewPassword', hashNewPassword)
 
     try {
       // update password in DB
@@ -330,10 +329,8 @@ export class AuthService {
       // generate new Token
       const newTokens = JWTServices.generateTokens(user)
 
-      console.log('newTokens', newTokens)
       const userId = convertObjectIdToString(user._id)
 
-      console.log('userId', userId)
       // save new RT in DB
       const { iat, exp } = this.getDateForToken()
       await this.refreshTokenRepository.saveRefreshtoken({

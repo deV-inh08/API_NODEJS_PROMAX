@@ -97,4 +97,11 @@ export class CartRepository extends BaseRepository {
       )
     }
   }
+
+  async getListUserCart(userId: string) {
+    const CartModel = await this.getCartModel()
+    return await CartModel.findOne({
+      user_id: userId
+    }).lean()
+  }
 }
