@@ -203,7 +203,8 @@ export class CartService {
 
       // check stock
       const inventory = await this.inventoryRepository.getInventory({
-        shopId: convertObjectIdToString(shop._id), productId
+        shopId: convertObjectIdToString(shop._id),
+        productId
       })
 
       if (!inventory) {
@@ -215,7 +216,14 @@ export class CartService {
       }
 
       // update Cart Item Quantity
-      const result = await this.cartRepository.updateCartItemQuantity(userId, cartId, shopId, productId, quantity, variant)
+      const result = await this.cartRepository.updateCartItemQuantity(
+        userId,
+        cartId,
+        shopId,
+        productId,
+        quantity,
+        variant
+      )
       return result
     } catch (error) {
       throw new BadRequestError('Update cart quantity failed')

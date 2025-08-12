@@ -32,6 +32,14 @@ export class CartRepository extends BaseRepository {
     }).lean()
   }
 
+  // find cart by id
+  async findCartById(cartId: string) {
+    const CartModel = await this.getCartModel()
+    return CartModel.findById({
+      _id: cartId
+    }).lean()
+  }
+
   // update cart with cartId
   async updateCartById(cartId: string, updateCart: Partial<ICartItem>) {
     const CartModel = await this.getCartModel()

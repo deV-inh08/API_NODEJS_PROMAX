@@ -1,6 +1,7 @@
 import { DiscountRepository } from '~/api/v1/repositories/discount.repository'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
+import { IDiscount } from '~/api/v1/types/discount.type'
 import { IProduct } from '~/api/v1/types/product.type'
 import { convertObjectIdToString, convertStringToObjectId } from '~/api/v1/utils/common.util'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
@@ -261,6 +262,55 @@ export class DiscountServices {
       return result.deletedCount
     } catch (error) {
       throw new BadRequestError('Delete discount failed')
+    }
+  }
+
+  validateDiscount = async ({
+    discountCode,
+    discountId,
+    userId,
+    shopId,
+    orderAmount
+  }: {
+    discountCode: string,
+    discountId: string,
+    userId: string,
+    shopId: string,
+    orderAmount: number
+  }): Promise<{
+    isValid: boolean
+    discount?: IDiscount
+    reason?: string
+    discountCode?: string
+  }> => {
+    try {
+      // check discount
+      const discount = await this.discountRepository.findDiscountById(discountId, shopId, ['__v'])
+      if (!discount || !discount.discount_is_active) {
+        return { isValid: false, reason: 'Discount is not exists or not active' }
+      }
+      if (discount.discount_code !== discountCode) {
+        return { isValid: false, reason: 'Discount code not same' }
+      }
+      // check order minimun
+      if (orderAmount < discount.discount_min_order_value) {
+        return { isValid: false, reason: `Đơn hàng tối thiểu ${discount.discount_min_order_value}` }
+      }
+
+      // Check date validity
+      const now = new Date()
+      if (now < discount.discount_start_date || now > discount.discount_end_date) {
+        return { isValid: false, reason: 'Discount đã hết hạn' }
+      }
+      // check user usage discount
+
+      return {
+        isValid: true,
+        discount,
+        discountCode
+      }
+    } catch (error) {
+      throw new BadRequestError('Validate discount failed')
     }
   }
 }

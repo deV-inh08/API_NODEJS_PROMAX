@@ -315,7 +315,6 @@ export class AuthService {
     // hash newPassword
     const hashNewPassword = await BcryptServices.hashPassword(newPassword)
 
-
     try {
       // update password in DB
       await this.userRepository.updatePassword(decodedAT.id, {

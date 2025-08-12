@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose'
+import { FlattenMaps, Model, Types } from 'mongoose'
 import { productSchema } from '~/api/v1/models/product.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IClothing, IElectronics, IFurniture, IProduct } from '~/api/v1/types/product.type'
@@ -12,6 +12,7 @@ import { BaseProductType } from '~/api/v1/validations/product.validation'
 import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/models/product.model'
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { convertStringToObjectId, getSelectData, unGetSelectData } from '~/api/v1/utils/common.util'
+
 
 export class ProductRepository extends BaseRepository {
   private models = {
@@ -160,6 +161,15 @@ export class ProductRepository extends BaseRepository {
       console.error(`❌ Error deleting ${productType} attributes ${attributesId}:`, error)
       throw new BadRequestError(`Failed to delete attributes: ${error.message}`)
     }
+  }
+
+  async checkProductByIds(productIds: string[]): Promise<FlattenMaps<IProduct>[]> {
+    const ProductModel = await this.getProductModel()
+    return await ProductModel.find({
+      _id: {
+        $in: productIds
+      }
+    }).lean()
   }
 
   async getAllDraftsForShop(userId: string) {

@@ -1,7 +1,11 @@
 import type { Response, Request, NextFunction } from 'express'
 import { CartService } from '~/api/v1/services/cart.service'
 import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
-import { addToCartZodType, removeProductFromCartZodType, updateCartQuantityZodType } from '~/api/v1/validations/cart.validation'
+import {
+  addToCartZodType,
+  removeProductFromCartZodType,
+  updateCartQuantityZodType
+} from '~/api/v1/validations/cart.validation'
 
 export class CartController {
   private cartService: CartService

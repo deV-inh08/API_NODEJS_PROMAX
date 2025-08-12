@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { validationReq } from '~/api/v1/middlewares/validation.middleware'
-import { addToCartSchema, removeProductFromCartSchema, updateCartQuantitySchema } from '~/api/v1/validations/cart.validation'
+import {
+  addToCartSchema,
+  removeProductFromCartSchema,
+  updateCartQuantitySchema
+} from '~/api/v1/validations/cart.validation'
 import { AuthMiddleWare } from '~/api/v1/middlewares/auth.middleware'
 import { CartController } from '~/api/v1/controllers/cart.controller'
 

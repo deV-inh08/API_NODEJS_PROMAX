@@ -32,7 +32,6 @@ export const removeProductFromCartSchema = z.object({
 })
 export type removeProductFromCartZodType = z.infer<typeof removeProductFromCartSchema>['body']
 
-
 export const updateCartQuantitySchema = z.object({
   params: z.object({
     cartId: z.string().min(24).max(24, 'Invalid Cart ID')
