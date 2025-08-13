@@ -13,7 +13,6 @@ import { electronicSchema, clothingSchema, furnitureSchema } from '~/api/v1/mode
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
 import { convertStringToObjectId, getSelectData, unGetSelectData } from '~/api/v1/utils/common.util'
 
-
 export class ProductRepository extends BaseRepository {
   private models = {
     product: new Map<string, Model<IProduct>>(),

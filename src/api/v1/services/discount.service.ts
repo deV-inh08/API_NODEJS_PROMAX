@@ -268,14 +268,13 @@ export class DiscountServices {
   validateDiscount = async ({
     discountCode,
     discountId,
-    userId,
     shopId,
     orderAmount
   }: {
-    discountCode: string,
-    discountId: string,
-    userId: string,
-    shopId: string,
+    discountCode: string
+    discountId: string
+    userId: string
+    shopId: string
     orderAmount: number
   }): Promise<{
     isValid: boolean
@@ -286,6 +285,7 @@ export class DiscountServices {
     try {
       // check discount
       const discount = await this.discountRepository.findDiscountById(discountId, shopId, ['__v'])
+      console.log('discount', discount);
       if (!discount || !discount.discount_is_active) {
         return { isValid: false, reason: 'Discount is not exists or not active' }
       }
