@@ -285,7 +285,7 @@ export class DiscountServices {
     try {
       // check discount
       const discount = await this.discountRepository.findDiscountById(discountId, shopId, ['__v'])
-      console.log('discount', discount);
+      console.log('discount', discount)
       if (!discount || !discount.discount_is_active) {
         return { isValid: false, reason: 'Discount is not exists or not active' }
       }

@@ -40,9 +40,7 @@ export class CheckoutService {
       const shop_order_ids_new = []
 
       // Batch fetch all products
-      const allProductIds = shop_order_ids.flatMap((shop) =>
-        shop.item_products.map((item) => item.productId) || []
-      )
+      const allProductIds = shop_order_ids.flatMap((shop) => shop.item_products.map((item) => item.productId) || [])
 
       const allProducts = await this.productRepository.checkProductByIds(allProductIds)
       const productMap = new Map(allProducts.map((p) => [p._id?.toString(), p]))
@@ -57,9 +55,7 @@ export class CheckoutService {
         const { shop_id, shop_discounts = [], item_products = [] } = shop_order_ids[i]
 
         // Validate products
-        const checkProductServer = item_products
-          .map((item) => productMap.get(item.productId))
-          .filter(isValidProduct)
+        const checkProductServer = item_products.map((item) => productMap.get(item.productId)).filter(isValidProduct)
 
         if (!checkProductServer || checkProductServer.length === 0) {
           throw new BadRequestError(`Shop ${shop_id}: Không có sản phẩm hợp lệ trong đơn hàng`)
@@ -79,21 +75,17 @@ export class CheckoutService {
             throw new BadRequestError(`Product thiếu thông tin giá`)
           }
 
-          const requestedItem = item_products.find(item =>
-            item.productId === product._id?.toString()
-          )
+          const requestedItem = item_products.find((item) => item.productId === product._id?.toString())
           if (!requestedItem) {
             throw new BadRequestError(`Không tìm thấy thông tin quantity`)
           }
 
           // ✅ ADDED: Additional validations
           if (product.product_quantity < requestedItem.quantity) {
-            throw new BadRequestError(
-              `Product ${product.product_name} chỉ còn ${product.product_quantity} sản phẩm`
-            )
+            throw new BadRequestError(`Product ${product.product_name} chỉ còn ${product.product_quantity} sản phẩm`)
           }
 
-          return acc + (requestedItem.quantity * product.product_price)
+          return acc + requestedItem.quantity * product.product_price
         }, 0)
 
         // Update total price
@@ -124,7 +116,6 @@ export class CheckoutService {
                 throw new BadRequestError(`Shop ${shop_id}: Thông tin discount không đầy đủ`)
               }
 
-
               const discountValidation = await this.discountServices.validateDiscount({
                 discountCode: discountInfo.discountcode,
                 discountId: discountInfo.discountId,
@@ -133,7 +124,7 @@ export class CheckoutService {
                 orderAmount: checkoutPrice
               })
 
-              console.log('discountValidation', discountValidation);
+              console.log('discountValidation', discountValidation)
 
               if (discountValidation.isValid) {
                 validDiscounts.push({
@@ -148,14 +139,12 @@ export class CheckoutService {
             // Apply discounts (use first valid discount)
             if (validDiscounts.length > 0) {
               const firstValidDiscount = validDiscounts[0]
-              console.log('firstValidDiscount', firstValidDiscount);
+              console.log('firstValidDiscount', firstValidDiscount)
 
               const discountResult = await this.discountServices.applyDiscountAmount(userId, {
                 discount_code: firstValidDiscount.discountcode,
                 products: checkProductServer.map((product) => {
-                  const requestedItem = item_products.find(item =>
-                    item.productId === product._id?.toString()
-                  )
+                  const requestedItem = item_products.find((item) => item.productId === product._id?.toString())
                   return {
                     _id: product._id?.toString() || '',
                     product_quantity: requestedItem?.quantity || 0,
@@ -166,13 +155,15 @@ export class CheckoutService {
 
               if (discountResult && discountResult.discount) {
                 shopDiscount = Math.min(discountResult.discount, checkoutPrice)
-                discountDetails = [{
-                  discount_code: firstValidDiscount.discountcode,
-                  discount_amount: shopDiscount,
-                  discount_type: firstValidDiscount.discount?.discount_type,
-                  original_order: discountResult.totalOrder,
-                  final_price: discountResult.totalPrice
-                }]
+                discountDetails = [
+                  {
+                    discount_code: firstValidDiscount.discountcode,
+                    discount_amount: shopDiscount,
+                    discount_type: firstValidDiscount.discount?.discount_type,
+                    original_order: discountResult.totalOrder,
+                    final_price: discountResult.totalPrice
+                  }
+                ]
 
                 // Update total discount
                 checkout_order.totalDiscount += shopDiscount
@@ -194,9 +185,7 @@ export class CheckoutService {
           discountAmount: shopDiscount,
           discountDetails: discountDetails,
           item_products: checkProductServer.map((product) => {
-            const requestedItem = item_products.find((item) =>
-              item.productId === product._id?.toString()
-            )
+            const requestedItem = item_products.find((item) => item.productId === product._id?.toString())
             return {
               productId: product._id,
               product_name: product.product_name,
@@ -209,8 +198,7 @@ export class CheckoutService {
           }),
           metadata: {
             hasDiscount: shopDiscount > 0,
-            discountPercentage: checkoutPrice > 0 ?
-              ((shopDiscount / checkoutPrice) * 100).toFixed(2) : '0',
+            discountPercentage: checkoutPrice > 0 ? ((shopDiscount / checkoutPrice) * 100).toFixed(2) : '0',
             originalPrice: checkoutPrice,
             finalPrice: checkoutPrice - shopDiscount
           }
@@ -235,7 +223,6 @@ export class CheckoutService {
           cartId
         }
       }
-
     } catch (error) {
       // Enhanced error handling
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
