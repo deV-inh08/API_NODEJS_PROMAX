@@ -9,6 +9,7 @@ export class CommentService {
   constructor() {
     this.commentRepository = new CommentRepository()
   }
+
   async createComment(
     body: CreateCommentZodType & {
       userId: string
@@ -27,10 +28,7 @@ export class CommentService {
       let rightValue = 0
       if (parentCommentId) {
         // reply logic
-
-        const parentComment = await CommentModel.findById({
-          parentCommentId
-        })
+        const parentComment = await CommentModel.findById(parentCommentId)
         if (!parentComment) throw new NotFoundError('Parent comment not found')
         rightValue = parentComment.comment_right
         await CommentModel.updateMany(
@@ -80,6 +78,55 @@ export class CommentService {
       return comment
     } catch (error) {
       throw new BadRequestError('Create comment failed')
+    }
+  }
+
+  async getCommentsByParentId(body: {
+    productId: string,
+    parentCommentId: string
+  }, limit = 50, skip = 0) {
+    try {
+      const CommentModel = await this.commentRepository.getCommentModel()
+      const { parentCommentId, productId } = body
+      if (parentCommentId) {
+        const parent = await CommentModel.findById(
+          parentCommentId
+        )
+        if (!parent) throw new NotFoundError('Not found comment for product')
+        const comments = await CommentModel.find({
+          comment_productId: convertStringToObjectId(productId),
+          comment_left: {
+            $gt: parent.comment_left
+          },
+          comment_right: {
+            $lt: parent.comment_right
+          }
+        })
+          .sort({
+            comment_left: 1
+          })
+          .select({
+            comment_left: 1,
+            comment_right: 1,
+            comment_content: 1,
+            comment_parentId: 1
+          })
+        return comments
+      }
+      const comments = await CommentModel.find({
+        comment_productId: convertStringToObjectId(productId),
+        comment_parentId: undefined
+      }).select({
+        comment_left: 1,
+        comment_right: 1,
+        comment_content: 1,
+        comment_parentId: 1
+      }).sort({
+        comment_left: 1
+      })
+      return comments
+    } catch (error) {
+      throw new BadRequestError('Get list comments failed')
     }
   }
 }

@@ -14,3 +14,5 @@ commentRouter.post(
   validationReq(CreateCommentSchema),
   commentController.createComment
 )
+
+commentRouter.get('/', authMiddleware.verifyAT, commentController.getCommentsByParentId)

@@ -23,4 +23,22 @@ export class CommentController {
       next(error)
     }
   }
+
+  getCommentsByParentId = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const decodedAT = req.decoded_accessToken
+      if (!decodedAT) {
+        throw new UnauthorizedError('AT is expired')
+      }
+      const { productId, parentCommentId } = req.query as {
+        productId: string
+        parentCommentId: string
+      }
+      console.log('productId', productId);
+      const result = await this.commentService.getCommentsByParentId({ productId, parentCommentId })
+      SuccessResponse.ok(result, 'Get list comments succesfully').send(res)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
