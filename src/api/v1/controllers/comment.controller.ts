@@ -1,8 +1,7 @@
-import { CommentService } from "~/api/v1/services/comment.service";
+import { CommentService } from '~/api/v1/services/comment.service'
 import type { Request, Response, NextFunction } from 'express'
-import { CreateCommentZodType } from "~/api/v1/validations/comment.validation";
-import { SuccessResponse, UnauthorizedError } from "~/api/v1/utils/response.util";
-
+import { CreateCommentZodType } from '~/api/v1/validations/comment.validation'
+import { SuccessResponse, UnauthorizedError } from '~/api/v1/utils/response.util'
 
 export class CommentController {
   private commentService: CommentService
