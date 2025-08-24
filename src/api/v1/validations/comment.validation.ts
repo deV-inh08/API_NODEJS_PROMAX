@@ -9,3 +9,12 @@ export const CreateCommentSchema = z.object({
 })
 
 export type CreateCommentZodType = z.infer<typeof CreateCommentSchema>['body']
+
+export const DeleteCommentSchema = z.object({
+  body: z.object({
+    commentId: z.string().trim(),
+    productId: z.string().trim()
+  })
+})
+
+export type DeleteComentZodType = z.infer<typeof DeleteCommentSchema>['body']
