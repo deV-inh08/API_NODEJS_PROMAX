@@ -144,7 +144,7 @@ export class ProductRepository extends BaseRepository {
     }
   }
 
-  async deleteProductAttributes(productType: string, attributesId: string): Promise<void> {
+  async deleteProductAttributes(productType: string, attributesId: string): Promise<number> {
     try {
       const AttributeModel = await this.getAttributeModel(productType)
       const result = await AttributeModel.deleteOne({
@@ -152,13 +152,11 @@ export class ProductRepository extends BaseRepository {
       })
 
       if (result.deletedCount === 0) {
-        console.warn(`⚠️ ${productType} attributes ${attributesId} not found for deletion`)
-      } else {
-        console.log(`🗑️ ${productType} attributes ${attributesId} deleted successfully`)
+        throw new NotFoundError(`${productType} attributes ${attributesId} not found for deletion`)
       }
-    } catch (error: any) {
-      console.error(`❌ Error deleting ${productType} attributes ${attributesId}:`, error)
-      throw new BadRequestError(`Failed to delete attributes: ${error.message}`)
+      return result.deletedCount
+    } catch (error) {
+      throw new BadRequestError(`Failed to delete attributes`)
     }
   }
 

@@ -7,6 +7,7 @@ import { discountRouter } from '~/api/v1/routes/discount.route'
 import { cartRouter } from '~/api/v1/routes/cart.route'
 import { checkoutRouter } from '~/api/v1/routes/checkout.route'
 import { commentRouter } from '~/api/v1/routes/comment.route'
+import { notifiRouter } from '~/api/v1/routes/notification.route'
 
 const routerApiV1 = Router()
 
@@ -33,5 +34,8 @@ routerApiV1.use('/checkout', checkoutRouter)
 
 // comment
 routerApiV1.use('/comment', commentRouter)
+
+// notification
+routerApiV1.use('/notification', notifiRouter)
 
 export default routerApiV1

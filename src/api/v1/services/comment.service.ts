@@ -85,7 +85,7 @@ export class CommentService {
 
   async getCommentsByParentId(
     body: {
-      productId: string,
+      productId: string
       parentCommentId: string
     },
     limit = 50,

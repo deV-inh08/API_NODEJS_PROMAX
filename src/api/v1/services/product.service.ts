@@ -1,5 +1,3 @@
-import { Types } from 'mongoose'
-import { resourceLimits } from 'worker_threads'
 import { isClothingProduct, isElectronicsProduct, isFurnitureProduct } from '~/api/v1/helpers/product.helper'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { ShopRepository } from '~/api/v1/repositories/shop.repository'
@@ -8,6 +6,7 @@ import { BadRequestError, NotFoundError, UnauthorizedError, ValidationError } fr
 import { CreateProductType, BaseProductType, updateProductBodyZodType } from '~/api/v1/validations/product.validation'
 import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '~/api/v1/validations/product.validation'
 import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
+import { pushNotificationToSystem } from '~/api/v1/services/notification.service'
 
 class ProductFactory {
   // filter product_attributes
@@ -217,6 +216,10 @@ export class ProductService {
         stock: result.product.product_quantity
       }
       await this.inventoryRepository.createInventory(body)
+      await pushNotificationToSystem('SHOP-001', convertObjectIdToString(body.shopId), userId, {
+        product_name: result.product.product_name,
+        shop_name: convertObjectIdToString(result.product.shop_id)
+      })
       return result
     } catch (error) {
       throw new BadRequestError('Create product failed')

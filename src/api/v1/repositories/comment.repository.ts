@@ -16,7 +16,6 @@ export class CommentRepository extends BaseRepository {
     return this.model.get(this.dbName)!
   }
 
-
   async findCommentWithId(commentId: string) {
     const commentModel = await this.getCommentModel()
     return commentModel.findById(commentId).lean()
@@ -24,39 +23,47 @@ export class CommentRepository extends BaseRepository {
 
   async deleteAllCommentsChildren(productId: string, leftValue: number, rightValue: number) {
     const commentModel = await this.getCommentModel()
-    return commentModel.deleteMany({
-      comment_productId: convertStringToObjectId(productId),
-      comment_left: {
-        $gte: leftValue, // > leftValue
-        $lte: rightValue // < right value
-      }
-    }).lean()
+    return commentModel
+      .deleteMany({
+        comment_productId: convertStringToObjectId(productId),
+        comment_left: {
+          $gte: leftValue, // > leftValue
+          $lte: rightValue // < right value
+        }
+      })
+      .lean()
   }
 
   async updateValue(productId: string, width: number, rightValue: number, condition: 'left' | 'right') {
     const commentModel = await this.getCommentModel()
     if (condition === 'left') {
-      return commentModel.updateMany({
-        comment_productId: convertStringToObjectId(productId),
-        comment_left: {
-          $gt: rightValue
+      return commentModel.updateMany(
+        {
+          comment_productId: convertStringToObjectId(productId),
+          comment_left: {
+            $gt: rightValue
+          }
+        },
+        {
+          $inc: {
+            comment_left: -width
+          }
         }
-      }, {
-        $inc: {
-          comment_left: -width
-        }
-      })
+      )
     } else {
-      return commentModel.updateMany({
-        comment_productId: convertStringToObjectId(productId),
-        comment_right: {
-          $gt: rightValue
+      return commentModel.updateMany(
+        {
+          comment_productId: convertStringToObjectId(productId),
+          comment_right: {
+            $gt: rightValue
+          }
+        },
+        {
+          $inc: {
+            comment_right: -width
+          }
         }
-      }, {
-        $inc: {
-          comment_right: -width
-        }
-      })
+      )
     }
   }
 }
