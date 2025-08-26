@@ -1,14 +1,19 @@
-import { notiEnum } from "~/api/v1/constants/nofitication.constant"
-import { NotificationRepository } from "~/api/v1/repositories/notifi.repository"
-import { convertStringToObjectId } from "~/api/v1/utils/common.util"
-import { BadRequestError } from "~/api/v1/utils/response.util"
+import { notiEnum } from '~/api/v1/constants/nofitication.constant'
+import { NotificationRepository } from '~/api/v1/repositories/notifi.repository'
+import { convertStringToObjectId } from '~/api/v1/utils/common.util'
+import { BadRequestError } from '~/api/v1/utils/response.util'
 
 type OptionsType = {
   product_name: string
   shop_name: string
 }
 
-export const pushNotificationToSystem = async (type: notiEnum = 'SHOP-001', shopId: string, userId: string, options: OptionsType) => {
+export const pushNotificationToSystem = async (
+  type: notiEnum = 'SHOP-001',
+  shopId: string,
+  userId: string,
+  options: OptionsType
+) => {
   try {
     const NotifiModel = await new NotificationRepository().getNotifiModel()
     let noti_content
@@ -30,7 +35,6 @@ export const pushNotificationToSystem = async (type: notiEnum = 'SHOP-001', shop
   }
 }
 
-
 export const listNotiByUser = async (type: string, userId: string, isRead = 0) => {
   try {
     const NotifiModel = await new NotificationRepository().getNotifiModel()
@@ -38,7 +42,7 @@ export const listNotiByUser = async (type: string, userId: string, isRead = 0) =
       user_id: convertStringToObjectId(userId),
       noti_type: type
     }
-    console.log('match', match);
+    console.log('match', match)
     return await NotifiModel.aggregate([
       {
         $match: match

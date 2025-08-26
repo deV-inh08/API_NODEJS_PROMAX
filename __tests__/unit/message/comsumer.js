@@ -1,8 +1,8 @@
-import { Kafka } from "kafkajs"
+import { Kafka } from 'kafkajs'
 
 const kafka = new Kafka({
   clientId: 'my-app',
-  brokers: ['localhost:9092', 'localhost:9092'],
+  brokers: ['localhost:9092', 'localhost:9092']
 })
 const consumer = kafka.consumer({ groupId: 'test-group' })
 
@@ -13,9 +13,9 @@ const runComsumer = async () => {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       console.log({
-        value: message.value.toString(),
+        value: message.value.toString()
       })
-    },
+    }
   })
 }
 runComsumer().catch(console.error)

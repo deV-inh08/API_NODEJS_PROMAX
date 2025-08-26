@@ -1,4 +1,4 @@
-import { notiEnum } from "~/api/v1/constants/nofitication.constant"
+import { notiEnum } from '~/api/v1/constants/nofitication.constant'
 export interface INotifi {
   user_id: string
   shop_id: string
