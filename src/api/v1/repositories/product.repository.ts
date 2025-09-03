@@ -84,6 +84,13 @@ export class ProductRepository extends BaseRepository {
     return await product.save()
   }
 
+  // get product by Id
+  async getProductById(productId: string) {
+    const ProductModel = await this.getProductModel()
+    const product = ProductModel.findById({ productId }).lean()
+    return product
+  }
+
   async createProductAttributes(
     productType: string,
     attributeData: ClothingAttributes | ElectronicsAttributes | FurnitureAttributes

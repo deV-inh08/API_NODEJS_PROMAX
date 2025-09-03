@@ -56,7 +56,6 @@ class MemoryDatabaseHelper {
       this.isConnected = false
       this.MongoServer = null
 
-      console.log('Test database disconnect')
     } catch (error) {
       console.log('error', error)
     }

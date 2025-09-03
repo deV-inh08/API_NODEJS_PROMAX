@@ -1,5 +1,4 @@
 import { Schema, Types } from 'mongoose'
-import { deflate } from 'zlib'
 
 /**
  * ORDER-001: Order successfully

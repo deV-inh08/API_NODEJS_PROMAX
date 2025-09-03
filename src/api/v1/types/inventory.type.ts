@@ -4,6 +4,7 @@ export interface IInventory {
   product_id: Types.ObjectId
   shop_id: Types.ObjectId
   inven_stock: number
+  inven_location: string
   inven_reservations: string[]
   createdAt?: Date
   updatedAt?: Date

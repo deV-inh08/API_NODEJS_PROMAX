@@ -26,4 +26,5 @@ export const checkoutSchema = z.object({
   })
 })
 
+export type shopOrderIdsZodType = z.infer<typeof shopOrderIdsSchema>
 export type checkoutSchemaZodType = z.infer<typeof checkoutSchema>['body']

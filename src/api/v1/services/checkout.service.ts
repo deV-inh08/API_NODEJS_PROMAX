@@ -1,24 +1,25 @@
 import { BadRequestError, NotFoundError } from '~/api/v1/utils/response.util'
-import { checkoutSchemaZodType } from '~/api/v1/validations/checkout.validation'
+import { checkoutSchemaZodType, shopOrderIdsZodType } from '~/api/v1/validations/checkout.validation'
 import { CartRepository } from '~/api/v1/repositories/cart.repository'
 import { ProductRepository } from '~/api/v1/repositories/product.repository'
 import { FlattenMaps } from 'mongoose'
 import { IProduct } from '~/api/v1/types/product.type'
-import { DiscountRepository } from '~/api/v1/repositories/discount.repository'
 import { DiscountServices } from '~/api/v1/services/discount.service'
 import { IDiscount } from '~/api/v1/types/discount.type'
+import { acquireClock, releaseClock } from '~/api/v1/services/redis.service'
+import { OrderRepository } from '~/api/v1/repositories/order.repository'
 
 export class CheckoutService {
   private cartRepository: CartRepository
   private productRepository: ProductRepository
-  private discountRepository: DiscountRepository
   private discountServices: DiscountServices
+  private orderRepository: OrderRepository
 
   constructor() {
     this.cartRepository = new CartRepository()
     this.productRepository = new ProductRepository()
-    this.discountRepository = new DiscountRepository()
     this.discountServices = new DiscountServices()
+    this.orderRepository = new OrderRepository()
   }
 
   checkoutReview = async (userId: string, body: checkoutSchemaZodType) => {
@@ -124,8 +125,6 @@ export class CheckoutService {
                 orderAmount: checkoutPrice
               })
 
-              console.log('discountValidation', discountValidation)
-
               if (discountValidation.isValid) {
                 validDiscounts.push({
                   ...discountInfo,
@@ -139,7 +138,6 @@ export class CheckoutService {
             // Apply discounts (use first valid discount)
             if (validDiscounts.length > 0) {
               const firstValidDiscount = validDiscounts[0]
-              console.log('firstValidDiscount', firstValidDiscount)
 
               const discountResult = await this.discountServices.applyDiscountAmount(userId, {
                 discount_code: firstValidDiscount.discountcode,
@@ -204,16 +202,13 @@ export class CheckoutService {
           }
         }
 
-        // ✅ FIXED: Push once per shop
         shop_order_ids_new.push(itemCheckout)
       }
 
-      // ✅ FIXED: Calculate final totals outside loop
       checkout_order.totalCheckout = checkout_order.totalPrice - checkout_order.totalDiscount + checkout_order.feeShip
 
-      // ✅ FIXED: Return at the end
       return {
-        shop_order_ids: shop_order_ids_new,
+        shop_order_ids_new: shop_order_ids_new,
         checkout_order,
         metadata: {
           totalShops: shop_order_ids_new.length,
@@ -230,5 +225,33 @@ export class CheckoutService {
       }
       throw new BadRequestError(`Checkout review failed`)
     }
+  }
+
+  orderByUser = async (shop_order_ids: shopOrderIdsZodType[], cartId: string, userId: string) => {
+    const { checkout_order, shop_order_ids_new } = await this.checkoutReview(userId, {
+      cartId,
+      shop_order_ids
+    })
+
+    const products = shop_order_ids_new.flatMap((order) => order.item_products)
+
+    const acquireProducts = []
+
+    for (let i = 0; i < products.length; i++) {
+      const { productId, quantity } = products[i]
+      const keyClock = await acquireClock(productId.toString(), quantity, cartId)
+      acquireProducts.push(keyClock ? true : false)
+      if (keyClock) {
+        await releaseClock(keyClock)
+      }
+    }
+
+    if (acquireProducts.includes(false)) {
+      throw new BadRequestError('Một số sản phẩm đã được cập nhật, vui lòng quay lại giỏ hàng')
+    }
+
+    const newOrder = this.orderRepository.getOrderModel()
+    // newOrder was created => remove product in cart
+
   }
 }

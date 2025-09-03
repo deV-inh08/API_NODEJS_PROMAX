@@ -2,6 +2,7 @@ import mongoose, { Types } from 'mongoose'
 import { InventotySchema } from '~/api/v1/models/inventory.model'
 import { BaseRepository } from '~/api/v1/repositories/base.repository'
 import { IInventory } from '~/api/v1/types/inventory.type'
+import { convertStringToObjectId } from '~/api/v1/utils/common.util'
 
 export class InventoryRepository extends BaseRepository {
   private models = new Map<string, mongoose.Model<IInventory>>()
@@ -33,5 +34,31 @@ export class InventoryRepository extends BaseRepository {
       product_id: body.productId,
       shop_id: body.shopId
     }).lean()
+  }
+
+  async revervationInventory(productId: string, quantity: number, cartId: string) {
+    const InventoryModel = await this.getInventoryModel()
+
+    const query = {
+      product_id: convertStringToObjectId(productId),
+      inven_stock: {
+        $gte: quantity
+      }
+    }
+
+    const updateSet = {
+      $inc: {
+        inven_stock: -quantity
+      },
+      $push: {
+        inven_revervations: {
+          quantity,
+          cartId,
+          createAt: new Date()
+        }
+      }
+    }
+
+    return await InventoryModel.updateOne(query, updateSet)
   }
 }

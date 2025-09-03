@@ -3,7 +3,7 @@ import { FurnitureAttributes, ElectronicsAttributes, ClothingAttributes } from '
 
 // Base Product Interface
 export interface IProduct {
-  _id?: Types.ObjectId
+  _id: Types.ObjectId
   product_name: string
   product_thumb: string
   product_description: string

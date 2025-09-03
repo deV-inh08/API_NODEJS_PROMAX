@@ -70,6 +70,7 @@
     "mongoose": "^8.15.2",
     "morgan": "^1.10.0",
     "nodemailer": "^7.0.5",
+    "redis": "^5.8.2",
     "supertest": "^7.1.1",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
