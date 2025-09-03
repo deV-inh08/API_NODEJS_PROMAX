@@ -1,0 +1,16 @@
+2025-08-13 12:11:45.181 PM --- error --- undefined --- 	Cannot found shop!
+2025-08-13 12:11:45.188 PM --- error --- undefined --- 	get list discount failed
+2025-08-13 12:13:38.860 PM --- error --- undefined --- 	Validation failed
+2025-08-13 12:15:36.007 PM --- error --- undefined --- 	Validation failed
+2025-08-13 12:17:44.929 PM --- error --- undefined --- 	Cannot find shop
+2025-08-13 12:17:44.930 PM --- error --- undefined --- 	Apply discount amount failed
+2025-08-13 12:22:45.081 PM --- error --- undefined --- 	Access Token expired
+2025-08-13 12:22:56.755 PM --- error --- undefined --- 	Cannot find shop
+2025-08-13 12:22:56.756 PM --- error --- undefined --- 	Apply discount amount failed
+2025-08-13 12:28:37.015 PM --- error --- undefined --- 	Discount is not active
+2025-08-13 12:28:37.016 PM --- error --- undefined --- 	Apply discount amount failed
+2025-08-13 12:29:13.975 PM --- error --- undefined --- 	Discount is not active
+2025-08-13 12:29:13.976 PM --- error --- undefined --- 	Apply discount amount failed
+2025-08-13 12:29:54.491 PM --- error --- undefined --- 	Discount is not active
+2025-08-13 12:29:54.493 PM --- error --- undefined --- 	Apply discount amount failed
+2025-08-13 12:35:14.535 PM --- error --- undefined --- 	Access Token expired

@@ -1,0 +1,99 @@
+# .github/workflows/test.yml
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build TypeScript
+        run: npm run build
+
+      - name: 🧪 Run Unit Tests
+        run: npm run test:unit
+        env:
+          NODE_ENV: test
+          TEST_TYPE: unit
+          JWT_ACCESS_TOKEN_SECRET: test_access_secret_key_123456
+          JWT_REFRESH_TOKEN_SECRET: test_refresh_secret_key_123456
+          JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
+          JWT_REFRESH_TOKEN_EXPIRES_IN: 30d
+          ALGORITHM: HS256
+
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # MongoDB service for integration tests
+    services:
+      mongodb:
+        image: mongo:6.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_DATABASE: test_db
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build TypeScript
+        run: npm run build
+
+      - name: 🔗 Run Integration Tests
+        run: npm run test:integration
+        env:
+          NODE_ENV: test
+          TEST_TYPE: integration
+          PORT: 3001
+          DB_URI: mongodb://root:password@localhost:27017
+          DB_NAME: testing
+          DB_OPTION: retryWrites=true&w=majority&authSource=admin
+          JWT_ACCESS_TOKEN_SECRET: test_access_secret_key_123456
+          JWT_REFRESH_TOKEN_SECRET: test_refresh_secret_key_123456
+          JWT_ACCESS_TOKEN_EXPIRES_IN: 15m
+          JWT_REFRESH_TOKEN_EXPIRES_IN: 30d
+          ALGORITHM: HS256
+      - name: 📊 Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+        continue-on-error: true
