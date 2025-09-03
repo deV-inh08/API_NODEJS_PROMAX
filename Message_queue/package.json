@@ -1,0 +1,29 @@
+{
+  "name": "message_queue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "npx ts-node server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/amqplib": "^0.10.7",
+    "@types/lodash": "^4.17.20",
+    "amqplib": "^0.10.9",
+    "dotenv": "^17.2.1",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.18.0",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.1.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.1.1",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.2"
+  }
+}
