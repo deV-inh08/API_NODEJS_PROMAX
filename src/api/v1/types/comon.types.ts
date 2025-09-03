@@ -1,6 +1,0 @@
-export type Gender = 'male' | 'female' | 'other'
-export type Status = 'active' | 'inactive' | 'suspended' | 'deleted'
-export type Role = 'seller' | 'admin' | 'customer'
-export type Currency = 'VND' | 'USD'
-export type Language = 'VI' | 'US'
-export type AddressType = 'home' | 'work'
