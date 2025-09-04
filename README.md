@@ -41,8 +41,6 @@ This API provides a complete backend solution for online shopping platforms:
 
 ---
 
-## 🚀 Features
-
 ### Core Functionality
 
 - **User Management**: register, login, profile, wishlist
@@ -103,71 +101,9 @@ This API provides a complete backend solution for online shopping platforms:
 - Error handling middleware
 - Unit + Integration tests
 - Monitoring & logging
+- Apply Design Patterns such as: SingleTon Pattern, Repository Pattern, Factory Pattern
 
 ---
-
-### Design Patterns
-
-1. Repository Pattern
-   class UserRepository extends BaseRepository<User> {
-   async findByEmail(email: string) {
-   return this.findOne({ email });
-   }
-   }
-
-class AuthService {
-constructor(private userRepo: UserRepository) {}
-
-async register(payload: RegisterDTO) {
-const existed = await this.userRepo.findByEmail(payload.email);
-if (existed) throw new Error('EMAIL_EXISTS');
-return this.userRepo.create(payload);
-}
-}
-
-2. Singleton Pattern
-
-Ensure one MongoDB connection across the app.
-export class MongoConnection {
-private static \_instance: MongoConnection | null = null;
-private connected = false;
-
-private constructor() {}
-
-static instance() {
-if (!this.\_instance) this.\_instance = new MongoConnection();
-return this.\_instance;
-}
-
-async connect(uri: string) {
-if (this.connected) return;
-await mongoose.connect(uri);
-this.connected = true;
-}
-}
-
-3. Factory Pattern
-
-Create objects (e.g., Payment providers) without spreading if/else.
-interface PaymentProvider {
-authorize(amount: number): Promise<{ authId: string }>;
-}
-
-class StripeProvider implements PaymentProvider {
-async authorize(amount: number) {
-return { authId: 'stripe_auth_123' };
-}
-}
-
-class PaymentFactory {
-static create(channel: 'stripe' | 'momo'): PaymentProvider {
-switch (channel) {
-case 'stripe': return new StripeProvider();
-case 'momo': return new MomoProvider();
-default: throw new Error('UNSUPPORTED_CHANNEL');
-}
-}
-}
 
 ## ⚙️ Prerequisites
 
