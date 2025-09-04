@@ -101,7 +101,10 @@ This API provides a complete backend solution for online shopping platforms:
 - Error handling middleware
 - Unit + Integration tests
 - Monitoring & logging
-- Apply Design Patterns such as: SingleTon Pattern, Repository Pattern, Factory Pattern
+- Apply Design Patterns: **Singleton**, **Repository**, **Factory**
+- Redis-based **distributed locking** to handle concurrent user purchases
+- Containerized with **Docker** for easy deployment
+- Asynchronous **Notification Service** with RabbitMQ (event-driven architecture)
 
 ---
 
