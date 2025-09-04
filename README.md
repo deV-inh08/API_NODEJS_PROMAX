@@ -8,18 +8,9 @@ A comprehensive **REST API** for e-commerce platforms, built with **Node.js**, *
 
 - [Overview](#overview)
 - [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
 - [API Reference](#api-reference)
-- [Testing](#testing)
 - [Architecture](#architecture)
 - [Design Patterns](#design-patterns)
-- [Contributing](#contributing)
-- [License](#license)
-- [Support](#support)
-- [Changelog](#changelog)
 
 ---
 
