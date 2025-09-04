@@ -53,42 +53,46 @@ This API provides a complete backend solution for online shopping platforms:
 
 ### API Reference
 
-Base URL: http://localhost:3000/api/v1
-Auth: JWT Bearer token
+### 🔑 Authentication
 
-Authentication
-POST /auth/register → Register
+| Method | Endpoint              | Description   |
+| ------ | --------------------- | ------------- |
+| POST   | `/auth/register`      | Register      |
+| POST   | `/auth/login`         | Login         |
+| POST   | `/auth/refresh-token` | Refresh token |
+| POST   | `/auth/logout`        | Logout        |
 
-POST /auth/login → Login
+---
 
-POST /auth/refresh-token → Refresh token
+### 🛍 Products
 
-POST /auth/logout → Logout
+| Method | Endpoint              | Description       |
+| ------ | --------------------- | ----------------- |
+| POST   | `/product/create`     | Create product    |
+| GET    | `/product/search`     | Search products   |
+| GET    | `/product/find/:id`   | Get product by ID |
+| PATCH  | `/product/update/:id` | Update product    |
 
-Products
-POST /product/create → Create product
+---
 
-GET /product/search → Search products
+### 🛒 Cart
 
-GET /product/find/:id → Get product by ID
+| Method | Endpoint           | Description |
+| ------ | ------------------ | ----------- |
+| POST   | `/cart/add`        | Add to cart |
+| GET    | `/cart`            | View cart   |
+| PATCH  | `/cart/update/:id` | Update item |
+| DELETE | `/cart/delete/:id` | Remove item |
 
-PATCH /product/update/:id → Update product
+---
 
-Cart
-POST /cart/add → Add to cart
+### 📦 Orders
 
-GET /cart → View cart
-
-PATCH /cart/update/:id → Update item
-
-DELETE /cart/delete/:id → Remove item
-
-Orders
-POST /orders/create → Create order
-
-GET /orders → User orders
-
-GET /orders/:id → Order details
+| Method | Endpoint         | Description   |
+| ------ | ---------------- | ------------- |
+| POST   | `/orders/create` | Create order  |
+| GET    | `/orders`        | User orders   |
+| GET    | `/orders/:id`    | Order details |
 
 ### Technical Features
 
