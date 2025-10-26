@@ -5,7 +5,6 @@ on:
     branches: ["main"]
 
 jobs:
-  # Job 1: CI - Test với nhiều versions
   test:
     runs-on: self-hosted
 
@@ -21,7 +20,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: './API_Ecommerce/package-lock.json'
+          cache-dependency-path: "./API_Ecommerce/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
@@ -35,9 +34,8 @@ jobs:
         run: npm test
         working-directory: ./API_Ecommerce
 
-  # Job 2: CD - Deploy CHỈ với Node 22.x
   deploy:
-    needs: test # Chỉ chạy khi test pass
+    needs: test
     runs-on: self-hosted
 
     steps:
@@ -48,7 +46,7 @@ jobs:
         with:
           node-version: "22.x"
           cache: "npm"
-           cache-dependency-path: './API_Ecommerce/package-lock.json'
+          cache-dependency-path: "./API_Ecommerce/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
@@ -61,7 +59,6 @@ jobs:
       - name: Deploy application
         run: |
           cd ~/actions-runner/_work/API_NODEJS_PROMAX/API_NODEJS_PROMAX/API_Ecommerce
-
           pm2 delete api-ecommerce || true
           pm2 start dist/index.js --name api-ecommerce
           pm2 save
