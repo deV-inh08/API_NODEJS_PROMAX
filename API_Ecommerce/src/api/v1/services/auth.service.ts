@@ -208,21 +208,16 @@ export class AuthService {
         throw new UnauthorizedError(`Account is ${user.status}`)
       }
 
-      console.log('userFromAT', userFromAT?.role)
-      console.log('user', user.role)
-
       // STEP 5: Additional security checks for proactive refresh
       if (isProactiveRefresh && userFromAT) {
         // Ensure user info consistency between AT and database
         if (userFromAT.role !== user.role) {
-          console.warn('🚨 Role mismatch detected, forcing reactive refresh')
           isProactiveRefresh = false
         }
       }
 
       const userId = convertObjectIdToString(user._id)
 
-      console.log('userId', userId)
       // STEP 6: Generate New Access Token
       const newAccessToken = JWTServices.generateAccessToken({
         id: userId,

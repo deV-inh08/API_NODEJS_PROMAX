@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/mnt/d/projects/Ecommerce/API_Ecommerce/src/api/v1/logs/.961911d1e568e2e59f178324df50e24cf68d655c-audit.json",
+    "files": [
+        {
+            "date": 1761473931535,
+            "name": "/mnt/d/projects/Ecommerce/API_Ecommerce/src/api/v1/logs/application-2025-10-26-10.info.log",
+            "hash": "b30c5298cdcbee571fd39b3d2d69de451916281104728fa11eb54fc40f873859"
+        }
+    ],
+    "hashType": "sha256"
+}

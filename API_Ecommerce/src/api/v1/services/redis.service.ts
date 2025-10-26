@@ -1,7 +1,7 @@
 import redis from 'redis'
 import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
 
-const redisClient = redis.createClient()
+const redisClient = redis.()
 
 const inventoryRepository = new InventoryRepository()
 

@@ -18,8 +18,6 @@ export class ForgotPasswordController {
   requestOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data: forgotPasswordZodType = req.body
-      const clientIP = this.getClientIP(req)
-
       const result = await this.forgotPasswordServices.requestPasswordReset(data)
       const successResponse = SuccessResponse.ok(result, 'OTP sent successfully')
       successResponse.send(res)
