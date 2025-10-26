@@ -6,6 +6,7 @@ import { BadRequestError, UnauthorizedError } from '~/api/v1/utils/response.util
 import { ErrorMessage } from '~/api/v1/constants/messages.constant'
 import { IUser } from '~/api/v1/types/user.type'
 import { convertObjectIdToString } from '~/api/v1/utils/common.util'
+import { FlattenMaps } from 'mongoose'
 
 export class JWTServices {
   private static readonly JWT_REFRESH_TOKEN_EXPIRES_IN = envConfig.JWT_REFRESH_TOKEN_EXPIRES_IN
@@ -102,7 +103,7 @@ export class JWTServices {
   }
 
   // generate AT & RT
-  static generateTokens(user: IUser) {
+  static generateTokens(user: FlattenMaps<IUser>) {
     const AT = this.generateAccessToken({
       id: convertObjectIdToString(user._id),
       email: user.email,

@@ -1,29 +1,66 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Node.js CI
+name: Node.js CI/CD
 
 on:
   push:
-    branches: [ "main" ]
-  
+    branches: ["main"]
 
 jobs:
-  build:
-
+  # Job 1: CI - Test với nhiều versions
+  test:
     runs-on: self-hosted
 
     strategy:
       matrix:
         node-version: [20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-  
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./API_Ecommerce
+
+      - name: Build TypeScript
+        run: npm run build
+        working-directory: ./API_Ecommerce
+
+      - name: Run Tests
+        run: npm test
+        working-directory: ./API_Ecommerce
+
+  # Job 2: CD - Deploy CHỈ với Node 22.x
+  deploy:
+    needs: test # Chỉ chạy khi test pass
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./API_Ecommerce
+
+      - name: Build TypeScript
+        run: npm run build
+        working-directory: ./API_Ecommerce
+
+      - name: Deploy application
+        run: |
+          cd ~/actions-runner/_work/API_NODEJS_PROMAX/API_NODEJS_PROMAX/API_Ecommerce
+
+          pm2 delete api-ecommerce || true
+          pm2 start dist/index.js --name api-ecommerce
+          pm2 save
+        working-directory: ./API_Ecommerce
