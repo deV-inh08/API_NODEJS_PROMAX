@@ -9,6 +9,11 @@
             "date": 1761473931535,
             "name": "/mnt/d/projects/Ecommerce/API_Ecommerce/src/api/v1/logs/application-2025-10-26-10.info.log",
             "hash": "b30c5298cdcbee571fd39b3d2d69de451916281104728fa11eb54fc40f873859"
+        },
+        {
+            "date": 1761491942832,
+            "name": "/mnt/d/projects/Ecommerce/API_Ecommerce/src/api/v1/logs/application-2025-10-26-15.info.log",
+            "hash": "5c6aa743d2e3f196903d9b26babf6f7fdacfb278859e5d4ba00667048efd2cd0"
         }
     ],
     "hashType": "sha256"
