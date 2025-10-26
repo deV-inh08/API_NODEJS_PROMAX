@@ -1,7 +1,15 @@
-import redis from 'redis'
+import { createClient } from 'redis'
 import { InventoryRepository } from '~/api/v1/repositories/inventory.repository'
 
-const redisClient = redis.()
+const redisClient = createClient({
+  url: 'redis://localhost:6379'
+})
+
+// Kết nối Redis client
+redisClient.connect().catch(console.error)
+
+// Xử lý lỗi
+redisClient.on('error', (err) => console.log('Redis Client Error', err))
 
 const inventoryRepository = new InventoryRepository()
 

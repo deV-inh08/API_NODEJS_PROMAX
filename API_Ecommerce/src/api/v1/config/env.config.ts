@@ -21,7 +21,7 @@ checkIsExistEnvFile()
 //  config Schema
 const configSchemaEnv = z.object({
   PORT: z.string().default('3000'),
-  DB_URI: z.string().default('mongodb://localhost:27017'),
+  DB_URI: z.string() || 'http://localhost:27017/',
   DB_NAME: z.string().default('testing'),
   DB_OPTION: z.string().default('retryWrites=true&w=majority'),
   NODE_ENV: z.string().default('test'),
